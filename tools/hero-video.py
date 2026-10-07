@@ -4,8 +4,9 @@ usage: python3 tools/hero-video.py assets/hero/hero-source.mp4 assets/hero   (ne
 
 Makes, in OUT:
   hero-VER-2560.mp4   wide screens: 2560 px, lightly denoised and sharpened, so Retina screens get a crisp picture
-  hero-VER-1920.mp4   phones and smaller screens
-  hero-VER-1920.webm  the same for browsers without H.264 (Chromium builds, some Linux Firefox)
+  hero-VER-1920.mp4   the 1920 px master the smaller files are made from
+  hero-VER-1600.mp4   phones and tablets: 2.6 MB instead of 7, and on a phone screen it looks the same as 1920
+  hero-VER-1920.webm  for browsers without H.264 (Chromium builds, some Linux Firefox)
   hero-VER-poster.jpg the first frame, shown until the video plays
   (VER changes with every new cut: browsers and the preview keep old files cached under the same name)
   hero-shoes.png  the mask that lets the sneakers show below the plate (index.html: .reel video mask)
@@ -111,6 +112,8 @@ assert enc.wait() == 0
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, f'hero-{VER}-1920.mp4'), '-c:v', 'libvpx-vp9',
                 '-b:v', '0', '-crf', '26', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '1',
                 os.path.join(OUT, f'hero-{VER}-1920.webm')], check=True)
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, f'hero-{VER}-1920.mp4'), '-vf', 'scale=1600:-2:flags=lanczos',
+                *x264, '-crf', '24', os.path.join(OUT, f'hero-{VER}-1600.mp4')], check=True)
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, f'hero-{VER}-2560.mp4'), '-frames:v', '1',
                 '-q:v', '2', os.path.join(OUT, f'hero-{VER}-poster.jpg')], check=True)
 

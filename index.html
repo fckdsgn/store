@@ -159,7 +159,10 @@ main{flex:1;padding:0 var(--x);outline:none}
 .ph img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
 
 /* ---------- home ---------- */
-.hero{position:relative;padding-top:14px}
+.hero{position:relative;padding-top:14px;overflow-x:clip}
+/* the video runs wider than the plate (it is masked to the plate); clipping it sideways keeps the page the width of the
+   screen on phones, while the sneakers can still step out downwards */
+@supports not (overflow:clip){.hero{overflow:hidden}}
 /* The plate shows the video down to row 962 of 1080 (under the bag and the legs). The video itself runs past the plate
    and is masked to the plate plus the sneakers: below the plate its floor is page white (tools/hero-video.py), so the
    sneakers and their shadows step out of the plate. The price tags ride on the same box, so they stay on the clothes. */
@@ -208,6 +211,8 @@ main{flex:1;padding:0 var(--x);outline:none}
 
 /* ---------- product card ---------- */
 .card{position:relative;min-width:0}
+/* the parts of the cards in one row share row heights (subgrid), so a name on two lines keeps the lines under it level */
+@supports (grid-template-rows:subgrid){.grid{grid-auto-rows:auto}.card{display:grid;grid-row:span 4;grid-template-rows:subgrid;row-gap:0;align-content:start}}
 .media{position:relative}
 .card .ph{display:block}
 .card:hover .ph img{transform:scale(1.035)}
@@ -288,6 +293,17 @@ button.sw:hover:not(.on){box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 1.5px 
 .wish-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
 .wish-btn:hover{color:var(--ink)}
 .wish-btn .ico{width:15px;height:15px}
+.act-links{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px}
+/* size guide: a frosted sheet like search, narrower; rows are sizes, the picked size is marked */
+.sheet.guide{left:max(var(--x),calc(50% - 270px));right:max(var(--x),calc(50% - 270px))}
+.guide-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px 4px}
+.guide-h h2{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin:0}
+.guide table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.guide th{font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-2);text-align:left;padding:8px 10px}
+.guide td{padding:9px 10px;border-top:1px solid rgba(0,0,0,.06)}
+.guide tr.on td{background:rgba(255,255,255,.85);font-weight:500}
+.guide tr.on td:first-child{border-radius:10px 0 0 10px}.guide tr.on td:last-child{border-radius:0 10px 10px 0}
+.guide p{font-size:12px;color:var(--ink-2);margin:14px 4px 2px;line-height:1.5}
 .more{width:100%;margin-top:18px;border-top:1px solid var(--line);text-align:left}
 .more details{border-bottom:1px solid var(--line)}
 .more summary{list-style:none;display:flex;justify-content:space-between;align-items:center;padding:13px 2px;cursor:pointer;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
@@ -441,6 +457,7 @@ details[open] .pm::after{transform:rotate(0)}
   .tag.l,.tag.pl{padding:0 8px 0 10px;translate:calc(-100% + 12px) -50%}
   .tag.pl i{order:1}
   .tag i{width:6px;height:6px;box-shadow:0 0 0 3px rgba(21,21,21,.12)}
+  .reel .tag span{display:none}
   .hero-card{position:static;width:auto;margin-top:46px;padding:18px 18px 16px}
   .hero-card .btn{flex:1}
   .quick{display:none}
@@ -589,12 +606,12 @@ const P = [
     text: 'Black fleece hoodie with a GIVENCHY PARIS print on the chest and destroyed-effect cuts all over.',
     details: ['Cotton fleece', 'Destroyed-effect cuts', 'Logo print on the chest', 'Drawstring hood'] },
   { id: 'burberry-check-hood-hoodie', brand: 'Burberry', name: 'Check Hood Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 990, img: 'burberry-check-hood-hoodie.webp',
-    color: { name: 'Pale grey melange', hex: '#C9C9C9' }, sizes: WEAR, out: [], views: TOP,
-    text: 'Zip-up hoodie in pale grey cotton with a hood lined in Burberry check and an embroidered Equestrian Knight logo.',
+    color: { name: 'Pale gray melange', hex: '#C9C9C9' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Zip-up hoodie in pale gray cotton with a hood lined in Burberry check and an embroidered Equestrian Knight logo.',
     details: ['Cotton jersey', 'Check-lined hood', 'Embroidered Equestrian Knight logo', 'Zip front and pockets'] },
   { id: 'ch-cross-patch-jeans', brand: 'Chrome Hearts', name: 'Cross Patch Jeans', cat: 'Jeans', groups: ['clothing'], price: 30094, img: 'ch-cross-patch-jeans.webp',
-    color: { name: 'Black / grey', hex: '#6E6E6E' }, sizes: WEAR, out: [], views: TOP,
-    text: 'Vintage Levi’s 501 jeans in a faded grey wash with black leather Chrome Hearts crosses sewn across the legs.',
+    color: { name: 'Black / gray', hex: '#6E6E6E' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Vintage Levi’s 501 jeans in a faded gray wash with black leather Chrome Hearts crosses sewn across the legs.',
     details: ['Levi’s 501 denim', 'Leather cross patches', 'Straight leg', 'Button fly'] },
   { id: 'vetements-anarchy-sweatpants', brand: 'Vetements', name: 'Anarchy Logo Sweatpants', cat: 'Trousers', groups: ['clothing'], price: 550, was: 915, img: 'vetements-anarchy-sweatpants.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
@@ -620,13 +637,13 @@ const P = [
         text: 'The classic Keepall in Monogram canvas with natural cowhide handles, trim and shoulder strap.',
         details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Removable shoulder strap'] },
       { key: 'monogram-eclipse', color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, img: 'lv-keepall-55-eclipse.webp', views: two('lv-keepall-55-eclipse-2.webp', BAG), price: 2700,
-        text: 'The Keepall in grey and black Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
+        text: 'The Keepall in gray and black Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
         details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
       { key: 'monogram-macassar', color: { name: 'Monogram Macassar', hex: '#4A3426' }, img: 'lv-keepall-55-macassar.webp', views: two('lv-keepall-55-macassar-2.webp', BAG), price: 2700,
         text: 'The Keepall in Monogram Macassar canvas, the brown Monogram paired with black leather trim.',
         details: ['Monogram Macassar coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
       { key: 'damier-graphite', color: { name: 'Damier Graphite', hex: '#3A3A3D' }, img: 'lv-keepall-55-graphite.webp', price: 2700,
-        text: 'The Keepall in Damier Graphite canvas, the grey and black check, with black leather trim.',
+        text: 'The Keepall in Damier Graphite canvas, the gray and black check, with black leather trim.',
         details: ['Damier Graphite coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
     ] },
   { id: 'lv-discovery-backpack', brand: 'Louis Vuitton', name: 'Discovery Backpack PM', cat: 'Backpacks', groups: ['bags'], price: 2940, img: 'lv-discovery-backpack.webp',
@@ -652,11 +669,11 @@ const P = [
   { id: 'gucci-gg-belt', brand: 'Gucci', name: 'GG Supreme Belt with Interlocking G', cat: 'Belts', groups: ['accessories'], price: 480, img: 'gucci-gg-belt.webp',
     color: { name: 'Beige / ebony', hex: '#B9A88C' }, sizes: BELT, out: [], views: BELTV,
     text: 'Belt in beige and ebony GG Supreme canvas with black leather trim and the silver-tone Interlocking G buckle.',
-    details: ['GG Supreme canvas', 'Black leather trim', 'Interlocking G buckle', 'Sized in centimetres'] },
+    details: ['GG Supreme canvas', 'Black leather trim', 'Interlocking G buckle', 'Sized in centimeters'] },
   { id: 'ch-cross-belt', brand: 'Chrome Hearts', name: 'Cross Buckle Studded Belt', cat: 'Belts', groups: ['accessories'], price: 750, img: 'ch-cross-belt.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'Black leather belt lined with metal studs and fastened with an ornate Chrome Hearts cross buckle.',
-    details: ['Black leather', 'Metal studs along the strap', 'Cross buckle', 'Sized in centimetres'] },
+    details: ['Black leather', 'Metal studs along the strap', 'Cross buckle', 'Sized in centimeters'] },
   { id: 'lv-initiales-40', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 635, sizes: BELT, out: [], views: BELTV,
     text: 'Reversible belt with plain leather on the other side, fastened with the LV Initiales buckle.',
     details: ['Reversible', 'LV Initiales buckle', '4 cm wide'],
@@ -667,20 +684,15 @@ const P = [
       { key: 'monogram-eclipse', color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, img: 'lv-initiales-eclipse.webp', price: 635,
         text: 'Reversible belt in Monogram Eclipse canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
         details: ['Monogram Eclipse canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
-      { key: 'grey-taurillon', color: { name: 'Grey Taurillon Monogram', hex: '#7A7A7A' }, img: 'lv-initiales-taurillon.webp', price: 820,
-        text: 'Reversible belt in grey Taurillon leather embossed with the Monogram, fastened with a striped LV Initiales buckle.',
+      { key: 'grey-taurillon', color: { name: 'Gray Taurillon Monogram', hex: '#7A7A7A' }, img: 'lv-initiales-taurillon.webp', price: 820,
+        text: 'Reversible belt in gray Taurillon leather embossed with the Monogram, fastened with a striped LV Initiales buckle.',
         details: ['Taurillon Monogram leather, calf leather reverse', 'Reversible', 'Striped LV Initiales buckle', '4 cm wide'] },
-    ] },
-  { id: 'lv-reversible-40', brand: 'Louis Vuitton', name: '40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 800, sizes: BELT, out: [], views: BELTV,
-    text: 'Reversible Monogram belt with a matching LV buckle.',
-    details: ['Monogram canvas', 'Reversible', 'LV buckle', '4 cm wide'],
-    variants: [
-      { key: 'eclipse-reverse', color: { name: 'Monogram Eclipse Reverse', hex: '#8A8A8E' }, img: 'lv-belt-eclipse-reverse.webp',
-        text: 'Reversible belt in grey Monogram Eclipse Reverse canvas with a dark metal LV buckle.',
-        details: ['Monogram Eclipse Reverse canvas', 'Reversible', 'Dark metal LV buckle', '4 cm wide'] },
-      { key: 'white-monogram', color: { name: 'White Monogram', hex: '#EDEDED' }, img: 'lv-belt-white-monogram.webp',
-        text: 'Reversible belt in white Monogram canvas with a matching white LV buckle.',
-        details: ['White Monogram canvas', 'Reversible', 'White LV buckle', '4 cm wide'] },
+      { key: 'eclipse-reverse', color: { name: 'Monogram Eclipse Reverse', hex: '#8A8A8E' }, img: 'lv-belt-eclipse-reverse.webp', price: 800,
+        text: 'Reversible belt in gray Monogram Eclipse Reverse canvas, fastened with a dark metal LV Initiales buckle.',
+        details: ['Monogram Eclipse Reverse canvas', 'Reversible', 'Dark metal LV Initiales buckle', '4 cm wide'] },
+      { key: 'white-monogram', color: { name: 'White Monogram', hex: '#EDEDED' }, img: 'lv-belt-white-monogram.webp', price: 800,
+        text: 'Reversible belt in white Monogram canvas, fastened with a matching white LV Initiales buckle.',
+        details: ['White Monogram canvas', 'Reversible', 'White LV Initiales buckle', '4 cm wide'] },
     ] },
   // ---- second upload ----
   // clothing
@@ -691,7 +703,7 @@ const P = [
       { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'moncler-maya-black.webp' },
       { key: 'navy', color: { name: 'Navy', hex: '#1B2233' }, img: 'moncler-maya-navy.webp',
         text: 'The Maya in shiny navy lacquered nylon, with the red, white and blue stripe running along the zip.',
-        details: ['Lacquered nylon', 'Down filling', 'Tricolour stripe along the zip', 'Hood'] },
+        details: ['Lacquered nylon', 'Down filling', 'Tricolor stripe along the zip', 'Hood'] },
     ] },
   { id: 'moncler-fur-hood-jacket', brand: 'Moncler', name: 'Down Jacket with Fur-Trim Hood', cat: 'Outerwear', groups: ['clothing'], price: 2795, img: 'moncler-fur-hood-jacket.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
@@ -706,7 +718,7 @@ const P = [
     text: 'Cropped black down jacket with an exposed two-way zip that runs all the way up and closes the hood.',
     details: ['Recycled nylon', '90% goose down, 10% feathers', 'Full-length exposed two-way zip', 'Zipped chest pocket'] },
   { id: 'cp-goggle-down-jacket', brand: 'C.P. Company', name: 'Goggle Down Jacket', cat: 'Outerwear', groups: ['clothing'], price: 650, img: 'cp-goggle-down-jacket.webp',
-    color: { name: 'Metallic sage / grey', hex: '#B9BBA8' }, sizes: WEAR, out: [], views: TOP,
+    color: { name: 'Metallic sage / gray', hex: '#B9BBA8' }, sizes: WEAR, out: [], views: TOP,
     text: 'Glossy two-tone down jacket with the C.P. Company goggle lenses set into the hood and the lens on the sleeve.',
     details: ['Glossy nylon shell', 'Down filling', 'Goggle hood', 'Lens on the sleeve'] },
   { id: 'supreme-arc-hooded-jacket', brand: 'Supreme', name: 'Arc Logo Hooded Jacket', cat: 'Outerwear', groups: ['clothing'], price: 368, img: 'supreme-arc-hooded-jacket.webp',
@@ -722,8 +734,8 @@ const P = [
     text: 'Black hoodie from Virgil Abloh’s aviation season with a large LV made of tiny white planes that fly off down one sleeve.',
     details: ['Cotton jersey', 'LV logo made of planes', 'Planes running down the sleeve', 'Drawstring hood'] },
   { id: 'bape-shark-hoodie', brand: 'BAPE', name: 'City Camo Shark Full Zip Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 510, img: 'bape-shark-hoodie.webp',
-    color: { name: 'Grey camo', hex: '#7C7C7C' }, sizes: WEAR, out: [], views: TOP,
-    text: 'The BAPE shark hoodie in grey camo: the zip closes over the face to finish the shark mouth on the hood.',
+    color: { name: 'Gray camo', hex: '#7C7C7C' }, sizes: WEAR, out: [], views: TOP,
+    text: 'The BAPE shark hoodie in gray camo: the zip closes over the face to finish the shark mouth on the hood.',
     details: ['Cotton fleece', 'Shark face on the hood', 'Full zip over the face', 'Kangaroo pockets'] },
   { id: 'balenciaga-tape-hoodie', brand: 'Balenciaga', name: 'Tape Type Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 1148, img: 'balenciaga-tape-hoodie.webp',
     color: { name: 'Washed black', hex: '#2A2A2A' }, sizes: WEAR, out: [], views: TOP,
@@ -770,8 +782,8 @@ const P = [
     details: ['Washed cotton', 'Rolling Stones tongue print', 'Frayed seams', 'Crew neck'] },
   { id: 'stone-island-knit', brand: 'Stone Island', name: 'Ribbed Crewneck Sweater', cat: 'Knitwear', groups: ['clothing'], price: 400, img: 'stone-island-knit.webp',
     color: { name: 'Green', hex: '#3E7A35' }, sizes: WEAR, out: [], views: TOP,
-    text: 'Ribbed crewneck sweater in green with a faded, sprayed-colour effect and the compass badge on the sleeve.',
-    details: ['Rib knit', 'Sprayed-colour effect', 'Compass badge on the sleeve', 'Crew neck'] },
+    text: 'Ribbed crewneck sweater in green with a faded, sprayed-color effect and the compass badge on the sleeve.',
+    details: ['Rib knit', 'Sprayed-color effect', 'Compass badge on the sleeve', 'Crew neck'] },
   { id: 'gucci-snake-polo', brand: 'Gucci', name: 'Polo Shirt with Snake Collar', cat: 'Polos', groups: ['clothing'], price: 550, was: 690, img: 'gucci-snake-polo.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Black piqué polo with a snake embroidered around the collar.',
@@ -857,7 +869,7 @@ const P = [
     details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'],
     variants: [
       { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'goyard-belvedere-black.webp', views: two('goyard-belvedere-black-2.webp', BAG) },
-      { key: 'grey', color: { name: 'Grey', hex: '#8E9399' }, img: 'goyard-belvedere-grey.webp' },
+      { key: 'grey', color: { name: 'Gray', hex: '#8E9399' }, img: 'goyard-belvedere-grey.webp' },
       { key: 'black-tan', color: { name: 'Black / tan', hex: '#B4652E' }, img: 'goyard-belvedere-black-tan.webp' },
       { key: 'red', color: { name: 'Red', hex: '#A1202A' }, img: 'goyard-belvedere-red.webp' },
       { key: 'orange', color: { name: 'Orange', hex: '#E5622B' }, img: 'goyard-belvedere-orange.webp' },
@@ -889,8 +901,8 @@ const P = [
     text: 'Flap messenger bag in beige and ebony GG Supreme canvas with a green and red Web strap.',
     details: ['GG Supreme canvas', 'Leather trim', 'Web shoulder strap', 'Flap front'] },
   { id: 'gucci-night-courrier', brand: 'Gucci', name: 'Night Courrier GG Supreme Messenger', cat: 'Messenger bags', groups: ['bags'], price: 1100, img: 'gucci-night-courrier.webp',
-    color: { name: 'Black / grey', hex: '#3A3A3D' }, sizes: ['OS'], out: [], views: BAG,
-    text: 'Slim messenger in black and grey GG Supreme canvas covered in patches, with a striped Web strap.',
+    color: { name: 'Black / gray', hex: '#3A3A3D' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Slim messenger in black and gray GG Supreme canvas covered in patches, with a striped Web strap.',
     details: ['GG Supreme canvas', 'Embroidered patches', 'Web shoulder strap', 'Zipped front pocket'] },
   { id: 'burberry-check-backpack', brand: 'Burberry', name: 'Vintage Check Backpack', cat: 'Backpacks', groups: ['bags'], price: 860, img: 'burberry-check-backpack.webp',
     color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ['OS'], out: [], views: BAG,
@@ -901,16 +913,16 @@ const P = [
     text: 'Compact crossbody in Burberry Vintage check with black leather trim and a logo shoulder strap.',
     details: ['Vintage check canvas', 'Black leather trim', 'Logo strap', 'Zip pockets'] },
   { id: 'ch-leather-cross-backpack', brand: 'Chrome Hearts', name: 'Leather Backpack with Cross Patches', cat: 'Backpacks', groups: ['bags'], price: 18400, img: 'ch-leather-cross-backpack.webp',
-    color: { name: 'Black / multicolour', hex: '#151515' }, sizes: ['OS'], out: [], views: BAG,
-    text: 'Black leather backpack with a front pocket covered in multicoloured leather Chrome Hearts crosses.',
-    details: ['Black leather', 'Multicolour leather cross patches', 'Front pocket', 'Top handle and straps'] },
+    color: { name: 'Black / multicolor', hex: '#151515' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Black leather backpack with a front pocket covered in multicolored leather Chrome Hearts crosses.',
+    details: ['Black leather', 'Multicolor leather cross patches', 'Front pocket', 'Top handle and straps'] },
   { id: 'ch-multicolor-cross-backpack', brand: 'Chrome Hearts', name: 'Multicolor Cross Patch Backpack', cat: 'Backpacks', groups: ['bags'], price: 18400, img: 'ch-multicolor-cross-backpack.webp',
-    color: { name: 'Multicolour', hex: '#C8102E' }, sizes: ['OS'], out: [], views: BAG,
-    text: 'Backpack covered all over in multicoloured leather Chrome Hearts crosses.',
-    details: ['Leather', 'Multicolour leather cross patches', 'Front pocket', 'Top handle and straps'] },
+    color: { name: 'Multicolor', hex: '#C8102E' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Backpack covered all over in multicolored leather Chrome Hearts crosses.',
+    details: ['Leather', 'Multicolor leather cross patches', 'Front pocket', 'Top handle and straps'] },
   { id: 'sprayground-shark-backpack', brand: 'Sprayground', name: 'Shark Check Backpack', cat: 'Backpacks', groups: ['bags'], price: 129, img: 'sprayground-shark-backpack.webp',
-    color: { name: 'Grey check', hex: '#4A4A4D' }, sizes: ['OS'], out: [], views: BAG,
-    text: 'Grey check backpack with Sprayground’s signature shark mouth across the front.',
+    color: { name: 'Gray check', hex: '#4A4A4D' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Gray check backpack with Sprayground’s signature shark mouth across the front.',
     details: ['Coated canvas', 'Shark mouth print', 'Zipped compartments', 'Padded straps'] },
   // accessories
   { id: 'ch-optical-glasses', brand: 'Chrome Hearts', name: 'Optical Glasses with Cross Temples', cat: 'Eyewear', groups: ['accessories'], price: 3165, img: 'ch-optical-glasses.webp',
@@ -918,13 +930,13 @@ const P = [
     text: 'Square optical frames in polished black acetate with silver cross details on the temples.',
     details: ['Black acetate frame', 'Silver cross hardware', 'Optical lenses', 'One size'] },
   { id: 'ch-rimless-sunglasses', brand: 'Chrome Hearts', name: 'Rimless Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 2954, img: 'ch-rimless-sunglasses.webp',
-    color: { name: 'Gold / grey gradient', hex: '#B79A5B' }, sizes: ONE, out: [], views: [[50, 50, 1], [30, 50, 2.2], [70, 46, 2.2]],
-    text: 'Rimless rectangular sunglasses with grey gradient lenses and gold-tone temples with Chrome Hearts details.',
-    details: ['Gold-tone metal', 'Grey gradient lenses', 'Rimless', 'One size'] },
+    color: { name: 'Gold / gray gradient', hex: '#B79A5B' }, sizes: ONE, out: [], views: [[50, 50, 1], [30, 50, 2.2], [70, 46, 2.2]],
+    text: 'Rimless rectangular sunglasses with gray gradient lenses and gold-tone temples with Chrome Hearts details.',
+    details: ['Gold-tone metal', 'Gray gradient lenses', 'Rimless', 'One size'] },
   { id: 'gucci-square-sunglasses', brand: 'Gucci', name: 'Square Sunglasses with GG Logo', cat: 'Eyewear', groups: ['accessories'], price: 260, was: 370, img: 'gucci-square-sunglasses.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: [[50, 50, 1], [36, 50, 2], [72, 48, 2.2]],
     text: 'Chunky square sunglasses in black acetate with dark lenses and the gold GG logo on the temples.',
-    details: ['Black acetate', 'Dark grey lenses', 'Gold GG logo', 'One size'] },
+    details: ['Black acetate', 'Dark gray lenses', 'Gold GG logo', 'One size'] },
   { id: 'dg-logo-sunglasses', brand: 'Dolce & Gabbana', name: 'Logo Shield Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 259, img: 'dg-logo-sunglasses.webp',
     color: { name: 'Black / white', hex: '#151515' }, sizes: ONE, out: [], views: [[50, 50, 1], [36, 46, 2], [78, 44, 2.2]],
     text: 'Black shield sunglasses with DOLCE&GABBANA printed in white across the lens and DG on the temples.',
@@ -942,8 +954,8 @@ const P = [
     text: 'Camo trucker cap with the Rolling Stones tongue in red leather on the front and a mesh back.',
     details: ['Camo cotton front', 'Red leather tongue patch', 'Mesh back', 'Snapback'] },
   { id: 'lv-damier-beanie', brand: 'Louis Vuitton', name: 'Néo Petit Damier Beanie', cat: 'Hats', groups: ['accessories'], price: 415, img: 'lv-damier-beanie.webp',
-    color: { name: 'Light grey', hex: '#A3A3A3' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 40, 1.9], [62, 72, 2]],
-    text: 'Grey wool beanie knitted in the Petit Damier check with a leather logo patch on the cuff.',
+    color: { name: 'Light gray', hex: '#A3A3A3' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 40, 1.9], [62, 72, 2]],
+    text: 'Gray wool beanie knitted in the Petit Damier check with a leather logo patch on the cuff.',
     details: ['Wool', 'Petit Damier knit', 'Logo patch', 'One size'] },
   { id: 'mm6-numbers-cap', brand: 'MM6 Maison Margiela', name: 'Numbers Logo Cap', cat: 'Hats', groups: ['accessories'], price: 240, img: 'mm6-numbers-cap.webp',
     color: { name: 'White', hex: '#EDEDED' }, sizes: ONE, out: [], views: [[50, 50, 1], [52, 48, 2], [50, 30, 2]],
@@ -983,22 +995,22 @@ const P = [
   { id: 'hermes-h-belt', brand: 'Hermès', name: 'H Belt Buckle & Reversible Leather Strap 32 mm', cat: 'Belts', groups: ['accessories'], price: 1035, img: 'hermes-h-belt.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'The Hermès H belt: a brushed silver-tone H buckle on a reversible black leather strap.',
-    details: ['Reversible leather strap', 'Brushed H buckle', '32 mm wide', 'Sized in centimetres'] },
+    details: ['Reversible leather strap', 'Brushed H buckle', '32 mm wide', 'Sized in centimeters'] },
   { id: 'ch-tongue-belt', brand: 'Chrome Hearts', name: 'Rolling Stones Tongue Buckle Belt', cat: 'Belts', groups: ['accessories'], price: 2500, img: 'ch-tongue-belt.webp',
     color: { name: 'Black / silver', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'Black leather belt with a large silver Rolling Stones tongue buckle and Chrome Hearts snaps.',
-    details: ['Black leather', 'Silver tongue buckle', 'Chrome Hearts snaps', 'Sized in centimetres'] },
+    details: ['Black leather', 'Silver tongue buckle', 'Chrome Hearts snaps', 'Sized in centimeters'] },
   { id: 'amiri-logo-belt', brand: 'Amiri', name: 'Core Logo Belt', cat: 'Belts', groups: ['accessories'], price: 550, img: 'amiri-logo-belt.webp',
     color: { name: 'Black / gold', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'Black leather belt with an open gold-tone AMIRI letter buckle.',
-    details: ['Black leather', 'Gold-tone logo buckle', 'Sized in centimetres'] },
+    details: ['Black leather', 'Gold-tone logo buckle', 'Sized in centimeters'] },
   { id: 'vetements-logo-belt', brand: 'Vetements', name: 'Logo Letters Belt', cat: 'Belts', groups: ['accessories'], price: 800, img: 'vetements-logo-belt.webp',
     color: { name: 'Black / silver', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'Black leather belt with VETEMENTS spelled out in silver letters along the strap.',
-    details: ['Black leather', 'Silver logo letters', 'Sized in centimetres'] },
+    details: ['Black leather', 'Silver logo letters', 'Sized in centimeters'] },
 ];
-// one piece in several colours keeps them in `variants`; a single-colour piece gets one variant of its own.
-// The piece shows its first colour and its lowest price ("From" when the colours cost differently).
+// one piece in several colors keeps them in `variants`; a single-color piece gets one variant of its own.
+// The piece shows its first color and its lowest price ("From" when the colors cost differently).
 P.forEach(p => {
   p.variants = (p.variants || [{ key: '', color: p.color, img: p.img, views: p.views }])
     .map(v => ({ ...v, price: v.price || p.price, views: v.views || p.views, text: v.text || p.text, details: v.details || p.details }));
@@ -1007,7 +1019,7 @@ P.forEach(p => {
     price: Math.min(...prices), from: new Set(prices).size > 1 });
 });
 const BY = Object.fromEntries(P.map(p => [p.id, p]));
-// the piece in one colour (the first colour when the key is unknown)
+// the piece in one color (the first color when the key is unknown)
 const vOf = (p, key) => ({ ...p, ...(p.variants.find(v => v.key === key) || p.variants[0]), from: false });
 const vHref = p => '#p-' + p.id + (p.key && p.key !== p.variants[0].key ? '--' + p.key : '');
 const LISTS = {
@@ -1038,17 +1050,22 @@ const KEY = 'pale.v1';
 const blank = () => ({ bag: [], wish: [], user: null, orders: [], promo: null });
 let S = blank();
 try { S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
+// pieces merged into another one: saved bag lines and wishlist entries follow them
+const MOVED = { 'lv-reversible-40': 'lv-initiales-40' };
+S.bag.forEach(l => { if (MOVED[l.id]) l.id = MOVED[l.id]; });
+S.wish = [...new Set(S.wish.map(id => MOVED[id] || id))];
 S.bag = S.bag.filter(l => BY[l.id]);
 S.bag.forEach(l => { l.v = vOf(BY[l.id], l.v).key; if (BY[l.id].sizes.length === 1) l.size = BY[l.id].sizes[0]; });
 S.wish = S.wish.filter(id => BY[id]);
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+save(); // keep the tidied bag and wishlist (merged pieces, sizes renamed)
 
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const money = n => '$ ' + n.toLocaleString('en-US');
-const money2 = n => '$ ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = n => '$' + n.toLocaleString('en-US');
+const money2 = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const isShoe = p => p.sizes === SHOE;
 const isBelt = p => p.sizes === BELT;
 const sizeLabel = (p, s) => isShoe(p) ? 'US ' + s : isBelt(p) ? s + ' cm' : s;
@@ -1066,6 +1083,7 @@ const I = {
   minus: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
   check: '<svg class="ico" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
   search: '<svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>',
+  ruler: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v2"/></svg>',
 };
 
 /* ---------- bag ---------- */
@@ -1109,7 +1127,7 @@ function card(p) {
     </div></div>
     <a class="card-brand" href="#p-${p.id}" tabindex="-1"><span>${esc(p.brand)}</span>${p.variants.length > 1 ? `<span class="cdots" aria-hidden="true">${p.variants.slice(0, 6).map(v => `<i style="--c:${v.color.hex}"></i>`).join('')}${p.variants.length > 6 ? `<em>+${p.variants.length - 6}</em>` : ''}</span>` : ''}</a>
     <a class="card-meta" href="#p-${p.id}"><b>${esc(p.name)}</b>${priceHTML(p)}</a>
-    <div class="card-sub"><span>${esc(p.cat)}</span><span>${p.variants.length > 1 ? p.variants.length + ' colours' : esc(p.color.name)}</span></div>
+    <div class="card-sub"><span>${esc(p.cat)}</span><span>${p.variants.length > 1 ? p.variants.length + ' colors' : esc(p.color.name)}</span></div>
   </article>`;
 }
 const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join('')}</div>`;
@@ -1140,7 +1158,7 @@ V.home = () => {
     <div class="stage-box">
       <div class="stage"></div>
       <div class="reel">
-        <video poster="assets/hero/hero-v3-poster.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero-v3-2560.mp4" type="video/mp4" media="(min-width: 901px)"><source src="assets/hero/hero-v3-1920.mp4" type="video/mp4"><source src="assets/hero/hero-v3-1920.webm" type="video/webm"></video>
+        <video poster="assets/hero/hero-v3-poster.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero-v3-2560.mp4" type='video/mp4; codecs="avc1.640032"' media="(min-width: 901px)"><source src="assets/hero/hero-v3-1600.mp4" type='video/mp4; codecs="avc1.640028"'><source src="assets/hero/hero-v3-1920.webm" type='video/webm; codecs="vp9"'></video>
         ${hot}
         ${tags}
       </div>
@@ -1208,11 +1226,16 @@ V.product = (id, key = '') => {
   const base = BY[id];
   if (!base) return V.missing();
   if (PV.id !== id) PV = { id, view: 0, size: base.sizes.length === 1 ? base.sizes[0] : null, v: '', hk: null };
-  // the colour in the address wins when the page opens or the address changes
+  // the color in the address wins when the page opens or the address changes
   if (PV.hk !== key) { PV.hk = key; PV.v = vOf(base, key).key; PV.view = 0; }
   const p = vOf(base, PV.v);
   const w = S.wish.includes(p.id);
-  const rel = P.filter(x => x.id !== p.id && x.groups.some(g => p.groups.includes(g))).slice(0, 4);
+  // you may also like: the same kind of piece first (Hoodies, Travel bags...), then the same house, then the rest of the
+  // section; among equals the nearest in the catalog, so every piece gets its own row
+  const at = P.indexOf(base);
+  const rel = P.filter(x => x.id !== p.id && x.groups.some(g => p.groups.includes(g)))
+    .map(x => ({ x, s: (x.cat === p.cat ? 2 : 0) + (x.brand === p.brand ? 1 : 0), d: Math.abs(P.indexOf(x) - at) }))
+    .sort((a, b) => b.s - a.s || a.d - b.d).slice(0, 4).map(r => r.x);
   return `<section class="pdp">
     <div class="thumbs" role="tablist" aria-label="Photos">
       ${p.views.map((v, i) => `<button class="th${i === PV.view ? ' on' : ''}" role="tab" aria-selected="${i === PV.view}" aria-label="Photo ${i + 1}" data-act="view" data-i="${i}">${pic(p, v, false)}</button>`).join('')}
@@ -1228,9 +1251,9 @@ V.product = (id, key = '') => {
       <h1>${esc(p.name)}</h1>
       ${priceHTML(p)}
       ${base.variants.length > 1
-        ? `<div class="swatches" role="radiogroup" aria-label="Colour">${base.variants.map(v => `<button class="sw${v.key === p.key ? ' on' : ''}" style="--c:${v.color.hex}" role="radio" aria-checked="${v.key === p.key}" aria-label="${esc(v.color.name)}" title="${esc(v.color.name)}" data-act="color" data-v="${v.key}"></button>`).join('')}</div>`
+        ? `<div class="swatches" role="radiogroup" aria-label="Color">${base.variants.map(v => `<button class="sw${v.key === p.key ? ' on' : ''}" style="--c:${v.color.hex}" role="radio" aria-checked="${v.key === p.key}" aria-label="${esc(v.color.name)}" title="${esc(v.color.name)}" data-act="color" data-v="${v.key}"></button>`).join('')}</div>`
         : `<div class="swatches"><span class="sw on" style="--c:${p.color.hex}" title="${esc(p.color.name)}"></span></div>`}
-      <div class="sw-name">${esc(p.color.name)}${base.variants.length > 1 ? `<span class="muted">, ${base.variants.length} colours</span>` : ''}</div>
+      <div class="sw-name">${esc(p.color.name)}${base.variants.length > 1 ? `<span class="muted">, ${base.variants.length} colors</span>` : ''}</div>
       <div class="actions">
         <button class="btn size-btn" id="size-btn" data-act="size" aria-haspopup="listbox" aria-expanded="false"><span>${PV.size ? sizeLabel(p, PV.size) : 'Size'}</span>${I.chev}</button>
         <div class="size-pop glass${isShoe(p) ? '' : ' cl'}" id="size-pop" role="listbox" aria-label="Size" hidden>
@@ -1239,7 +1262,7 @@ V.product = (id, key = '') => {
         </div>
         <button class="btn wide" data-act="add">Add to bag</button>
         <p class="hint" id="hint" aria-live="polite"></p>
-        <button class="wish-btn${w ? ' on' : ''}" data-act="wish" data-id="${p.id}" aria-pressed="${w}">${I.heart}<span class="t">${w ? 'In your wishlist' : 'Add to wishlist'}</span></button>
+        <div class="act-links"><button class="wish-btn${w ? ' on' : ''}" data-act="wish" data-id="${p.id}" aria-pressed="${w}">${I.heart}<span class="t">${w ? 'In your wishlist' : 'Add to wishlist'}</span></button>${guideKind(p) ? `<button class="wish-btn" data-act="guide" data-k="${guideKind(p)}">${I.ruler}<span>Size guide</span></button>` : ''}</div>
       </div>
       <div class="more">
         <details><summary>Details<span class="pm"></span></summary><div class="body">${esc(p.text)}<ul>${p.details.map(d => `<li>${esc(d)}</li>`).join('')}</ul></div></details>
@@ -1303,7 +1326,7 @@ V.checkout = () => {
     <section>
       <h1 class="h-title">Checkout</h1>
       <form class="form" id="co-form" novalidate>
-        <fieldset class="fs"><legend>Contact</legend>${f('email', 'Email', 'email', 'email', true, u.email || '')}</fieldset>
+        <fieldset class="fs"><legend>Contact</legend>${f('email', 'Email', 'email', 'email', false, u.email || '')}${f('phone', 'Phone', 'tel', 'tel', false, u.phone || '', ' inputmode="tel" maxlength="20"')}</fieldset>
         <fieldset class="fs"><legend>Shipping address</legend>
           ${f('first', 'First name', 'text', 'given-name', false, (u.name || '').split(' ')[0] || '')}${f('last', 'Last name', 'text', 'family-name', false, (u.name || '').split(' ').slice(1).join(' '))}
           ${f('addr', 'Address', 'text', 'address-line1', true)}
@@ -1386,12 +1409,12 @@ V.account = () => {
 };
 
 const PAGES = {
-  about: ['About', `<p>Pale Store brings together clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler, Balenciaga and other houses.</p><p>Every piece is shown on the same grey backdrop, so you can compare colors and details side by side.</p>`],
+  about: ['About', `<p>Pale Store brings together clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler, Balenciaga and other houses.</p><p>Every piece is shown on the same gray backdrop, so you can compare colors and details side by side.</p>`],
   contact: ['Contact', `<p>Questions about an order, sizing or returns? Write to us and we answer within one business day.</p><h2>Email</h2><div class="copy-row"><span id="mail">hello@palestore.shop</span><button class="btn" style="height:30px;font-size:10.5px" data-act="copy" data-t="mail">Copy</button></div><h2>Hours</h2><p>Monday to Friday, 10:00 to 19:00</p>`],
   faq: ['FAQ', `<div class="faq">${[
     ['How long does delivery take?', 'Standard shipping takes 3 to 5 business days and is free. Express takes 1 to 2 business days.'],
     ['Can I return an order?', 'Yes. Returns are free within 30 days of delivery, as long as the piece is unworn and has its tags.'],
-    ['How do I pick a size?', 'Clothing runs XS to XL, shoes use US sizes and belts are sized in centimetres. Bags come in the house’s own sizes, such as PM, MM or 55; hats are one size.'],
+    ['How do I pick a size?', 'Clothing runs XS to XL, shoes use US sizes and belts are sized in centimeters; each piece has a size guide next to its size. Bags come in the house’s own sizes, such as PM, MM or 55; hats are one size.'],
     ['Which payment methods do you accept?', 'Visa, Mastercard, UnionPay and American Express. You enter your card at checkout.'],
     ['How do I track my order?', 'Your orders are listed in your account. A tracking link arrives by email once the parcel ships.'],
   ].map(([q, a]) => `<details><summary>${q}<span class="pm"></span></summary><div class="body">${a}</div></details>`).join('')}</div>`],
@@ -1412,9 +1435,20 @@ function route() {
   return { name: 'missing' };
 }
 let lastKey = '';
+// Back and forward return to where that page was scrolled: every history step gets an id in history.state, and the
+// scroll listener keeps its last position here. A new step (a link) starts at the top.
+const SCROLL = {};
+try { history.scrollRestoration = 'manual'; } catch (err) {}
+function stepKey() {
+  const st = history.state;
+  if (st && st.k) return [st.k, true];
+  const k = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  try { history.replaceState({ ...(st || {}), k }, ''); } catch (err) {}
+  return [k, false];
+}
 function render(scroll) {
   const r = route(), key = r.name + ':' + (r.arg || '');
-  // a new section or page cross-fades with the old one; a redraw of the same page (sort, colour, bag) stays instant
+  // a new section or page cross-fades with the old one; a redraw of the same page (sort, color, bag) stays instant
   if (lastKey && key !== lastKey && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.startViewTransition(() => paint(r, key, scroll, true));
   } else paint(r, key, scroll, false);
@@ -1426,7 +1460,7 @@ function paint(r, key, scroll, fade) {
   // photos already in the cache show at once; the rest fade in on load (the listener below)
   $$('img', app).forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
   if (key === lastKey && !scroll) { app.firstElementChild.style.animation = 'none'; window.scrollTo(0, y); }
-  else window.scrollTo(0, 0);
+  else { const [k, back] = stepKey(); window.scrollTo(0, back && SCROLL[k] || 0); }
   lastKey = key;
   $$('.nav [data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === (r.arg || r.name)));
   document.title = titleFor(r);
@@ -1462,7 +1496,9 @@ function mountProduct() {
   }, { passive: true });
   const bar = $('#pbar'), act = $('.actions');
   if (pObs) pObs.disconnect();
-  pObs = new IntersectionObserver(([e]) => bar.classList.toggle('show', !e.isIntersecting && e.boundingClientRect.top < 0));
+  // the phone bar shows whenever the size and Add to bag buttons are off screen: below the first screen as well as above.
+  // The bottom 110px count as off screen, since the bar itself sits there (and a button just peeking in is no help).
+  pObs = new IntersectionObserver(([e]) => bar.classList.toggle('show', !e.isIntersecting), { rootMargin: '0px 0px -110px 0px' });
   pObs.observe(act);
 }
 function sizePop(open) {
@@ -1488,6 +1524,33 @@ function closeLayer() {
   if (l.innerHTML) { l.innerHTML = ''; document.body.style.overflow = ''; }
   $$('[data-act="menu"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
 }
+// Size guide. General charts for now, the same for every house: placeholders until the owner sends the houses' own.
+const GUIDE = {
+  wear: { title: 'Clothing sizes', head: ['Size', 'Chest, cm', 'Waist, cm', 'EU / IT'],
+    rows: [['XS', '86–91', '71–76', '44'], ['S', '91–96', '76–81', '46'], ['M', '96–101', '81–86', '48'], ['L', '101–106', '86–91', '50'], ['XL', '106–111', '91–96', '52']],
+    note: 'Body measurements. Fit varies by house, and oversized pieces run large: if you are between sizes, compare with a piece you own.' },
+  shoe: { title: 'Shoe sizes', head: ['US', 'UK', 'EU', 'Foot, cm'],
+    rows: [['7', '6', '40', '25'], ['8', '7', '41', '26'], ['8.5', '7.5', '42', '26.5'], ['9', '8', '42.5', '27'], ['9.5', '8.5', '43', '27.5'], ['10', '9', '44', '28'], ['10.5', '9.5', '44.5', '28.5'], ['11', '10', '45', '29'], ['12', '11', '46', '30']],
+    note: 'Men’s sizes. Measure your foot from heel to toe while standing. European houses size in EU; we list the US size.' },
+  belt: { title: 'Belt sizes', head: ['Belt, cm', 'Belt, in', 'Jeans waist (W)'],
+    rows: [['80', '32', '30'], ['85', '34', '32'], ['90', '36', '34'], ['95', '38', '36'], ['100', '40', '38'], ['105', '42', '40'], ['110', '44', '42']],
+    note: 'The belt size is its length to the middle hole. Pick a belt about 5 cm (2 in) longer than your jeans waist.' },
+};
+const guideKind = p => isShoe(p) ? 'shoe' : isBelt(p) ? 'belt' : p.sizes === WEAR ? 'wear' : '';
+function openGuide(k) {
+  const g = GUIDE[k], l = $('#layer');
+  l.innerHTML = `<div class="veil" data-act="close"></div>
+    <div class="sheet glass guide" role="dialog" aria-label="${g.title}">
+      <div class="guide-h"><h2>${g.title}</h2><button class="icon-btn" data-act="close" aria-label="Close size guide">${I.x}</button></div>
+      <table><thead><tr>${g.head.map(h => `<th scope="col">${h}</th>`).join('')}</tr></thead>
+      <tbody>${g.rows.map(r => `<tr class="${r[0] === PV.size ? 'on' : ''}">${r.map(c => `<td class="num">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>
+      <p>${g.note}</p>
+    </div>`;
+  document.body.style.overflow = 'hidden';
+  dropToast();
+  sizePop(false);
+  setTimeout(() => $('.guide [data-act="close"]').focus(), 30);
+}
 function openSearch() {
   const l = $('#layer');
   l.innerHTML = `<div class="veil" data-act="close"></div>
@@ -1502,6 +1565,35 @@ function openSearch() {
 }
 // lower case without accents, so "belvedere" finds Belvedère and "hermes" finds Hermès
 const fold = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+// words of a text, lower case, no accents, "T-shirt" as one word
+const words = t => fold(t).replace(/([a-z0-9])[-'’.]([a-z0-9])/g, '$1$2').split(/[^a-z0-9а-яё]+/).filter(Boolean);
+// Russian words for pieces, colors and houses (by their stem), and short names of the houses
+const RU = [['худи', 'hoodie'], ['толстовк', 'hoodie sweatshirt'], ['свитшот', 'sweatshirt'], ['кофт', 'hoodie sweatshirt sweater'],
+  ['куртк', 'jacket'], ['пухов', 'down puffer'], ['жилет', 'vest'], ['джинс', 'jeans'], ['штан', 'trousers sweatpants jeans'],
+  ['брюк', 'trousers'], ['футболк', 'tshirt'], ['майк', 'tshirt'], ['поло', 'polo'], ['свитер', 'sweater knit'], ['одежд', 'clothing'],
+  ['сумк', 'bag'], ['рюкзак', 'backpack'], ['кошел', 'wallet'], ['кроссов', 'sneaker'], ['кеды', 'sneaker'], ['ботин', 'boot'],
+  ['сапог', 'boot'], ['обув', 'shoes'], ['шлеп', 'slides'], ['сланц', 'slides'], ['ремен', 'belt'], ['ремн', 'belt'], ['пояс', 'belt'],
+  ['очк', 'glasses sunglasses eyewear'], ['кепк', 'cap'], ['бейсболк', 'cap'], ['шапк', 'beanie'], ['шарф', 'scarf'],
+  ['перчат', 'gloves'], ['маск', 'mask'], ['аксессуар', 'accessories'], ['скидк', 'sale'], ['распродаж', 'sale'], ['нов', 'new'],
+  ['черн', 'black'], ['чёрн', 'black'], ['бел', 'white'], ['сер', 'gray grey'], ['розов', 'pink'], ['красн', 'red'],
+  ['син', 'blue navy'], ['голуб', 'blue'], ['зелен', 'green'], ['зелён', 'green'], ['коричн', 'brown'], ['беж', 'beige'],
+  ['оранж', 'orange'], ['фиолет', 'purple'], ['бордо', 'burgundy'], ['луи', 'louis'], ['виттон', 'vuitton'], ['вюиттон', 'vuitton'],
+  ['лв', 'louis'], ['гоярд', 'goyard'], ['хром', 'chrome'], ['хартс', 'hearts'], ['баленс', 'balenciaga'], ['гуч', 'gucci'],
+  ['барбер', 'burberry'], ['бербер', 'burberry'], ['бёрбер', 'burberry'], ['монклер', 'moncler'], ['рик', 'rick'], ['оуэн', 'owens'],
+  ['суприм', 'supreme'], ['маржел', 'margiela'], ['марджел', 'margiela'], ['амири', 'amiri'], ['адидас', 'adidas'], ['найк', 'nike'],
+  ['стон', 'stone'], ['айленд', 'island'], ['бейп', 'bape'], ['ветем', 'vetements'], ['живанш', 'givenchy'], ['сен', 'saint'],
+  ['лоран', 'laurent'], ['гермес', 'hermes'], ['эрмес', 'hermes'], ['дольч', 'dolce'], ['габбан', 'gabbana'], ['тимберл', 'timberland'],
+  ['спрейгр', 'sprayground'], ['комм', 'comme']];
+const SHORT = { lv: 'louis', ch: 'chrome', ysl: 'saint', dg: 'dolce', cdg: 'comme', erd: 'enfants', cp: 'cp', tee: 'tshirt', grey: 'gray', gray: 'grey' };
+// the ways one word of a query can match: itself, without a plural ending, its English word, the full name of a house
+function alts(w) {
+  const a = [w];
+  if (w.length > 3 && w.endsWith('es')) a.push(w.slice(0, -2));
+  if (w.length > 3 && w.endsWith('s')) a.push(w.slice(0, -1));
+  for (const [stem, en] of RU) if (w.startsWith(stem)) a.push(...en.split(' '));
+  if (SHORT[w]) a.push(SHORT[w]);
+  return a;
+}
 function searchOut(q) {
   q = fold(q.trim());
   const out = $('#sr-out');
@@ -1510,12 +1602,24 @@ function searchOut(q) {
       <div class="label sr-h">New in</div><div class="sr-list">${P.filter(p => p.isNew).map(srItem).join('')}</div>`;
     return;
   }
-  // a piece found by its name shows once; found only by a colour, it opens in that colour
+  // every word of the query has to match the start of a word ("lv" finds LV, not "silver"); pieces that match by name,
+  // brand, category or color come before those that match only in the description. A piece found by a color other
+  // than its first opens in that color.
+  const terms = words(q).map(alts);
   const hits = P.map(p => {
-    if ((q === 'sale' && p.was) || fold([p.brand, p.name, p.cat, ...p.groups].join(' ')).includes(q)) return p;
-    const v = p.variants.find(v => fold(v.color.name + ' ' + v.text).includes(q));
-    return v && (p.variants.length > 1 ? vOf(p, v.key) : p);
-  }).filter(Boolean);
+    let best = null;
+    p.variants.forEach((v, i) => {
+      const strong = words([p.brand, p.name, p.cat, ...p.groups, p.was ? 'sale' : '', p.isNew ? 'new' : '', v.color.name].join(' '));
+      const weak = words([v.text, ...v.details].join(' '));
+      let score = 0;
+      for (const t of terms) {
+        const hit = w => t.some(a => w.startsWith(a));
+        if (strong.some(hit)) score += 2; else if (weak.some(hit)) score += 1; else return;
+      }
+      if (!best || score > best.score) best = { score, i };
+    });
+    return best && { p: best.i && p.variants.length > 1 ? vOf(p, p.variants[best.i].key) : p, score: best.score };
+  }).filter(Boolean).sort((a, b) => b.score - a.score).map(h => h.p);
   out.innerHTML = hits.length ? `<div class="label sr-h">${hits.length} ${hits.length === 1 ? 'result' : 'results'}</div><div class="sr-list">${hits.map(srItem).join('')}</div>`
     : `<p class="sr-empty">Nothing matches “${esc(q)}”. Try coat, knit or sneakers.</p>`;
 }
@@ -1568,6 +1672,7 @@ function fieldErr(i) {
   const v = i.value.trim(), c = CARDS[payBy];
   if (!v) return FILL;
   if (i.type === 'email' && !emailOk(v)) return 'Check the email address';
+  if (i.type === 'tel' && !/^\+?[\d\s()-]{7,20}$/.test(v)) return 'Check the phone number';
   if (i.id === 'cc-num') {
     const n = digits(v), k = cardOf(n);
     if (!k) return 'We accept Visa, Mastercard, UnionPay and American Express';
@@ -1617,10 +1722,10 @@ document.addEventListener('click', e => {
     case 'color': {
       if (d.v === PV.v) break;
       PV.v = d.v; PV.view = 0;
-      // keep the colour in the address without a new history step, so a reload or a shared link opens it
+      // keep the color in the address without a new history step, so a reload or a shared link opens it
       const p = BY[PV.id], h = d.v === p.variants[0].key ? '' : d.v;
       PV.hk = h;
-      try { history.replaceState(null, '', '#p-' + p.id + (h ? '--' + h : '')); } catch (err) {}
+      try { history.replaceState(history.state, '', '#p-' + p.id + (h ? '--' + h : '')); } catch (err) {}
       render();
       $(`.sw[data-v="${d.v}"]`)?.focus({ preventScroll: true });
       break;
@@ -1635,6 +1740,7 @@ document.addEventListener('click', e => {
       save(); render(); break;
     }
     case 'search': openSearch(); break;
+    case 'guide': openGuide(d.k); break;
     case 'menu': openMenu(); break;
     case 'close': closeLayer(); break;
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
@@ -1715,7 +1821,7 @@ document.addEventListener('submit', e => {
     const n = 'PS-' + (1041 + S.orders.length);
     // only the brand and the last 4 digits are kept, as on a receipt
     const pay = { brand: CARDS[payBy].name, last4: digits($('#cc-num').value).slice(-4) };
-    S.orders.push({ n, at: Date.now(), email: $('#email').value.trim(), lines: S.bag.map(l => ({ ...l })), sub, disc: d, promo: S.promo, ship, pay, total: sub - d + ship });
+    S.orders.push({ n, at: Date.now(), email: $('#email').value.trim(), phone: $('#phone').value.trim(), lines: S.bag.map(l => ({ ...l })), sub, disc: d, promo: S.promo, ship, pay, total: sub - d + ship });
     S.bag = []; S.promo = null; express = false; payBy = 'visa'; save();
     location.hash = 'order-' + n;
   }
@@ -1731,6 +1837,7 @@ document.addEventListener('submit', e => {
 });
 let lastY = -1;
 addEventListener('scroll', () => {
+  if (history.state && history.state.k) SCROLL[history.state.k] = scrollY;
   const y = scrollY > 8;
   if (y !== lastY) { $('#hdr').classList.toggle('lift', y); lastY = y; }
 }, { passive: true });
