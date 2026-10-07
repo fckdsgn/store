@@ -103,10 +103,16 @@ button{background:none;border:0;padding:0;cursor:pointer}
 /* ---------- telegram pill under the header ---------- */
 .tg-top{display:flex;justify-content:center;padding:12px var(--x) 0}
 /* Men / Women / Unisex: one pill like the Telegram one, the picked part white */
-.gpill{display:inline-flex;gap:2px;height:34px;padding:3px;border-radius:999px;background:var(--bar);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px var(--glass-edge)}
-.gpill button{padding:0 16px;border-radius:999px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);transition:background .25s,color .25s,box-shadow .25s}
-.gpill button:hover{color:var(--ink)}
-.gpill button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08),0 4px 14px -6px rgba(0,0,0,.18)}
+.gpill{position:relative;display:inline-flex;gap:2px;height:34px;padding:3px;border-radius:999px;background:var(--bar);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px var(--glass-edge)}
+.gpill button{position:relative;z-index:1;padding:0 16px;border-radius:999px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);transition:color .3s}
+.gpill button:hover,.gpill button.on{color:var(--ink)}
+/* the white part slides to the picked button (placed by placeG() in the script), like the switch on the account page */
+.gpill>i{position:absolute;top:3px;bottom:3px;left:0;width:var(--gw,0);transform:translateX(var(--gx,0));border-radius:999px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08),0 4px 14px -6px rgba(0,0,0,.18)}
+.gpill.ready>i{transition:transform .45s var(--ease),width .45s var(--ease)}
+/* while the pieces cross-fade after a switch, the pill stays live so its slide is seen, not a fade */
+html.g-switch .gpill{view-transition-name:gpill}
+::view-transition-old(gpill){display:none}
+::view-transition-new(gpill){animation:none}
 .tg-pill{display:inline-flex;align-items:center;gap:10px;max-width:100%;height:34px;padding:0 14px 0 6px;border-radius:999px;background:var(--bar);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px var(--glass-edge);font-size:12px;white-space:nowrap;transition:background .2s}
 .tg-pill:hover{background:var(--pill-hover)}
 .tg-pill>svg{width:24px;height:24px;flex:none}
@@ -1204,9 +1210,19 @@ function card(p) {
 const TG = '<a class="tg-pill" href="https://telegram.org" target="_blank" rel="noopener" aria-label="Join our Telegram channel: new drops land there first"><svg viewBox="2 2 20 20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg><span>New drops land in Telegram first</span><b>Join<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b></a>';
 const GENDERS = [['all', 'All'], ['men', 'Men'], ['women', 'Women'], ['unisex', 'Unisex']];
 let genderBy = 'all';
-const genderHTML = () => `<div class="gpill" role="radiogroup" aria-label="Shop for">${GENDERS.map(([k, t]) =>
+const genderHTML = () => `<div class="gpill" role="radiogroup" aria-label="Shop for"><i aria-hidden="true"></i>${GENDERS.map(([k, t]) =>
   `<button role="radio" aria-checked="${k === genderBy}" class="${k === genderBy ? 'on' : ''}" data-act="gender" data-g="${k}">${t}</button>`).join('')}</div>`;
 // Men and Women include the unisex pieces, as most stores do; Unisex shows only those
+function placeG(slide) {
+  const g = $('.gpill'), b = g && $('button.on', g);
+  if (!b) return;
+  g.classList.toggle('ready', !!slide);
+  g.style.setProperty('--gx', b.offsetLeft + 'px');
+  g.style.setProperty('--gw', b.offsetWidth + 'px');
+}
+// the font arriving or the window changing size moves the buttons
+document.fonts && document.fonts.ready.then(() => placeG());
+addEventListener('resize', () => placeG());
 const genderOK = p => genderBy === 'all' || p.gender === genderBy || (genderBy !== 'unisex' && p.gender === 'unisex');
 const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join('')}</div>`;
 
@@ -1561,11 +1577,14 @@ function stepKey() {
   try { history.replaceState({ ...(st || {}), k }, ''); } catch (err) {}
   return [k, false];
 }
-function render(scroll) {
+function render(scroll, fade) {
   const r = route(), key = r.name + ':' + (r.arg || '');
-  // a new section or page cross-fades with the old one; a redraw of the same page (sort, color, bag) stays instant
-  if (lastKey && key !== lastKey && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.startViewTransition(() => paint(r, key, scroll, true));
+  // a new section or page cross-fades with the old one, and so does the Men / Women switch (`fade`, owner's request);
+  // other redraws of the same page (sort, color, bag) stay instant
+  if ((fade || lastKey && key !== lastKey) && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const root = document.documentElement;
+    root.classList.toggle('g-switch', !!fade);
+    document.startViewTransition(() => paint(r, key, scroll, true)).finished.finally(() => root.classList.remove('g-switch'));
   } else paint(r, key, scroll, false);
 }
 function paint(r, key, scroll, fade) {
@@ -1573,10 +1592,16 @@ function paint(r, key, scroll, fade) {
   const y = window.scrollY;
   // the strip goes in before the page and the scroll, so a restored scroll position is not pushed down by it
   const strip = $('#strip'), sh = r.name === 'home' ? TG : r.name === 'list' ? genderHTML() : '';
-  strip.innerHTML = sh; strip.hidden = !sh;
+  // the Men / Women switch stays in place from one catalog page to the next, so its white part can slide
+  const gp = $('.gpill', strip);
+  if (gp && r.name === 'list') {
+    $$('button', gp).forEach(b => { const on = b.dataset.g === genderBy; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    placeG(true);
+  } else { strip.innerHTML = sh; strip.hidden = !sh; placeG(); }
   app.innerHTML = `<div class="view${fade ? ' vt-in' : ''}">${V[r.name](r.arg, r.v)}</div>`;
   // photos already in the cache show at once; the rest fade in on load (the listener below)
   $$('img', app).forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
+  // the same page redrawn (the Men / Women switch included) does not settle, so the title and filters that stay put do not shift
   if (key === lastKey && !scroll) { app.firstElementChild.style.animation = 'none'; window.scrollTo(0, y); }
   else { const [k, back] = stepKey(); window.scrollTo(0, back && SCROLL[k] || 0); }
   lastKey = key;
@@ -1904,7 +1929,7 @@ document.addEventListener('click', e => {
       save(); render(); break;
     }
     case 'search': openSearch(); break;
-    case 'gender': genderBy = d.g; render(); break;
+    case 'gender': if (d.g !== genderBy) { genderBy = d.g; render(false, true); } break;
     case 'resend': startResend(); { const b = $('.code-box'); if (b) b.focus(); } break;
     case 'guide': openGuide(d.k); break;
     case 'menu': openMenu(); break;
