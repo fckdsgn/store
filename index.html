@@ -166,7 +166,9 @@ main{flex:1;padding:0 var(--x);outline:none}
 .tag.l i{order:1}
 .reel .tag{background:rgba(255,255,255,.74)}
 .reel .tag span{color:#5A5A5A}
-.tag:hover{transform:translateY(-2px);background:var(--glass-hi)}
+.tag:hover,.tag.lit{transform:translateY(-2px);background:var(--glass-hi)}
+.hot{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.hot path{fill:transparent;pointer-events:visiblePainted;cursor:pointer}
 .tag i{width:8px;height:8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(21,21,21,.12);flex:none}
 .tag b{font-weight:500}
 .tag span{color:var(--ink-2)}
@@ -1107,12 +1109,23 @@ V.home = () => {
     ['lv-keepall-55', 'monogram', 25, 70, '', 30],
     ['margiela-future-high', '', 61.5, 79, 'pl'],
   ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span></a>`; }).join('');
+  // the same pieces are clickable on the video itself: outlines in frame pixels from tools/hero-hotspots.py
+  // (the hoodie and the bag cover every pose of the clip; later areas lie on top)
+  const HOT = [
+    ['balenciaga-soccer-hoodie', 'pink', 'M936 232L918 269L894 280L888 305L846 364L842 383L834 384L812 437L792 438L798 495L786 520L788 567L781 570L796 624L782 729L788 780L805 783L808 798L867 805L899 740L909 733L971 594L990 579L1025 579L1131 651L1237 752L1295 769L1333 865L1356 897L1394 907L1440 904L1461 913L1519 913L1522 919L1538 910L1531 903L1531 878L1545 844L1529 835L1529 792L1513 779L1491 720L1457 687L1429 633L1437 564L1429 550L1416 547L1417 508L1405 488L1380 475L1344 470L1333 479L1332 505L1295 540L1269 540L1264 530L1229 559L1163 560L1122 552L1101 526L1104 488L1099 477L1089 475L1092 434L1072 434L1064 424L1059 439L1029 440L1032 402L1019 399L1019 373L1079 333L1042 334L1016 348L992 348L989 309L1005 287L995 256Z'],
+    ['lv-keepall-55', 'monogram', 'M858 658L845 655L827 600L806 600L805 589L801 595L758 592L758 607L735 622L700 622L684 585L667 568L627 559L612 564L583 593L550 661L512 662L484 646L440 654L418 680L403 729L350 799L338 804L336 815L359 848L403 851L421 868L497 904L596 885L633 885L664 874L779 867L799 818L856 816L872 789L872 730Z'],
+    ['margiela-future-high', '', 'M612 1003L650 982L700 955L740 930L742 850L760 825L800 808L870 808L925 820L940 850L943 1008L925 1032L860 1040L780 1049L700 1047L640 1036L612 1018Z'],
+    ['margiela-future-high', '', 'M1000 880L1040 858L1110 850L1180 870L1250 890L1318 920L1314 965L1298 1010L1270 1046L1244 1054L1221 1053L1206 1050L1192 1030L1186 1007L1150 983L1080 967L1010 960L995 930Z'],
+    ['lv-snow-mask', '', 'M990 110L1060 88L1200 85L1258 110L1262 185L1240 222L1000 226L985 185Z'],
+  ];
+  const hot = `<svg class="hot" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">${HOT.map(([id, v, d]) => { const p = vOf(BY[id], v); return `<a href="${vHref(p)}" tabindex="-1"><path d="${d}"/></a>`; }).join('')}</svg>`;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   return `<section class="hero">
     <div class="stage-box">
       <div class="stage"></div>
       <div class="reel">
         <video poster="assets/hero/hero-poster.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero-2560.mp4" type="video/mp4" media="(min-width: 901px)"><source src="assets/hero/hero-1920.mp4" type="video/mp4"><source src="assets/hero/hero-1920.webm" type="video/webm"></video>
+        ${hot}
         ${tags}
       </div>
     </div>
@@ -1610,6 +1623,12 @@ document.addEventListener('click', e => {
     }
   }
 });
+// a piece on the home video lights up its price tag while the pointer is over it
+for (const [type, on] of [['pointerover', true], ['pointerout', false]])
+  document.addEventListener(type, e => {
+    const a = e.target.closest && e.target.closest('.hot a');
+    if (a) $$(`.reel .tag[href="${a.getAttribute('href')}"]`).forEach(t => t.classList.toggle('lit', on));
+  });
 document.addEventListener('click', e => {
   // links inside sheets close them even when the hash does not change
   if (e.target.closest('.sheet a')) setTimeout(closeLayer, 0);
