@@ -454,7 +454,7 @@ details[open] .pm::after{transform:rotate(0)}
 <header class="hdr" id="hdr">
   <div class="hdr-m"><button class="icon-btn" data-act="menu" aria-label="Menu" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></svg></button></div>
   <nav class="nav" aria-label="Shop">
-    <a href="#new" data-r="new">New in</a>
+    <a href="#home" data-r="home">Home</a>
     <a href="#clothing" data-r="clothing">Clothing</a>
     <a href="#bags" data-r="bags">Bags</a>
     <a href="#shoes" data-r="shoes">Shoes</a>
@@ -512,6 +512,7 @@ const SHOEV = [[50, 50, 1], [38, 48, 1.9], [62, 56, 1.9]];
 const SMALL = [[50, 50, 1], [50, 42, 1.8], [50, 62, 1.8]];
 const two = (file, v) => [v[0], [50, 50, 1, file], v[1]];
 // Prices and sizes are placeholders taken from brand sites and resale listings; the owner sets the real ones.
+// The sale prices (`was` = the price found online, `price` = 20 to 40% off) are placeholders too.
 const P = [
   { id: 'ch-horseshoe-zip-hoodie', brand: 'Chrome Hearts', name: 'Horseshoe Floral Cross Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 3690, img: 'ch-horseshoe-zip-hoodie.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: two('ch-horseshoe-zip-hoodie-2.webp', TOP),
@@ -567,7 +568,7 @@ const P = [
     color: { name: 'Black / grey', hex: '#6E6E6E' }, sizes: WEAR, out: [], views: TOP,
     text: 'Vintage Levi’s 501 jeans in a faded grey wash with black leather Chrome Hearts crosses sewn across the legs.',
     details: ['Levi’s 501 denim', 'Leather cross patches', 'Straight leg', 'Button fly'] },
-  { id: 'vetements-anarchy-sweatpants', brand: 'Vetements', name: 'Anarchy Logo Sweatpants', cat: 'Trousers', groups: ['clothing'], price: 915, img: 'vetements-anarchy-sweatpants.webp',
+  { id: 'vetements-anarchy-sweatpants', brand: 'Vetements', name: 'Anarchy Logo Sweatpants', cat: 'Trousers', groups: ['clothing'], price: 550, was: 915, img: 'vetements-anarchy-sweatpants.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Wide, cropped sweatpants in black cotton with the Vetements anarchy logo printed down one leg.',
     details: ['100% cotton', 'Elasticated drawstring waist', 'Side pockets and a back pocket', 'Raw-cut hems'] },
@@ -668,7 +669,7 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Matte black quilted down jacket with a fur-trimmed hood and the Moncler logo patch on the sleeve.',
     details: ['Nylon shell', 'Down filling', 'Fur-trimmed hood', 'Logo patch on the sleeve'] },
-  { id: 'burberry-check-hood-puffer', brand: 'Burberry', name: 'Check Hood Puffer Jacket', cat: 'Outerwear', groups: ['clothing'], price: 1445, img: 'burberry-check-hood-puffer.webp',
+  { id: 'burberry-check-hood-puffer', brand: 'Burberry', name: 'Check Hood Puffer Jacket', cat: 'Outerwear', groups: ['clothing'], price: 1085, was: 1445, img: 'burberry-check-hood-puffer.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Black hooded puffer jacket in smooth nylon with the hood lined in Burberry check.',
     details: ['Nylon shell', 'Down filling', 'Check-lined hood', 'Zip front'] },
@@ -700,7 +701,7 @@ const P = [
     color: { name: 'Washed black', hex: '#2A2A2A' }, sizes: WEAR, out: [], views: TOP,
     text: 'Washed black oversized hoodie with the Balenciaga logo in tape-style lettering and destroyed edges.',
     details: ['Cotton fleece', 'Tape-style logo print', 'Destroyed effect', 'Oversized fit'] },
-  { id: 'balenciaga-3b-sports-hoodie', brand: 'Balenciaga', name: '3B Sports Icon Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 1090, img: 'balenciaga-3b-sports-hoodie.webp',
+  { id: 'balenciaga-3b-sports-hoodie', brand: 'Balenciaga', name: '3B Sports Icon Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 765, was: 1090, img: 'balenciaga-3b-sports-hoodie.webp',
     color: { name: 'Faded blue', hex: '#8FB0CF' }, sizes: WEAR, out: [], views: TOP,
     text: 'Faded blue hoodie with the 3B Sports Icon logo on the chest and destroyed, washed-out detailing.',
     details: ['Cotton fleece', '3B Sports Icon logo', 'Destroyed effect', 'Drawstring hood'] },
@@ -743,7 +744,7 @@ const P = [
     color: { name: 'Green', hex: '#3E7A35' }, sizes: WEAR, out: [], views: TOP,
     text: 'Ribbed crewneck sweater in green with a faded, sprayed-colour effect and the compass badge on the sleeve.',
     details: ['Rib knit', 'Sprayed-colour effect', 'Compass badge on the sleeve', 'Crew neck'] },
-  { id: 'gucci-snake-polo', brand: 'Gucci', name: 'Polo Shirt with Snake Collar', cat: 'Polos', groups: ['clothing'], price: 690, img: 'gucci-snake-polo.webp',
+  { id: 'gucci-snake-polo', brand: 'Gucci', name: 'Polo Shirt with Snake Collar', cat: 'Polos', groups: ['clothing'], price: 550, was: 690, img: 'gucci-snake-polo.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Black piqué polo with a snake embroidered around the collar.',
     details: ['Cotton piqué', 'Embroidered snake on the collar', 'Button placket', 'Short sleeves'] },
@@ -767,7 +768,7 @@ const P = [
     text: 'Washed black jeans with an Amiri cherub print on the leg and distressed star patches.',
     details: ['Stretch denim', 'Cherub print', 'Distressed patches', 'Slim fit'] },
   // shoes
-  { id: 'rick-owens-geobasket', brand: 'Rick Owens', name: 'Geobasket', cat: 'Sneakers', groups: ['shoes'], price: 1435, img: 'rick-owens-geobasket.webp',
+  { id: 'rick-owens-geobasket', brand: 'Rick Owens', name: 'Geobasket', cat: 'Sneakers', groups: ['shoes'], price: 1150, was: 1435, img: 'rick-owens-geobasket.webp',
     color: { name: 'Milk / black', hex: '#E9E4D8' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'Rick Owens’ high-top Geobasket in milk leather with black panels and a chunky white sole.',
     details: ['Leather upper', 'Black side panels', 'Rubber sole', 'High top'] },
@@ -779,7 +780,7 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'The Dr. Martens 1460 reworked by Rick Owens: black leather on a stacked Quad sole with jumbo laces wrapped round the ankle.',
     details: ['Smooth leather upper', 'Quad platform sole', 'Jumbo laces', 'Side zip'] },
-  { id: 'balenciaga-runner-graffiti', brand: 'Balenciaga', name: 'Runner Graffiti Sneaker', cat: 'Sneakers', groups: ['shoes'], price: 1090, img: 'balenciaga-runner-graffiti.webp',
+  { id: 'balenciaga-runner-graffiti', brand: 'Balenciaga', name: 'Runner Graffiti Sneaker', cat: 'Sneakers', groups: ['shoes'], price: 765, was: 1090, img: 'balenciaga-runner-graffiti.webp',
     color: { name: 'Black / red', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'All-black Runner sneaker with Balenciaga sprayed across the side in red graffiti lettering.',
     details: ['Mesh and nylon upper', 'Red graffiti print', 'Worn-in effect', 'Chunky rubber sole'] },
@@ -855,7 +856,7 @@ const P = [
     color: { name: 'Black / white', hex: '#151515' }, sizes: ONE, out: [], views: BAG,
     text: 'The Hourglass bag in black leather with the Balenciaga name scrawled across it in white graffiti and the curved B buckle.',
     details: ['Calf leather', 'White graffiti print', 'B buckle', 'Top handle and shoulder strap'] },
-  { id: 'gucci-gg-messenger', brand: 'Gucci', name: 'GG Supreme Messenger Bag', cat: 'Messenger bags', groups: ['bags'], price: 1600, img: 'gucci-gg-messenger.webp',
+  { id: 'gucci-gg-messenger', brand: 'Gucci', name: 'GG Supreme Messenger Bag', cat: 'Messenger bags', groups: ['bags'], price: 1200, was: 1600, img: 'gucci-gg-messenger.webp',
     color: { name: 'Beige / ebony', hex: '#B9A88C' }, sizes: ONE, out: [], views: BAG,
     text: 'Flap messenger bag in beige and ebony GG Supreme canvas with a green and red Web strap.',
     details: ['GG Supreme canvas', 'Leather trim', 'Web shoulder strap', 'Flap front'] },
@@ -867,7 +868,7 @@ const P = [
     color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: BAG,
     text: 'Backpack in Burberry Vintage check nylon with a logo on the front pocket.',
     details: ['Recycled nylon', 'Vintage check', 'Front pocket', 'Adjustable straps'] },
-  { id: 'burberry-check-crossbody', brand: 'Burberry', name: 'Vintage Check Crossbody Bag', cat: 'Shoulder bags', groups: ['bags'], price: 1200, img: 'burberry-check-crossbody.webp',
+  { id: 'burberry-check-crossbody', brand: 'Burberry', name: 'Vintage Check Crossbody Bag', cat: 'Shoulder bags', groups: ['bags'], price: 840, was: 1200, img: 'burberry-check-crossbody.webp',
     color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: BAG,
     text: 'Compact crossbody in Burberry Vintage check with black leather trim and a logo shoulder strap.',
     details: ['Vintage check canvas', 'Black leather trim', 'Logo strap', 'Zip pockets'] },
@@ -892,7 +893,7 @@ const P = [
     color: { name: 'Gold / grey gradient', hex: '#B79A5B' }, sizes: ONE, out: [], views: [[50, 50, 1], [30, 50, 2.2], [70, 46, 2.2]],
     text: 'Rimless rectangular sunglasses with grey gradient lenses and gold-tone temples with Chrome Hearts details.',
     details: ['Gold-tone metal', 'Grey gradient lenses', 'Rimless', 'One size'] },
-  { id: 'gucci-square-sunglasses', brand: 'Gucci', name: 'Square Sunglasses with GG Logo', cat: 'Eyewear', groups: ['accessories'], price: 370, img: 'gucci-square-sunglasses.webp',
+  { id: 'gucci-square-sunglasses', brand: 'Gucci', name: 'Square Sunglasses with GG Logo', cat: 'Eyewear', groups: ['accessories'], price: 260, was: 370, img: 'gucci-square-sunglasses.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: [[50, 50, 1], [36, 50, 2], [72, 48, 2.2]],
     text: 'Chunky square sunglasses in black acetate with dark lenses and the gold GG logo on the temples.',
     details: ['Black acetate', 'Dark grey lenses', 'Gold GG logo', 'One size'] },
@@ -920,7 +921,7 @@ const P = [
     color: { name: 'White', hex: '#EDEDED' }, sizes: ONE, out: [], views: [[50, 50, 1], [52, 48, 2], [50, 30, 2]],
     text: 'White cotton baseball cap with the Maison Margiela number calendar on the front, the 6 circled.',
     details: ['Cotton', 'Numbers logo print', 'Curved peak', 'Adjustable back'] },
-  { id: 'burberry-check-cap', brand: 'Burberry', name: 'Vintage Check Baseball Cap', cat: 'Hats', groups: ['accessories'], price: 440, img: 'burberry-check-cap.webp',
+  { id: 'burberry-check-cap', brand: 'Burberry', name: 'Vintage Check Baseball Cap', cat: 'Hats', groups: ['accessories'], price: 330, was: 440, img: 'burberry-check-cap.webp',
     color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 44, 2], [70, 56, 2]],
     text: 'Baseball cap in Burberry Vintage check cotton.',
     details: ['Cotton', 'Vintage check', 'Curved peak', 'Adjustable back'] },
@@ -1475,7 +1476,7 @@ function openMenu() {
   if (l.innerHTML) return closeLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <nav class="sheet glass menu" aria-label="Menu">
-      ${Object.keys(LISTS).filter(k => P.some(LISTS[k].pick)).map(k => `<a href="#${k}">${LISTS[k].title}</a>`).join('')}
+      <a href="#home">Home</a>${Object.keys(LISTS).filter(k => k !== 'new' && P.some(LISTS[k].pick)).map(k => `<a href="#${k}">${LISTS[k].title}</a>`).join('')}
       <div class="menu-sub"><a href="#account">Account</a><a href="#wishlist">Wishlist${S.wish.length ? ' (' + S.wish.length + ')' : ''}</a><a href="#bag">Bag${bagCount() ? ' (' + bagCount() + ')' : ''}</a></div>
     </nav>`;
   document.body.style.overflow = 'hidden';
