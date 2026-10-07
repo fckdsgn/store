@@ -476,6 +476,9 @@ details[open] .pm::after{transform:rotate(0)}
   .reel .tag span{display:none}
   .hero-card{position:static;width:auto;margin-top:46px;padding:18px 18px 16px}
   .deals{gap:10px;padding-top:14px}
+  /* three filter pills fit one row on a phone; a long choice (Messenger bags, Dolce & Gabbana) still wraps */
+  .tools{gap:6px}
+  .dd-btn{height:34px;gap:6px;padding:0 9px 0 13px}
   .deal{height:auto;aspect-ratio:4/5;border-radius:20px}
   .deal.main{height:auto;aspect-ratio:1/1.05;border-radius:22px}
   .deal .pics,.deal:not(.main) .pics{inset:4% 3% auto 3%;width:auto;height:62%;justify-content:center}
@@ -1231,7 +1234,7 @@ function dealsHTML(all) {
     ${DEALS.small.map(b => `<div class="deal">${pics(val(b.ids, all))}${card(b, 'h2', all)}</div>`).join('')}
   </section>`;
 }
-let sortBy = 'featured', brandBy = 'all', brandList = '';
+let sortBy = 'featured', brandBy = 'all', typeBy = 'all', brandList = '';
 const SORTS = { featured: 'Featured', low: 'Price: low to high', high: 'Price: high to low' };
 // a pill that opens a frosted list, in place of the browser's own select menu
 const dropdown = (key, label, cur, opts, end) => `<div class="dd${end ? ' end' : ''}">
@@ -1250,16 +1253,32 @@ function ddOpen(btn, open) {
 V.list = key => {
   const L = LISTS[key];
   const all = P.filter(L.pick);
-  const brands = [...new Set(all.map(p => p.brand))].sort((a, b) => a.localeCompare(b));
-  // the brand choice belongs to one section: a new section starts from all brands
-  if (brandList !== key || !brands.includes(brandBy)) brandBy = 'all';
+  // the type filter: the kinds of piece in a section (Hats, Eyewear, Belts...); in New in and Sale, which mix the
+  // sections, the sections themselves. Both choices belong to one section: a new section starts from all of them.
+  const mixed = !['clothing', 'bags', 'shoes', 'accessories'].includes(key);
+  const typeOf = p => mixed ? p.groups[0] : p.cat;
+  const typeName = t => mixed ? LISTS[t].title : t;
+  if (brandList !== key) { brandBy = 'all'; typeBy = 'all'; }
   brandList = key;
-  let list = brandBy === 'all' ? all : all.filter(p => p.brand === brandBy);
+  const tally = {};
+  all.forEach(p => { tally[typeOf(p)] = (tally[typeOf(p)] || 0) + 1; });
+  // the sections in menu order; kinds of piece with the most pieces first
+  const order = Object.keys(LISTS);
+  const types = Object.keys(tally).sort((a, b) => mixed ? order.indexOf(a) - order.indexOf(b) : tally[b] - tally[a] || a.localeCompare(b));
+  if (!types.includes(typeBy)) typeBy = 'all';
+  // each list offers only what goes with the other choice, so no pick leaves the section empty
+  const byType = typeBy === 'all' ? all : all.filter(p => typeOf(p) === typeBy);
+  const brands = [...new Set(byType.map(p => p.brand))].sort((a, b) => a.localeCompare(b));
+  if (!brands.includes(brandBy)) brandBy = 'all';
+  const byBrand = brandBy === 'all' ? all : all.filter(p => p.brand === brandBy);
+  const typesHere = types.filter(t => byBrand.some(p => typeOf(p) === t));
+  let list = byType.filter(p => brandBy === 'all' || p.brand === brandBy);
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   return `${key === 'sale' ? dealsHTML(all) : ''}<div class="cat-top">
-      <div><h1 class="h-title">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note ? ', ' + L.note.toLowerCase() : ''}</div></div>
+      <div><h1 class="h-title">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note && typeBy === 'all' && brandBy === 'all' ? ', ' + L.note.toLowerCase() : ''}</div></div>
       <div class="tools">
+        ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
         ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true)}
       </div>
@@ -1749,7 +1768,7 @@ document.addEventListener('click', e => {
     case 'size': sizePop(); break;
     case 'dd': ddOpen(a); break;
     case 'dd-pick': {
-      if (d.dd === 'brand') brandBy = d.v; else sortBy = d.v;
+      if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
       render();
       $('#dd-' + d.dd)?.focus({ preventScroll: true });
       break;
