@@ -56,7 +56,7 @@
 
 ## Превью для владельца
 
-- Артефакт: https://claude.ai/artifact/H17VjozpjbnJS9psxMEVWn. Это `index.html` без `<!doctype>`, `<html>`, `<head>`, `<body>` и мет charset/viewport, фото передаются файлами `assets/img/*`.
+- Артефакт: https://claude.ai/artifact/H17VjozpjbnJS9psxMEVWn. Это `index.html` без `<!doctype>`, `<html>`, `<head>`, `<body>` и мет charset/viewport, фото передаются файлами `assets/products/*.webp` (исходники `.jpg` в превью не нужны).
 
 ## Заглушки и открытые вопросы
 
