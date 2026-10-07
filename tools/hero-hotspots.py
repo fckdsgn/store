@@ -1,27 +1,21 @@
-"""Click areas and press outlines for the clothes on the home video.
+"""Click areas for the clothes on the home video: pressing a piece she wears opens its product page.
 
-usage: python3 tools/hero-hotspots.py assets/hero/hero-v3-1920.mp4 assets/hero/hero-outlines.json [CHECK.png]
-       (needs ffmpeg, numpy, opencv-python-headless)
+usage: python3 tools/hero-hotspots.py assets/hero/hero-v3-1920.mp4 [CHECK.png]   (needs ffmpeg, numpy, opencv-python-headless)
 
 The loop plays source frames FROM..TO forward and then back (tools/hero-video.py), so its first half holds every pose.
-
-Click areas (printed as the HOT list for V.home in index.html, SVG paths in frame pixels, 1920 x 1080): the hoodie (pink)
-and the bag (brown monogram, tan leather) are found by colour in every frame and joined, so they hold in every pose;
-the snow mask is the union of its traced outlines, the sneakers are their traced outlines.
-
-Press outlines (written to the JSON file, loaded by the page): the grey line drawn along the piece while it is pressed.
-The hoodie is outlined by colour in every other frame, the mask moves with her head, so it is traced by hand on a
-keyframe every second and blended in between (black goggles on black hair do not separate by colour); the bag and the
-sneakers stand still and have one outline each. Paths are relative ('l' steps), which keeps the file small.
-With CHECK.png the outlines are drawn over a few frames, to look at.
+Prints the HOT list for V.home in index.html: SVG paths in frame pixels (1920 x 1080). The hoodie (pink) and the bag
+(brown monogram, tan leather) are found by colour in every frame and joined, so the areas hold in every pose (she lifts
+her arm to her head); the bag stands still, so only what is bag in most frames counts (her hand passing by is skin like
+tan leather). The snow mask moves with her head and does not separate from her black hair by colour, so it is traced
+by hand on a keyframe every second, blended in between, and the area is the union of all its places. The sneakers
+stand still and are traced by hand. With CHECK.png the areas are drawn over a few frames, to look at.
 """
-import json, subprocess, sys
+import subprocess, sys
 import numpy as np
 import cv2
 
 W, H = 1920, 1080
 FROM = 12                                  # first source frame of the loop (tools/hero-video.py)
-STEP = 2                                   # hoodie and mask outlines for every other frame
 # the snow mask, traced on source frames (keys), the same 12 points in the same order each time
 GOGGLES = {
     12:  [(1062, 150), (1067, 193), (1093, 200), (1127, 207), (1152, 200), (1163, 167), (1200, 188), (1227, 177), (1223, 133), (1200, 117), (1157, 112), (1103, 132)],
@@ -79,12 +73,6 @@ def fill(poly, grow=0):
     return cv2.dilate(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * grow + 1,) * 2)) if grow else m
 
 
-def smooth(m, close, blur=9):
-    """Bridge hair strands that cross the piece and round off the pixel steps, so the outline runs smoothly."""
-    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (close, close)))
-    return (cv2.GaussianBlur(m.astype(np.float32), (0, 0), blur / 3) > 0.5).astype(np.uint8)
-
-
 def contours(m, eps, min_area, close=0):
     if close:
         m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((close, close), np.uint8))
@@ -92,66 +80,34 @@ def contours(m, eps, min_area, close=0):
     return [cv2.approxPolyDP(c, eps, True)[:, 0].tolist() for c in cs if cv2.contourArea(c) >= min_area]
 
 
-def path(cs, relative=True):
-    out = ''
-    for c in cs:
-        if relative:
-            steps, (x0, y0) = [], c[0]
-            for x, y in c[1:]:
-                steps.append(f'{x - x0} {y - y0}')
-                x0, y0 = x, y
-            out += f'M{c[0][0]} {c[0][1]}l' + ' '.join(steps) + 'z'
-        else:
-            out += 'M' + 'L'.join(f'{x} {y}' for x, y in c) + 'Z'
-    return out.replace(' -', '-')
+def path(cs):
+    return ''.join('M' + 'L'.join(f'{x} {y}' for x, y in c) + 'Z' for c in cs)
 
 
 pink_all, gog_all = (np.zeros((H, W), np.uint8) for _ in range(2))
 bag_count = np.zeros((H, W), np.uint16)
-hood_lines, gog_lines = [], []
 for j, f in enumerate(frames):
     pink, bag = colour_masks(f)
     pink_all |= pink
     bag_count += bag
-    gog = fill(goggles_at(j), GOGGLES_RIM)
-    gog_all |= gog
-    if j % STEP == 0:
-        hood_lines.append(path(contours(smooth(pink, 21), 3, 2500)))
-        gog_lines.append(path(contours(gog, 2, 100)))
-# the bag stands still: keep what is bag in most frames, so her hand passing by (skin like tan leather) drops out
+    gog_all |= fill(goggles_at(j), GOGGLES_RIM)
 bag_all = (bag_count >= 0.6 * len(frames)).astype(np.uint8)
-bag_line = path(sorted(contours(smooth(bag_all, 15), 2.5, 5000), key=lambda c: -cv2.contourArea(np.array(c, np.int32)))[:1])
-shoes_line = path([LEFT_SHOE, RIGHT_SHOE])
-
-json.dump({'step': STEP, 'half': len(frames), 'hood': hood_lines, 'gog': gog_lines, 'bag': bag_line, 'shoes': shoes_line},
-          open(sys.argv[2], 'w'), separators=(',', ':'))
 
 biggest = lambda cs: [max(cs, key=lambda c: cv2.contourArea(np.array(c, np.int32)))]
-areas = [('balenciaga-soccer-hoodie', 'pink', 'hood', biggest(contours(pink_all, 5, 1000, close=25))),
-         ('lv-keepall-55', 'monogram', 'bag', biggest(contours(bag_all, 5, 1000, close=31))),
-         ('margiela-future-high', '', 'shoes', contours(fill(LEFT_SHOE, 4) | fill(RIGHT_SHOE, 4), 3, 1000)),
-         ('lv-snow-mask', '', 'gog', contours(gog_all, 3, 1000))]   # later areas lie on top: the mask over the hoodie
-print('const HOT = [')
-for pid, v, key, cs in areas:
-    print(f"    ['{pid}', '{v}', '{key}', '{path(cs, relative=False)}'],")
+areas = [('balenciaga-soccer-hoodie', 'pink', biggest(contours(pink_all, 5, 1000, close=25))),
+         ('lv-keepall-55', 'monogram', biggest(contours(bag_all, 5, 1000, close=31))),
+         ('margiela-future-high', '', contours(fill(LEFT_SHOE, 4) | fill(RIGHT_SHOE, 4), 3, 1000)),
+         ('lv-snow-mask', '', contours(gog_all, 3, 1000))]       # later areas lie on top: the mask over the hoodie
+print('  const HOT = [')
+for pid, v, cs in areas:
+    print(f"    ['{pid}', '{v}', '{path(cs)}'],")
 print('  ];')
 
-if len(sys.argv) > 3:
+if len(sys.argv) > 2:
     tiles = []
     for j in range(0, len(frames), len(frames) // 6)[:6]:
         im = frames[j].copy()
-        k = j // STEP
-        for d in (hood_lines[k], gog_lines[k], bag_line, shoes_line):
-            for sub in d.split('z'):
-                if not sub:
-                    continue
-                head, steps = sub[1:].split('l')
-                x, y = map(int, head.split())
-                pts = [(x, y)]
-                nums = [int(n) for n in steps.replace('-', ' -').split()]
-                for dx, dy in zip(nums[::2], nums[1::2]):
-                    x, y = x + dx, y + dy
-                    pts.append((x, y))
-                cv2.polylines(im, [np.array(pts, np.int32)], True, (110, 110, 110), 3)
+        for _, _, cs in areas:
+            cv2.polylines(im, [np.array(c, np.int32) for c in cs], True, (255, 0, 255), 3)
         tiles.append(cv2.resize(im[40:, 250:1650], (700, 520)))
-    cv2.imwrite(sys.argv[3], np.vstack([np.hstack(tiles[:3]), np.hstack(tiles[3:])]))
+    cv2.imwrite(sys.argv[2], np.vstack([np.hstack(tiles[:3]), np.hstack(tiles[3:])]))
