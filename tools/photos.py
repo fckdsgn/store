@@ -5,6 +5,7 @@ usage: python3 tools/photos.py SRC_DIR OUT_DIR   (SRC_DIR holds <slug>.jpg; need
 The backdrop is levelled to the tile grey (231, 231, 231), flattened from the frame edges inward,
 and the piece is centred on an 864 x 1152 canvas so wide bags and belts are not cropped by the 3:4 tiles.
 A photo whose backdrop is a grey panel inside a white frame must be cropped to the panel first.
+Add --gradient for a studio backdrop that darkens towards one edge: it is levelled across rows and columns.
 """
 import sys, glob, os
 import numpy as np
@@ -16,10 +17,16 @@ W, H = 864, 1152
 BOX_W, BOX_H = 0.80 * W, 0.74 * H   # the piece fits inside this box
 MAX_UP = 2.4                        # never upscale more than this
 
-def process(path):
+def process(path, gradient=False):
     im = np.asarray(Image.open(path).convert('RGB')).astype(np.float32)
     h, w, _ = im.shape
     b = max(2, int(min(h, w) * 0.02))
+    if gradient:
+        # backdrop model from the frame: rows from the left/right edges, columns from the top/bottom edges
+        row_bg = ndimage.median_filter(np.median(np.concatenate([im[:, :b], im[:, -b:]], axis=1), axis=1), size=(9, 1))
+        col_bg = ndimage.median_filter(np.median(np.concatenate([im[:b], im[-b:]], axis=0), axis=0), size=(9, 1))
+        plate = row_bg[:, None, :] * col_bg[None, :, :] / np.maximum(np.median(row_bg, axis=0), 1)
+        im = np.clip(im * (GREY / np.maximum(plate, 1)), 0, 255)
     border = np.concatenate([im[:b].reshape(-1, 3), im[-b:].reshape(-1, 3),
                              im[:, :b].reshape(-1, 3), im[:, -b:].reshape(-1, 3)])
     bg = np.median(border, axis=0)
@@ -49,9 +56,10 @@ def process(path):
 
 if __name__ == '__main__':
     src, dst = sys.argv[1], sys.argv[2]
+    gradient = '--gradient' in sys.argv[3:]
     os.makedirs(dst, exist_ok=True)
     for p in sorted(glob.glob(os.path.join(src, '*.jpg'))):
-        out, bg, s = process(p)
+        out, bg, s = process(p, gradient)
         name = os.path.splitext(os.path.basename(p))[0]
         out.save(os.path.join(dst, name + '.webp'), 'WEBP', quality=84, method=6)
         print(f'{name:32s} bg {bg.round().astype(int)} scale {s:.2f}')
