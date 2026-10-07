@@ -190,7 +190,11 @@ main{flex:1;padding:0 var(--x);outline:none}
 .quick-s button{min-width:30px;height:28px;padding:0 7px;border-radius:8px;background:rgba(255,255,255,.75);font-size:11.5px;transition:background .2s,color .2s}
 .quick-s button:hover{background:var(--ink);color:#fff}
 .quick-s button[disabled]{color:var(--ink-3);text-decoration:line-through;background:transparent;cursor:default}
-.card-brand{display:block;margin-top:12px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+.card-brand{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+.card-brand>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cdots{display:flex;align-items:center;gap:3px;flex:none}
+.cdots i{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.cdots em{font-style:normal;font-size:10.5px;letter-spacing:0;margin-left:2px}
 .card-meta{display:flex;justify-content:space-between;gap:12px;margin-top:3px;font-size:13.5px}
 .card-meta b{font-weight:500;min-width:0}
 .card-meta .price{flex:none;white-space:nowrap}
@@ -223,8 +227,11 @@ main{flex:1;padding:0 var(--x);outline:none}
 .info{justify-self:center;width:min(280px,100%);display:flex;flex-direction:column;align-items:center;text-align:center}
 .info h1{font-size:20px;font-weight:500;letter-spacing:-.01em;margin:14px 0 12px;line-height:1.25;text-wrap:balance}
 .info .price{font-size:18px}
-.swatches{display:flex;gap:6px;margin-top:14px}
+.swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:14px}
+.swatches:has(button){gap:2px}
 .sw{width:22px;height:13px;border-radius:999px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+button.sw{width:26px;height:15px;margin:3px;padding:0;cursor:pointer;transition:box-shadow .2s}
+button.sw:hover:not(.on){box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 1.5px #fff,0 0 0 2.5px #BDBDBD}
 .sw.on{box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 1.5px #fff,0 0 0 2.5px var(--ink)}
 .sw-name{font-size:12.5px;margin-top:6px}
 .actions{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:30px;width:190px;position:relative}
@@ -492,18 +499,28 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: two('ch-horseshoe-zip-hoodie-2.webp', TOP),
     text: 'Black zip-up hoodie with the Chrome Hearts horseshoe logo on the chest and Floral Cross prints running down both sleeves.',
     details: ['Cotton fleece', 'Horseshoe logo on the chest', 'Floral Cross print on both sleeves', 'Full zip and hood'] },
-  { id: 'lv-keepall-50-taigarama', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50 Taigarama', cat: 'Travel bags', groups: ['bags'], price: 3250, img: 'lv-keepall-50-taigarama.webp',
-    color: { name: 'Cobalt', hex: '#1F4EA8' }, sizes: ONE, out: [], isNew: true, views: BAG,
-    text: 'The Keepall, Louis Vuitton’s original soft travel bag from the 1930s, in cobalt Taïga leather with a band of Monogram canvas.',
-    details: ['Taïga cowhide leather and Monogram coated canvas', '50 x 29 x 23 cm', 'Double zip with padlock', 'Removable, adjustable shoulder strap'] },
+  { id: 'lv-keepall-50', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', cat: 'Travel bags', groups: ['bags'], price: 3250, sizes: ONE, out: [], isNew: true, views: BAG,
+    text: 'The Keepall, Louis Vuitton’s original soft travel bag from the 1930s, in the smaller 50 cm size with a removable shoulder strap.',
+    details: ['50 x 29 x 23 cm', 'Double zip with padlock', 'Removable, adjustable shoulder strap'],
+    variants: [
+      { key: 'taigarama-cobalt', color: { name: 'Taigarama Cobalt', hex: '#1F4EA8' }, img: 'lv-keepall-50-taigarama.webp', price: 3250,
+        text: 'The Keepall, Louis Vuitton’s original soft travel bag from the 1930s, in cobalt Taïga leather with a band of Monogram canvas.',
+        details: ['Taïga cowhide leather and Monogram coated canvas', '50 x 29 x 23 cm', 'Double zip with padlock', 'Removable, adjustable shoulder strap'] },
+      { key: 'monogram-eclipse', color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, img: 'lv-keepall-50-eclipse.webp', price: 2700,
+        text: 'The smaller 50 cm Keepall in Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
+        details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+    ] },
   { id: 'balenciaga-track', brand: 'Balenciaga', name: 'Track Sneaker', cat: 'Sneakers', groups: ['shoes'], price: 895, img: 'balenciaga-track.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], isNew: true, views: SHOEV,
     text: 'The Track sneaker in all black: layered mesh and nylon panels, moulded rubber overlays and a multi-part sole.',
     details: ['Mesh and nylon upper', 'Moulded rubber overlays', 'Logo on the side and the tongue', 'Multi-layer rubber sole'] },
-  { id: 'cp-goggle-beanie', brand: 'C.P. Company', name: 'Goggle Beanie', cat: 'Hats', groups: ['accessories'], price: 160, img: 'cp-goggle-beanie.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], isNew: true, views: [[50, 50, 1], [50, 60, 1.9], [50, 36, 1.9]],
+  { id: 'cp-goggle-beanie', brand: 'C.P. Company', name: 'Goggle Beanie', cat: 'Hats', groups: ['accessories'], price: 160, sizes: ONE, out: [], isNew: true, views: [[50, 50, 1], [50, 60, 1.9], [50, 36, 1.9]],
     text: 'Chunky ribbed beanie in extra fine merino wool with the signature C.P. Company goggle lenses set into the cuff.',
-    details: ['Extra fine merino wool', 'Goggle lenses on the cuff', 'Ribbed knit', 'One size'] },
+    details: ['Extra fine merino wool', 'Goggle lenses on the cuff', 'Ribbed knit', 'One size'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'cp-goggle-beanie.webp' },
+      { key: 'off-white', color: { name: 'Off-white', hex: '#E4E1D8' }, img: 'cp-goggle-beanie-white.webp' },
+    ] },
   { id: 'moncler-hooded-vest', brand: 'Moncler', name: 'Hooded Down Vest', cat: 'Outerwear', groups: ['clothing'], price: 980, img: 'moncler-hooded-vest.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: TOP,
     text: 'Down vest in shiny black lacquered nylon with a hood, a zip front and the Moncler logo patch on the chest.',
@@ -548,26 +565,23 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'Black nubuck 6-inch Timberland boot finished with white leather cross patches and thick rope laces.',
     details: ['Nubuck upper', 'White leather cross patches', 'Padded collar', 'Lug rubber sole'] },
-  { id: 'lv-keepall-55-monogram', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 3250, img: 'lv-keepall-55-monogram.webp',
-    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
-    text: 'The classic Keepall in Monogram canvas with natural cowhide handles, trim and shoulder strap.',
-    details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Removable shoulder strap'] },
-  { id: 'lv-keepall-55-eclipse', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-55-eclipse.webp',
-    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: two('lv-keepall-55-eclipse-2.webp', BAG),
-    text: 'The Keepall in grey and black Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
-    details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
-  { id: 'lv-keepall-55-macassar', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-55-macassar.webp',
-    color: { name: 'Monogram Macassar', hex: '#4A3426' }, sizes: ONE, out: [], views: two('lv-keepall-55-macassar-2.webp', BAG),
-    text: 'The Keepall in Monogram Macassar canvas, the brown Monogram paired with black leather trim.',
-    details: ['Monogram Macassar coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
-  { id: 'lv-keepall-55-graphite', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-55-graphite.webp',
-    color: { name: 'Damier Graphite', hex: '#3A3A3D' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Keepall in Damier Graphite canvas, the grey and black check, with black leather trim.',
-    details: ['Damier Graphite coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
-  { id: 'lv-keepall-50-eclipse', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-50-eclipse.webp',
-    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
-    text: 'The smaller 50 cm Keepall in Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
-    details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+  { id: 'lv-keepall-55', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, sizes: ONE, out: [], views: BAG,
+    text: 'The Keepall, Louis Vuitton’s original soft travel bag, in the 55 cm size with a removable shoulder strap.',
+    details: ['Coated canvas', 'Double zip with padlock', 'Removable shoulder strap'],
+    variants: [
+      { key: 'monogram', color: { name: 'Monogram', hex: '#5A3E2B' }, img: 'lv-keepall-55-monogram.webp', price: 3250,
+        text: 'The classic Keepall in Monogram canvas with natural cowhide handles, trim and shoulder strap.',
+        details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+      { key: 'monogram-eclipse', color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, img: 'lv-keepall-55-eclipse.webp', views: two('lv-keepall-55-eclipse-2.webp', BAG), price: 2700,
+        text: 'The Keepall in grey and black Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
+        details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+      { key: 'monogram-macassar', color: { name: 'Monogram Macassar', hex: '#4A3426' }, img: 'lv-keepall-55-macassar.webp', views: two('lv-keepall-55-macassar-2.webp', BAG), price: 2700,
+        text: 'The Keepall in Monogram Macassar canvas, the brown Monogram paired with black leather trim.',
+        details: ['Monogram Macassar coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+      { key: 'damier-graphite', color: { name: 'Damier Graphite', hex: '#3A3A3D' }, img: 'lv-keepall-55-graphite.webp', price: 2700,
+        text: 'The Keepall in Damier Graphite canvas, the grey and black check, with black leather trim.',
+        details: ['Damier Graphite coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+    ] },
   { id: 'lv-discovery-backpack', brand: 'Louis Vuitton', name: 'Discovery Backpack PM', cat: 'Backpacks', groups: ['bags'], price: 2940, img: 'lv-discovery-backpack.webp',
     color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
     text: 'Backpack in Monogram Eclipse canvas with a zipped front pocket, a leather logo patch and padded shoulder straps.',
@@ -596,36 +610,42 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'Black leather belt lined with metal studs and fastened with an ornate Chrome Hearts cross buckle.',
     details: ['Black leather', 'Metal studs along the strap', 'Cross buckle', 'Sized in centimetres'] },
-  { id: 'lv-initiales-damier-graphite', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 635, img: 'lv-initiales-damier-graphite.webp',
-    color: { name: 'Damier Graphite', hex: '#3A3A3D' }, sizes: BELT, out: [], views: BELTV,
-    text: 'Reversible belt in Damier Graphite canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
-    details: ['Damier Graphite canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
-  { id: 'lv-initiales-eclipse', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 635, img: 'lv-initiales-eclipse.webp',
-    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: BELT, out: [], views: BELTV,
-    text: 'Reversible belt in Monogram Eclipse canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
-    details: ['Monogram Eclipse canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
-  { id: 'lv-initiales-taurillon', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 820, img: 'lv-initiales-taurillon.webp',
-    color: { name: 'Grey Taurillon Monogram', hex: '#7A7A7A' }, sizes: BELT, out: [], views: BELTV,
-    text: 'Reversible belt in grey Taurillon leather embossed with the Monogram, fastened with a striped LV Initiales buckle.',
-    details: ['Taurillon Monogram leather, calf leather reverse', 'Reversible', 'Striped LV Initiales buckle', '4 cm wide'] },
-  { id: 'lv-belt-eclipse-reverse', brand: 'Louis Vuitton', name: '40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 800, img: 'lv-belt-eclipse-reverse.webp',
-    color: { name: 'Monogram Eclipse Reverse', hex: '#8A8A8E' }, sizes: BELT, out: [], views: BELTV,
-    text: 'Reversible belt in grey Monogram Eclipse Reverse canvas with a dark metal LV buckle.',
-    details: ['Monogram Eclipse Reverse canvas', 'Reversible', 'Dark metal LV buckle', '4 cm wide'] },
-  { id: 'lv-belt-white-monogram', brand: 'Louis Vuitton', name: '40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 800, img: 'lv-belt-white-monogram.webp',
-    color: { name: 'White Monogram', hex: '#EDEDED' }, sizes: BELT, out: [], views: BELTV,
-    text: 'Reversible belt in white Monogram canvas with a matching white LV buckle.',
-    details: ['White Monogram canvas', 'Reversible', 'White LV buckle', '4 cm wide'] },
+  { id: 'lv-initiales-40', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 635, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible belt with plain leather on the other side, fastened with the LV Initiales buckle.',
+    details: ['Reversible', 'LV Initiales buckle', '4 cm wide'],
+    variants: [
+      { key: 'damier-graphite', color: { name: 'Damier Graphite', hex: '#3A3A3D' }, img: 'lv-initiales-damier-graphite.webp', price: 635,
+        text: 'Reversible belt in Damier Graphite canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
+        details: ['Damier Graphite canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
+      { key: 'monogram-eclipse', color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, img: 'lv-initiales-eclipse.webp', price: 635,
+        text: 'Reversible belt in Monogram Eclipse canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
+        details: ['Monogram Eclipse canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
+      { key: 'grey-taurillon', color: { name: 'Grey Taurillon Monogram', hex: '#7A7A7A' }, img: 'lv-initiales-taurillon.webp', price: 820,
+        text: 'Reversible belt in grey Taurillon leather embossed with the Monogram, fastened with a striped LV Initiales buckle.',
+        details: ['Taurillon Monogram leather, calf leather reverse', 'Reversible', 'Striped LV Initiales buckle', '4 cm wide'] },
+    ] },
+  { id: 'lv-reversible-40', brand: 'Louis Vuitton', name: '40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 800, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible Monogram belt with a matching LV buckle.',
+    details: ['Monogram canvas', 'Reversible', 'LV buckle', '4 cm wide'],
+    variants: [
+      { key: 'eclipse-reverse', color: { name: 'Monogram Eclipse Reverse', hex: '#8A8A8E' }, img: 'lv-belt-eclipse-reverse.webp',
+        text: 'Reversible belt in grey Monogram Eclipse Reverse canvas with a dark metal LV buckle.',
+        details: ['Monogram Eclipse Reverse canvas', 'Reversible', 'Dark metal LV buckle', '4 cm wide'] },
+      { key: 'white-monogram', color: { name: 'White Monogram', hex: '#EDEDED' }, img: 'lv-belt-white-monogram.webp',
+        text: 'Reversible belt in white Monogram canvas with a matching white LV buckle.',
+        details: ['White Monogram canvas', 'Reversible', 'White LV buckle', '4 cm wide'] },
+    ] },
   // ---- second upload ----
   // clothing
-  { id: 'moncler-maya-black', brand: 'Moncler', name: 'Maya Short Down Jacket', cat: 'Outerwear', groups: ['clothing'], price: 1866, img: 'moncler-maya-black.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
-    text: 'The Maya, Moncler’s short hooded down jacket in shiny black lacquered nylon with the felt logo patch on the sleeve.',
-    details: ['Lacquered nylon', 'Down filling', 'Detachable hood', 'Logo patch on the sleeve'] },
-  { id: 'moncler-maya-navy', brand: 'Moncler', name: 'Maya Short Down Jacket', cat: 'Outerwear', groups: ['clothing'], price: 1866, img: 'moncler-maya-navy.webp',
-    color: { name: 'Navy', hex: '#1B2233' }, sizes: WEAR, out: [], views: TOP,
-    text: 'The Maya in shiny navy lacquered nylon, with the red, white and blue stripe running along the zip.',
-    details: ['Lacquered nylon', 'Down filling', 'Tricolour stripe along the zip', 'Hood'] },
+  { id: 'moncler-maya', brand: 'Moncler', name: 'Maya Short Down Jacket', cat: 'Outerwear', groups: ['clothing'], price: 1866, sizes: WEAR, out: [], views: TOP,
+    text: 'The Maya, Moncler’s short hooded down jacket in shiny lacquered nylon with the felt logo patch on the sleeve.',
+    details: ['Lacquered nylon', 'Down filling', 'Hood', 'Logo patch on the sleeve'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'moncler-maya-black.webp' },
+      { key: 'navy', color: { name: 'Navy', hex: '#1B2233' }, img: 'moncler-maya-navy.webp',
+        text: 'The Maya in shiny navy lacquered nylon, with the red, white and blue stripe running along the zip.',
+        details: ['Lacquered nylon', 'Down filling', 'Tricolour stripe along the zip', 'Hood'] },
+    ] },
   { id: 'moncler-fur-hood-jacket', brand: 'Moncler', name: 'Down Jacket with Fur-Trim Hood', cat: 'Outerwear', groups: ['clothing'], price: 2795, img: 'moncler-fur-hood-jacket.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Matte black quilted down jacket with a fur-trimmed hood and the Moncler logo patch on the sleeve.',
@@ -666,14 +686,13 @@ const P = [
     color: { name: 'Faded blue', hex: '#8FB0CF' }, sizes: WEAR, out: [], views: TOP,
     text: 'Faded blue hoodie with the 3B Sports Icon logo on the chest and destroyed, washed-out detailing.',
     details: ['Cotton fleece', '3B Sports Icon logo', 'Destroyed effect', 'Drawstring hood'] },
-  { id: 'balenciaga-soccer-hoodie-black', brand: 'Balenciaga', name: 'Soccer Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 1390, img: 'balenciaga-soccer-hoodie-black.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
-    text: 'Black zip-up hoodie styled like a football club top, with sponsor-style logo, crest and sleeve prints.',
-    details: ['Cotton fleece', 'Football-kit logo prints', 'Zip front', 'Oversized fit'] },
-  { id: 'balenciaga-soccer-hoodie-pink', brand: 'Balenciaga', name: 'Soccer Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 1390, img: 'balenciaga-soccer-hoodie-pink.webp',
-    color: { name: 'Pink', hex: '#F2A7C3' }, sizes: WEAR, out: [], views: TOP,
-    text: 'The football-club zip-up hoodie in pink, with the Balenciaga sponsor-style logo and crest.',
-    details: ['Cotton fleece', 'Football-kit logo prints', 'Zip front', 'Oversized fit'] },
+  { id: 'balenciaga-soccer-hoodie', brand: 'Balenciaga', name: 'Soccer Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 1390, sizes: WEAR, out: [], views: TOP,
+    text: 'Zip-up hoodie styled like a football club top, with sponsor-style logo, crest and sleeve prints.',
+    details: ['Cotton fleece', 'Football-kit logo prints', 'Zip front', 'Oversized fit'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'balenciaga-soccer-hoodie-black.webp' },
+      { key: 'pink', color: { name: 'Pink', hex: '#F2A7C3' }, img: 'balenciaga-soccer-hoodie-pink.webp' },
+    ] },
   { id: 'supreme-stone-island-hoodie', brand: 'Supreme', name: 'x Stone Island Stripe Hooded Sweatshirt', cat: 'Hoodies', groups: ['clothing'], price: 348, img: 'supreme-stone-island-hoodie.webp',
     color: { name: 'White', hex: '#F1EEE6' }, sizes: WEAR, out: [], views: TOP,
     text: 'Striped hooded sweatshirt from the Supreme and Stone Island collaboration, with both logos on the chest and the compass badge on the sleeve.',
@@ -714,14 +733,13 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
     text: 'Black cotton piqué polo with a collar in Burberry check.',
     details: ['Cotton piqué', 'Check collar', 'Button placket', 'Short sleeves'] },
-  { id: 'balenciaga-tape-tee-blue', brand: 'Balenciaga', name: 'Tape Type T-Shirt', cat: 'T-shirts', groups: ['clothing'], price: 950, img: 'balenciaga-tape-tee-blue.webp',
-    color: { name: 'Faded blue', hex: '#A7BCD6' }, sizes: WEAR, out: [], views: TOP,
-    text: 'Oversized faded blue T-shirt with the Balenciaga logo in tape-style lettering across the chest.',
-    details: ['Cotton jersey', 'Tape-style logo print', 'Washed effect', 'Oversized fit'] },
-  { id: 'balenciaga-tape-tee-black', brand: 'Balenciaga', name: 'Tape Type T-Shirt', cat: 'T-shirts', groups: ['clothing'], price: 950, img: 'balenciaga-tape-tee-black.webp',
-    color: { name: 'Washed black', hex: '#2A2A2A' }, sizes: WEAR, out: [], views: TOP,
-    text: 'The Tape Type T-shirt in washed black, with the logo in tape-style lettering.',
-    details: ['Cotton jersey', 'Tape-style logo print', 'Washed effect', 'Oversized fit'] },
+  { id: 'balenciaga-tape-tee', brand: 'Balenciaga', name: 'Tape Type T-Shirt', cat: 'T-shirts', groups: ['clothing'], price: 950, sizes: WEAR, out: [], views: TOP,
+    text: 'Oversized washed T-shirt with the Balenciaga logo in tape-style lettering across the chest.',
+    details: ['Cotton jersey', 'Tape-style logo print', 'Washed effect', 'Oversized fit'],
+    variants: [
+      { key: 'faded-blue', color: { name: 'Faded blue', hex: '#A7BCD6' }, img: 'balenciaga-tape-tee-blue.webp' },
+      { key: 'washed-black', color: { name: 'Washed black', hex: '#2A2A2A' }, img: 'balenciaga-tape-tee-black.webp' },
+    ] },
   { id: 'amiri-mx1-jeans', brand: 'Amiri', name: 'MX1 Leather Patch Jeans', cat: 'Jeans', groups: ['clothing'], price: 980, img: 'amiri-mx1-jeans.webp',
     color: { name: 'Black / red', hex: '#2B2B2E' }, sizes: WEAR, out: [], views: TOP,
     text: 'Skinny black jeans with distressed rips backed by red pleated leather patches and paint flecks.',
@@ -759,18 +777,17 @@ const P = [
     color: { name: 'White', hex: '#F2F2F2' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'All-white Lunar Force 1 by Acronym with a diagonal zip across the side and an extended tongue.',
     details: ['Leather upper', 'Diagonal side zip', 'Lunarlon sole', 'Low top'] },
-  { id: 'adidas-js-wings-white', brand: 'adidas', name: 'Jeremy Scott JS Wings', cat: 'Sneakers', groups: ['shoes'], price: 200, img: 'adidas-js-wings-white.webp',
-    color: { name: 'White', hex: '#F2F2F2' }, sizes: SHOE, out: [], views: SHOEV,
-    text: 'Jeremy Scott’s high-top with leather wings on the sides, in all white.',
-    details: ['Leather upper', 'Leather wings', 'Hook-and-loop strap', 'High top'] },
-  { id: 'adidas-js-wings-black', brand: 'adidas', name: 'Jeremy Scott JS Wings', cat: 'Sneakers', groups: ['shoes'], price: 300, img: 'adidas-js-wings-black.webp',
-    color: { name: 'Black patent', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
-    text: 'The JS Wings high-top in black patent leather.',
-    details: ['Patent leather upper', 'Leather wings', 'Hook-and-loop strap', 'High top'] },
-  { id: 'adidas-js-wings-flag', brand: 'adidas', name: 'Jeremy Scott JS Wings Flag', cat: 'Sneakers', groups: ['shoes'], price: 300, img: 'adidas-js-wings-flag.webp',
-    color: { name: 'Stars and stripes', hex: '#C8102E' }, sizes: SHOE, out: [], views: SHOEV,
-    text: 'The JS Wings high-top printed with stars and stripes across the upper and wings.',
-    details: ['Leather upper', 'Flag print', 'Leather wings', 'High top'] },
+  { id: 'adidas-js-wings', brand: 'adidas', name: 'Jeremy Scott JS Wings', cat: 'Sneakers', groups: ['shoes'], price: 200, sizes: SHOE, out: [], views: SHOEV,
+    text: 'Jeremy Scott’s high-top with leather wings on the sides.',
+    details: ['Leather upper', 'Leather wings', 'Hook-and-loop strap', 'High top'],
+    variants: [
+      { key: 'white', color: { name: 'White', hex: '#F2F2F2' }, img: 'adidas-js-wings-white.webp', price: 200 },
+      { key: 'black-patent', color: { name: 'Black patent', hex: '#151515' }, img: 'adidas-js-wings-black.webp', price: 300,
+        details: ['Patent leather upper', 'Leather wings', 'Hook-and-loop strap', 'High top'] },
+      { key: 'stars-and-stripes', color: { name: 'Stars and stripes', hex: '#C8102E' }, img: 'adidas-js-wings-flag.webp', price: 300,
+        text: 'Jeremy Scott’s winged high-top printed with stars and stripes across the upper and wings.',
+        details: ['Leather upper', 'Flag print', 'Leather wings', 'High top'] },
+    ] },
   { id: 'lv-trainer', brand: 'Louis Vuitton', name: 'LV Trainer Sneaker', cat: 'Sneakers', groups: ['shoes'], price: 1220, img: 'lv-trainer.webp',
     color: { name: 'White / black', hex: '#F2F2F2' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'The LV Trainer, a ’90s basketball-inspired sneaker, in white leather with black Monogram panels.',
@@ -788,46 +805,26 @@ const P = [
     text: 'Black rubber slides with a wide strap in Burberry Vintage check.',
     details: ['Vintage check strap', 'Moulded rubber sole', 'Slip-on', 'Open toe'] },
   // bags
-  { id: 'goyard-belvedere-black', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-black.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: two('goyard-belvedere-black-2.webp', BAG),
-    text: 'Goyard’s saddle-shaped messenger bag in black Goyardine canvas with a leather flap and strap.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-grey', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-grey.webp',
-    color: { name: 'Grey', hex: '#8E9399' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in grey Goyardine canvas with matching grey leather.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-black-tan', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-black-tan.webp',
-    color: { name: 'Black / tan', hex: '#B4652E' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in black and tan Goyardine canvas with tan leather.',
-    details: ['Goyardine coated canvas', 'Tan leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-red', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-red.webp',
-    color: { name: 'Red', hex: '#A1202A' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in red Goyardine canvas with red leather.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-orange', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-orange.webp',
-    color: { name: 'Orange', hex: '#E5622B' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in orange Goyardine canvas with orange leather.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-burgundy', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-burgundy.webp',
-    color: { name: 'Burgundy', hex: '#6B1F35' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in burgundy Goyardine canvas with burgundy leather.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-khaki', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-khaki.webp',
-    color: { name: 'Khaki', hex: '#6E6B3A' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in khaki Goyardine canvas with khaki leather.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-belvedere-green', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, img: 'goyard-belvedere-green.webp',
-    color: { name: 'Green', hex: '#1E5B3E' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Belvedère messenger in green Goyardine canvas with green leather.',
-    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'] },
-  { id: 'goyard-croisiere-green', brand: 'Goyard', name: 'Croisière 50', cat: 'Travel bags', groups: ['bags'], price: 3300, img: 'goyard-croisiere-green.webp',
-    color: { name: 'Green', hex: '#1E5B3E' }, sizes: ONE, out: [], views: BAG,
-    text: 'Goyard’s soft Boston-style travel bag in green Goyardine canvas with rolled leather handles.',
-    details: ['Goyardine coated canvas', 'Leather handles and trim', 'Zip top', '50 cm wide'] },
-  { id: 'goyard-croisiere-burgundy', brand: 'Goyard', name: 'Croisière 50', cat: 'Travel bags', groups: ['bags'], price: 3300, img: 'goyard-croisiere-burgundy.webp',
-    color: { name: 'Burgundy', hex: '#6B1F35' }, sizes: ONE, out: [], views: BAG,
-    text: 'The Croisière travel bag in burgundy Goyardine canvas with rolled leather handles.',
-    details: ['Goyardine coated canvas', 'Leather handles and trim', 'Zip top', '50 cm wide'] },
+  { id: 'goyard-belvedere', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, sizes: ONE, out: [], views: BAG,
+    text: 'Goyard’s saddle-shaped messenger bag in Goyardine canvas with a leather flap and an adjustable strap.',
+    details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'goyard-belvedere-black.webp', views: two('goyard-belvedere-black-2.webp', BAG) },
+      { key: 'grey', color: { name: 'Grey', hex: '#8E9399' }, img: 'goyard-belvedere-grey.webp' },
+      { key: 'black-tan', color: { name: 'Black / tan', hex: '#B4652E' }, img: 'goyard-belvedere-black-tan.webp' },
+      { key: 'red', color: { name: 'Red', hex: '#A1202A' }, img: 'goyard-belvedere-red.webp' },
+      { key: 'orange', color: { name: 'Orange', hex: '#E5622B' }, img: 'goyard-belvedere-orange.webp' },
+      { key: 'burgundy', color: { name: 'Burgundy', hex: '#6B1F35' }, img: 'goyard-belvedere-burgundy.webp' },
+      { key: 'khaki', color: { name: 'Khaki', hex: '#6E6B3A' }, img: 'goyard-belvedere-khaki.webp' },
+      { key: 'green', color: { name: 'Green', hex: '#1E5B3E' }, img: 'goyard-belvedere-green.webp' },
+    ] },
+  { id: 'goyard-croisiere', brand: 'Goyard', name: 'Croisière 50', cat: 'Travel bags', groups: ['bags'], price: 3300, sizes: ONE, out: [], views: BAG,
+    text: 'Goyard’s soft Boston-style travel bag in Goyardine canvas with rolled leather handles.',
+    details: ['Goyardine coated canvas', 'Leather handles and trim', 'Zip top', '50 cm wide'],
+    variants: [
+      { key: 'green', color: { name: 'Green', hex: '#1E5B3E' }, img: 'goyard-croisiere-green.webp' },
+      { key: 'burgundy', color: { name: 'Burgundy', hex: '#6B1F35' }, img: 'goyard-croisiere-burgundy.webp' },
+    ] },
   { id: 'goyard-boeing-55', brand: 'Goyard', name: 'Boeing 55', cat: 'Travel bags', groups: ['bags'], price: 3940, img: 'goyard-boeing-55.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: BAG,
     text: 'Large structured holdall in black Goyardine canvas with leather handles, made for weekends away.',
@@ -897,10 +894,6 @@ const P = [
     color: { name: 'Camo', hex: '#5E6B45' }, sizes: ONE, out: [], views: [[50, 50, 1], [48, 44, 2], [50, 30, 2]],
     text: 'Camo trucker cap with the Rolling Stones tongue in red leather on the front and a mesh back.',
     details: ['Camo cotton front', 'Red leather tongue patch', 'Mesh back', 'Snapback'] },
-  { id: 'cp-goggle-beanie-white', brand: 'C.P. Company', name: 'Goggle Beanie', cat: 'Hats', groups: ['accessories'], price: 160, img: 'cp-goggle-beanie-white.webp',
-    color: { name: 'Off-white', hex: '#E4E1D8' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 60, 1.9], [50, 36, 1.9]],
-    text: 'The C.P. Company goggle beanie in off-white extra fine merino wool.',
-    details: ['Extra fine merino wool', 'Goggle lenses on the cuff', 'Ribbed knit', 'One size'] },
   { id: 'lv-damier-beanie', brand: 'Louis Vuitton', name: 'Néo Petit Damier Beanie', cat: 'Hats', groups: ['accessories'], price: 415, img: 'lv-damier-beanie.webp',
     color: { name: 'Light grey', hex: '#A3A3A3' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 40, 1.9], [62, 72, 2]],
     text: 'Grey wool beanie knitted in the Petit Damier check with a leather logo patch on the cuff.',
@@ -913,26 +906,21 @@ const P = [
     color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 44, 2], [70, 56, 2]],
     text: 'Baseball cap in Burberry Vintage check cotton.',
     details: ['Cotton', 'Vintage check', 'Curved peak', 'Adjustable back'] },
-  { id: 'gucci-gg-cap-beige', brand: 'Gucci', name: 'GG Canvas Baseball Cap with Web', cat: 'Hats', groups: ['accessories'], price: 559, img: 'gucci-gg-cap-beige.webp',
-    color: { name: 'Beige / ebony', hex: '#B9A88C' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 44, 2], [70, 56, 2]],
-    text: 'Baseball cap in beige and ebony GG canvas with the green and red Web stripe on the side.',
-    details: ['GG canvas', 'Web stripe', 'Curved peak', 'Adjustable back'] },
-  { id: 'gucci-gg-cap-blue', brand: 'Gucci', name: 'GG Canvas Baseball Cap with Web', cat: 'Hats', groups: ['accessories'], price: 559, img: 'gucci-gg-cap-blue.webp',
-    color: { name: 'Beige / blue', hex: '#A4A9B8' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 44, 2], [70, 56, 2]],
-    text: 'The GG canvas cap in beige and blue with the green and red Web stripe.',
-    details: ['GG canvas', 'Web stripe', 'Curved peak', 'Adjustable back'] },
-  { id: 'gucci-gg-cap-black', brand: 'Gucci', name: 'GG Canvas Baseball Cap with Web', cat: 'Hats', groups: ['accessories'], price: 559, img: 'gucci-gg-cap-black.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: [[50, 50, 1], [50, 44, 2], [70, 56, 2]],
-    text: 'The GG canvas cap in black with the green and red Web stripe.',
-    details: ['GG canvas', 'Web stripe', 'Curved peak', 'Adjustable back'] },
-  { id: 'burberry-check-scarf-beige', brand: 'Burberry', name: 'Check Cashmere Scarf', cat: 'Scarves', groups: ['accessories'], price: 645, img: 'burberry-check-scarf-beige.webp',
-    color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: SMALL,
-    text: 'Burberry’s classic fringed scarf in soft cashmere, woven in the Archive beige check.',
-    details: ['100% cashmere', 'Burberry check', 'Fringed ends', 'One size'] },
-  { id: 'burberry-check-scarf-navy', brand: 'Burberry', name: 'Check Cashmere Scarf', cat: 'Scarves', groups: ['accessories'], price: 645, img: 'burberry-check-scarf-navy.webp',
-    color: { name: 'Navy', hex: '#1B2233' }, sizes: ONE, out: [], views: SMALL,
-    text: 'The fringed cashmere scarf in the navy Burberry check.',
-    details: ['100% cashmere', 'Burberry check', 'Fringed ends', 'One size'] },
+  { id: 'gucci-gg-cap', brand: 'Gucci', name: 'GG Canvas Baseball Cap with Web', cat: 'Hats', groups: ['accessories'], price: 559, sizes: ONE, out: [], views: [[50, 50, 1], [50, 44, 2], [70, 56, 2]],
+    text: 'Baseball cap in GG canvas with the green and red Web stripe on the side.',
+    details: ['GG canvas', 'Web stripe', 'Curved peak', 'Adjustable back'],
+    variants: [
+      { key: 'beige-ebony', color: { name: 'Beige / ebony', hex: '#B9A88C' }, img: 'gucci-gg-cap-beige.webp' },
+      { key: 'beige-blue', color: { name: 'Beige / blue', hex: '#A4A9B8' }, img: 'gucci-gg-cap-blue.webp' },
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'gucci-gg-cap-black.webp' },
+    ] },
+  { id: 'burberry-check-scarf', brand: 'Burberry', name: 'Check Cashmere Scarf', cat: 'Scarves', groups: ['accessories'], price: 645, sizes: ONE, out: [], views: SMALL,
+    text: 'Burberry’s classic fringed scarf in soft cashmere, woven in the Burberry check.',
+    details: ['100% cashmere', 'Burberry check', 'Fringed ends', 'One size'],
+    variants: [
+      { key: 'archive-beige', color: { name: 'Archive beige', hex: '#C9B28A' }, img: 'burberry-check-scarf-beige.webp' },
+      { key: 'navy', color: { name: 'Navy', hex: '#1B2233' }, img: 'burberry-check-scarf-navy.webp' },
+    ] },
   { id: 'lv-damier-gloves', brand: 'Louis Vuitton', name: 'Néo Petit Damier Gloves', cat: 'Gloves', groups: ['accessories'], price: 303, img: 'lv-damier-gloves.webp',
     color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: SMALL,
     text: 'Black wool gloves knitted with the Petit Damier check on the back and a logo patch at the cuff.',
@@ -962,7 +950,19 @@ const P = [
     text: 'Black leather belt with VETEMENTS spelled out in silver letters along the strap.',
     details: ['Black leather', 'Silver logo letters', 'Sized in centimetres'] },
 ];
+// one piece in several colours keeps them in `variants`; a single-colour piece gets one variant of its own.
+// The piece shows its first colour and its lowest price ("From" when the colours cost differently).
+P.forEach(p => {
+  p.variants = (p.variants || [{ key: '', color: p.color, img: p.img, views: p.views }])
+    .map(v => ({ ...v, price: v.price || p.price, views: v.views || p.views, text: v.text || p.text, details: v.details || p.details }));
+  const prices = p.variants.map(v => v.price);
+  Object.assign(p, { color: p.variants[0].color, img: p.variants[0].img, views: p.variants[0].views,
+    price: Math.min(...prices), from: new Set(prices).size > 1 });
+});
 const BY = Object.fromEntries(P.map(p => [p.id, p]));
+// the piece in one colour (the first colour when the key is unknown)
+const vOf = (p, key) => ({ ...p, ...(p.variants.find(v => v.key === key) || p.variants[0]), from: false });
+const vHref = p => '#p-' + p.id + (p.key && p.key !== p.variants[0].key ? '--' + p.key : '');
 const LISTS = {
   new: { title: 'New in', note: 'Fresh this season', pick: p => p.isNew },
   clothing: { title: 'Clothing', pick: p => p.groups.includes('clothing') },
@@ -992,6 +992,7 @@ const blank = () => ({ bag: [], wish: [], user: null, orders: [], promo: null })
 let S = blank();
 try { S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 S.bag = S.bag.filter(l => BY[l.id]);
+S.bag.forEach(l => { l.v = vOf(BY[l.id], l.v).key; });
 S.wish = S.wish.filter(id => BY[id]);
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
@@ -1006,7 +1007,7 @@ const isBelt = p => p.sizes === BELT;
 const sizeLabel = (p, s) => isShoe(p) ? 'US ' + s : isBelt(p) ? s + ' cm' : s;
 const sizeKind = p => isShoe(p) ? 'US size' : isBelt(p) ? 'Size, cm' : 'Size';
 const off = p => p.was ? Math.round((1 - p.price / p.was) * 100) : 0;
-const priceHTML = p => `<span class="price num">${p.was ? `<s>${money(p.was)}</s>` : ''}${money(p.price)}</span>`;
+const priceHTML = p => `<span class="price num">${p.was ? `<s>${money(p.was)}</s>` : ''}${p.from ? 'From ' : ''}${money(p.price)}</span>`;
 const pic = (p, v = [50, 50, 1], lazy = true) =>
   `<img src="${IMG + (v[3] || p.img)}" alt="${esc(p.brand)} ${esc(p.name)}, ${esc(p.color.name)}" width="864" height="1152"${lazy ? ' loading="lazy"' : ''} decoding="async"${v[2] > 1 ? ` style="transform-origin:${v[0]}% ${v[1]}%;transform:scale(${v[2]})"` : ''}>`;
 const I = {
@@ -1021,14 +1022,14 @@ const I = {
 };
 
 /* ---------- bag ---------- */
-const lineKey = l => l.id + '|' + l.size;
+const lineKey = l => l.id + '|' + l.size + '|' + (l.v || '');
 const bagCount = () => S.bag.reduce((n, l) => n + l.qty, 0);
-const subtotal = () => S.bag.reduce((n, l) => n + BY[l.id].price * l.qty, 0);
+const subtotal = () => S.bag.reduce((n, l) => n + vOf(BY[l.id], l.v).price * l.qty, 0);
 const discount = () => S.promo && PROMOS[S.promo] ? Math.round(subtotal() * PROMOS[S.promo] * 100) / 100 : 0;
-function addToBag(id, size) {
-  const l = S.bag.find(x => x.id === id && x.size === size);
-  if (l) l.qty = Math.min(9, l.qty + 1); else S.bag.push({ id, size, qty: 1 });
-  save(); counts(); toast(BY[id], size);
+function addToBag(id, size, v = BY[id].variants[0].key) {
+  const l = S.bag.find(x => x.id === id && x.size === size && x.v === v);
+  if (l) l.qty = Math.min(9, l.qty + 1); else S.bag.push({ id, size, v, qty: 1 });
+  save(); counts(); toast(vOf(BY[id], v), size);
 }
 function counts() {
   const b = bagCount(), w = S.wish.length;
@@ -1059,9 +1060,9 @@ function card(p) {
       <span class="quick-l">Quick add${isShoe(p) ? ', US size' : isBelt(p) ? ', cm' : ''}</span>
       <div class="quick-s">${p.sizes.map(s => `<button data-act="quick" data-id="${p.id}" data-size="${s}"${p.out.includes(s) ? ' disabled aria-label="' + s + ', sold out"' : ''}>${s}</button>`).join('')}</div>
     </div></div>
-    <a class="card-brand" href="#p-${p.id}" tabindex="-1">${esc(p.brand)}</a>
+    <a class="card-brand" href="#p-${p.id}" tabindex="-1"><span>${esc(p.brand)}</span>${p.variants.length > 1 ? `<span class="cdots" aria-hidden="true">${p.variants.slice(0, 6).map(v => `<i style="--c:${v.color.hex}"></i>`).join('')}${p.variants.length > 6 ? `<em>+${p.variants.length - 6}</em>` : ''}</span>` : ''}</a>
     <a class="card-meta" href="#p-${p.id}"><b>${esc(p.name)}</b>${priceHTML(p)}</a>
-    <div class="card-sub"><span>${esc(p.cat)}</span><span>${esc(p.color.name)}</span></div>
+    <div class="card-sub"><span>${esc(p.cat)}</span><span>${p.variants.length > 1 ? p.variants.length + ' colours' : esc(p.color.name)}</span></div>
   </article>`;
 }
 const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join('')}</div>`;
@@ -1095,7 +1096,7 @@ V.home = () => {
   <section class="sec">
     <div class="sec-h"><h2 class="h-title">Shop by category</h2></div>
     <div class="cats">
-      ${[['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55-monogram'], ['shoes', 'timberland-cross-boot'], ['accessories', 'gucci-gg-belt']].map(([k, id]) => {
+      ${[['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55'], ['shoes', 'timberland-cross-boot'], ['accessories', 'gucci-gg-belt']].map(([k, id]) => {
         const n = P.filter(LISTS[k].pick).length;
         return `<a class="cat" href="#${k}">${pic(BY[id])}<span class="cat-plate glass"><span><b>${LISTS[k].title}</b><span>${n} pieces</span></span><span class="arrow">${I.arrow}</span></span></a>`;
       }).join('')}
@@ -1130,11 +1131,14 @@ V.list = key => {
     ${grid(list)}`;
 };
 
-let PV = { id: null, view: 0, size: null };
-V.product = id => {
-  const p = BY[id];
-  if (!p) return V.missing();
-  if (PV.id !== id) PV = { id, view: 0, size: p.sizes.length === 1 ? p.sizes[0] : null };
+let PV = { id: null, view: 0, size: null, v: '', hk: null };
+V.product = (id, key = '') => {
+  const base = BY[id];
+  if (!base) return V.missing();
+  if (PV.id !== id) PV = { id, view: 0, size: base.sizes.length === 1 ? base.sizes[0] : null, v: '', hk: null };
+  // the colour in the address wins when the page opens or the address changes
+  if (PV.hk !== key) { PV.hk = key; PV.v = vOf(base, key).key; PV.view = 0; }
+  const p = vOf(base, PV.v);
   const w = S.wish.includes(p.id);
   const rel = P.filter(x => x.id !== p.id && x.groups.some(g => p.groups.includes(g))).slice(0, 4);
   return `<section class="pdp">
@@ -1151,8 +1155,10 @@ V.product = id => {
       <span class="label">${esc(p.brand)}</span>
       <h1>${esc(p.name)}</h1>
       ${priceHTML(p)}
-      <div class="swatches"><span class="sw on" style="--c:${p.color.hex}" title="${esc(p.color.name)}"></span></div>
-      <div class="sw-name">${esc(p.color.name)}</div>
+      ${base.variants.length > 1
+        ? `<div class="swatches" role="radiogroup" aria-label="Colour">${base.variants.map(v => `<button class="sw${v.key === p.key ? ' on' : ''}" style="--c:${v.color.hex}" role="radio" aria-checked="${v.key === p.key}" aria-label="${esc(v.color.name)}" title="${esc(v.color.name)}" data-act="color" data-v="${v.key}"></button>`).join('')}</div>`
+        : `<div class="swatches"><span class="sw on" style="--c:${p.color.hex}" title="${esc(p.color.name)}"></span></div>`}
+      <div class="sw-name">${esc(p.color.name)}${base.variants.length > 1 ? `<span class="muted">, ${base.variants.length} colours</span>` : ''}</div>
       <div class="actions">
         <button class="btn size-btn" id="size-btn" data-act="size" aria-haspopup="listbox" aria-expanded="false"><span>${PV.size ? sizeLabel(p, PV.size) : 'Size'}</span>${I.chev}</button>
         <div class="size-pop glass${isShoe(p) ? '' : ' cl'}" id="size-pop" role="listbox" aria-label="Size" hidden>
@@ -1190,9 +1196,9 @@ V.bag = () => {
     <section>
       <h1 class="h-title">Bag <span class="muted">(${bagCount()})</span></h1>
       <div class="items">${S.bag.map(l => {
-        const p = BY[l.id], k = lineKey(l);
+        const p = vOf(BY[l.id], l.v), k = lineKey(l);
         return `<div class="item">
-          <a class="ph" href="#p-${p.id}">${pic(p)}</a>
+          <a class="ph" href="${vHref(p)}">${pic(p)}</a>
           <div class="mid"><b>${esc(p.name)}</b><div><small>Size - ${sizeLabel(p, l.size)}</small><small>Color - ${esc(p.color.name)}</small></div></div>
           <div class="end">
             <button class="x" data-act="rm" data-k="${k}" aria-label="Remove ${esc(p.name)}">${I.x}</button>
@@ -1250,7 +1256,7 @@ V.checkout = () => {
     <span class="div" aria-hidden="true"></span>
     <section>
       <h2 class="sum-h">Order summary</h2>
-      <div class="sum-items">${S.bag.map(l => { const p = BY[l.id]; return `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>`; }).join('')}</div>
+      <div class="sum-items">${S.bag.map(l => { const p = vOf(BY[l.id], l.v); return `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>`; }).join('')}</div>
       <div id="co-sum">${summaryRows(express, true)}</div>
       <button class="btn wide" style="margin-top:24px" type="submit" form="co-form">Place order</button>
       <p class="muted" style="font-size:12px;margin:10px 2px 0">Test mode: no money is taken and card details are not saved. Placing an order here saves it to your account.</p>
@@ -1265,7 +1271,7 @@ V.order = n => {
     <span class="stamp glass">${I.check}</span>
     <h1 class="h-title">Thank you</h1>
     <p class="muted" style="margin:0">Order ${esc(o.n)} is placed for ${esc(o.email)}. You can find it in your account.</p>
-    <div class="items">${o.lines.map(l => { const p = BY[l.id]; return p ? `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>` : ''; }).join('')}</div>
+    <div class="items">${o.lines.map(l => { const p = BY[l.id] && vOf(BY[l.id], l.v); return p ? `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>` : ''; }).join('')}</div>
     <div class="rows num" style="width:100%">
       ${o.disc ? `<div><span>Subtotal</span><span>${money2(o.sub)}</span></div><div class="disc"><span>Promo ${esc(o.promo || '')}</span><span>−${money2(o.disc)}</span></div>` : ''}
       <div><span>Shipping</span><span>${o.ship ? money2(o.ship) : 'Free'}</span></div>
@@ -1326,7 +1332,7 @@ V.missing = () => `<div class="empty"><h1 class="h-title">Not found</h1><p>This 
 /* ---------- router ---------- */
 function route() {
   const h = decodeURIComponent((location.hash || '').replace(/^#\/?/, '')) || 'home';
-  if (h.startsWith('p-')) return { name: 'product', arg: h.slice(2) };
+  if (h.startsWith('p-')) { const [arg, v = ''] = h.slice(2).split('--'); return { name: 'product', arg, v }; }
   if (h.startsWith('order-')) return { name: 'order', arg: h.slice(6) };
   if (LISTS[h]) return { name: 'list', arg: h };
   if (PAGES[h]) return { name: 'page', arg: h };
@@ -1338,7 +1344,7 @@ function render(scroll) {
   const r = route(), key = r.name + ':' + (r.arg || '');
   const app = $('#app');
   const y = window.scrollY;
-  app.innerHTML = `<div class="view">${V[r.name](r.arg)}</div>`;
+  app.innerHTML = `<div class="view">${V[r.name](r.arg, r.v)}</div>`;
   if (key === lastKey && !scroll) { app.firstElementChild.style.animation = 'none'; window.scrollTo(0, y); }
   else window.scrollTo(0, 0);
   lastKey = key;
@@ -1350,7 +1356,7 @@ function render(scroll) {
   if (r.name === 'product') mountProduct();
 }
 function titleFor(r) {
-  if (r.name === 'product' && BY[r.arg]) return BY[r.arg].brand + ' ' + BY[r.arg].name + ' | Pale Store';
+  if (r.name === 'product' && BY[r.arg]) { const p = vOf(BY[r.arg], PV.v); return p.brand + ' ' + p.name + (p.variants.length > 1 ? ', ' + p.color.name : '') + ' | Pale Store'; }
   if (r.name === 'list') return LISTS[r.arg].title + ' | Pale Store';
   if (r.name === 'page') return PAGES[r.arg][0] + ' | Pale Store';
   if (r.name === 'home') return 'Pale Store';
@@ -1412,19 +1418,26 @@ function openSearch() {
   searchOut('');
   setTimeout(() => $('#q').focus(), 30);
 }
+// lower case without accents, so "belvedere" finds Belvedère and "hermes" finds Hermès
+const fold = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 function searchOut(q) {
-  q = q.trim().toLowerCase();
+  q = fold(q.trim());
   const out = $('#sr-out');
   if (!q) {
     out.innerHTML = `<div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
       <div class="label sr-h">New in</div><div class="sr-list">${P.filter(p => p.isNew).map(srItem).join('')}</div>`;
     return;
   }
-  const hits = P.filter(p => (q === 'sale' && p.was) || [p.brand, p.name, p.cat, p.color.name, p.text, ...p.groups].join(' ').toLowerCase().includes(q));
+  // a piece found by its name shows once; found only by a colour, it opens in that colour
+  const hits = P.map(p => {
+    if ((q === 'sale' && p.was) || fold([p.brand, p.name, p.cat, ...p.groups].join(' ')).includes(q)) return p;
+    const v = p.variants.find(v => fold(v.color.name + ' ' + v.text).includes(q));
+    return v && (p.variants.length > 1 ? vOf(p, v.key) : p);
+  }).filter(Boolean);
   out.innerHTML = hits.length ? `<div class="label sr-h">${hits.length} ${hits.length === 1 ? 'result' : 'results'}</div><div class="sr-list">${hits.map(srItem).join('')}</div>`
     : `<p class="sr-empty">Nothing matches “${esc(q)}”. Try coat, knit or sneakers.</p>`;
 }
-const srItem = p => `<a class="sr-item" href="#p-${p.id}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${money(p.price)}</span></span></a>`;
+const srItem = p => `<a class="sr-item" href="${vHref(p)}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${p.key && p.variants.length > 1 ? esc(p.color.name) + ', ' : ''}${p.from ? 'from ' : ''}${money(p.price)}</span></span></a>`;
 function openMenu() {
   const l = $('#layer');
   if (l.innerHTML) return closeLayer();
@@ -1442,7 +1455,7 @@ function toast(p, size) {
   let t = $('#toast');
   if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
   t.className = 'toast glass';
-  t.innerHTML = `<span class="ph">${pic(p)}</span><div><b>Added to bag</b><small>${esc(p.name)}, ${sizeLabel(p, size)}</small><a class="btn" href="#bag">View bag</a></div>`;
+  t.innerHTML = `<span class="ph">${pic(p)}</span><div><b>Added to bag</b><small>${esc(p.name)}, ${p.variants.length > 1 ? esc(p.color.name) + ', ' : ''}${sizeLabel(p, size)}</small><a class="btn" href="#bag">View bag</a></div>`;
   clearTimeout(toastT);
   toastT = setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3600);
 }
@@ -1502,7 +1515,7 @@ document.addEventListener('click', e => {
     case 'size': sizePop(); break;
     case 'pick': {
       PV.size = d.size;
-      const p = BY[PV.id];
+      const p = vOf(BY[PV.id], PV.v);
       $('#size-btn span').textContent = sizeLabel(p, d.size);
       $$('#size-pop [data-act="pick"]').forEach(b => { b.classList.toggle('on', b === a); b.setAttribute('aria-selected', b === a); });
       $('#hint').textContent = '';
@@ -1510,7 +1523,18 @@ document.addEventListener('click', e => {
       sizePop(false); $('#size-btn').focus({ preventScroll: true });
       break;
     }
-    case 'add': if (!PV.size) needSize(); else addToBag(PV.id, PV.size); break;
+    case 'add': if (!PV.size) needSize(); else addToBag(PV.id, PV.size, PV.v); break;
+    case 'color': {
+      if (d.v === PV.v) break;
+      PV.v = d.v; PV.view = 0;
+      // keep the colour in the address without a new history step, so a reload or a shared link opens it
+      const p = BY[PV.id], h = d.v === p.variants[0].key ? '' : d.v;
+      PV.hk = h;
+      try { history.replaceState(null, '', '#p-' + p.id + (h ? '--' + h : '')); } catch (err) {}
+      render();
+      $(`.sw[data-v="${d.v}"]`)?.focus({ preventScroll: true });
+      break;
+    }
     case 'rm': S.bag = S.bag.filter(l => lineKey(l) !== d.k); if (!S.bag.length) S.promo = null; save(); render(); break;
     case 'qty': {
       const l = S.bag.find(x => lineKey(x) === d.k);
