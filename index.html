@@ -1827,9 +1827,10 @@ function setPay(k) {
   if (cvc) { cvc.maxLength = CARDS[k].cvc; cvc.value = cvc.value.slice(0, CARDS[k].cvc); }
   $$('#cc-num, #cc-cvc').forEach(i => i.parentElement.classList.remove('bad'));
 }
-// a finished card field hands the caret to the next one (owner's request); only when what was typed is complete and checks out
+// a card field typed to its full length hands the caret to the next one (owner's request); a wrong value still moves on,
+// but its field turns red with the reason, so the order cannot go through with it
 const NEXT = { 'cc-num': 'cc-exp', 'cc-exp': 'cc-cvc', 'cc-cvc': 'cc-name' };
-const cardDone = i => (i.id === 'cc-num' ? digits(i.value).length >= (payBy === 'amex' ? 15 : 16) : i.id === 'cc-exp' ? i.value.length === 5 : digits(i.value).length === CARDS[payBy].cvc) && !fieldErr(i);
+const cardFull = i => digits(i.value).length >= (i.id === 'cc-num' ? (payBy === 'amex' ? 15 : 16) : i.id === 'cc-exp' ? 4 : CARDS[payBy].cvc);
 const FILL = 'Fill in the highlighted fields';
 function fieldErr(i) {
   const v = i.value.trim(), c = CARDS[payBy];
@@ -1944,7 +1945,6 @@ document.addEventListener('input', e => {
   }
   if (e.target.id === 'cc-exp') { const n = digits(e.target.value).slice(0, 4); reformat(e.target, n.length > 2 ? n.slice(0, 2) + '/' + n.slice(2) : n); }
   if (e.target.id === 'cc-cvc') reformat(e.target, digits(e.target.value).slice(0, CARDS[payBy].cvc));
-  if (NEXT[e.target.id] && /^insert/.test(e.inputType || '') && cardDone(e.target)) $('#' + NEXT[e.target.id]).focus();
   if (e.target.classList.contains('code-box')) {
     const boxes = $$('.code-box'), i = boxes.indexOf(e.target), v = digits(e.target.value);
     $('.code-boxes').classList.remove('bad'); $('#code-err').textContent = '';
@@ -1953,7 +1953,20 @@ document.addEventListener('input', e => {
       (boxes[Math.min(i + v.length, boxes.length - 1)]).focus();
     } else { e.target.value = v; if (v && i < boxes.length - 1) boxes[i + 1].focus(); }
   }
-  const f = e.target.closest('.field.bad'); if (f) f.classList.remove('bad');
+  const f = e.target.closest('.field.bad');
+  // the message under the form follows the fields still marked
+  if (f) { f.classList.remove('bad'); const b = $('#co-form .field.bad input'), m = $('#co-err'); if (m) m.textContent = b ? fieldErr(b) : ''; }
+  // moves on only when a digit was added (not on delete), whatever the keyboard reports as the kind of input
+  const t = e.target;
+  if (NEXT[t.id]) {
+    const n = digits(t.value).length, was = +(t.dataset.n || 0);
+    t.dataset.n = n;
+    if (n > was && cardFull(t)) {
+      const m = fieldErr(t);
+      if (m) { t.parentElement.classList.add('bad'); $('#co-err').textContent = m; }
+      $('#' + NEXT[t.id]).focus();
+    }
+  }
 });
 document.addEventListener('keydown', e => {
   const dd = e.target.closest && e.target.closest('.dd');
