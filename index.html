@@ -149,10 +149,15 @@ main{flex:1;padding:0 var(--x);outline:none}
 
 /* ---------- home ---------- */
 .hero{position:relative;padding-top:14px}
-.stage{position:relative;height:clamp(500px,46vw,820px);border-radius:28px;background:var(--tile);overflow:hidden;isolation:isolate;container-type:size}
+/* The plate shows the video down to the line under the bag and the legs (row 962 of 1080); the sneakers below
+   that line are a still cut-out (they do not move in the video) laid over the plate's bottom edge, so they step out of it. */
+.stage-box{position:relative;aspect-ratio:1920/962;container-type:size;margin-bottom:4.8%}
+.stage{position:absolute;inset:0;border-radius:28px;background:var(--tile);overflow:hidden;isolation:isolate}
 /* the video fills the stage like object-fit: cover; the price tags ride on the same box, so they stay on the clothes at any size */
-.reel{position:absolute;--w:max(100cqw,100cqh * 16 / 9);--h:max(100cqh,100cqw * 9 / 16);width:var(--w);height:var(--h);left:calc((100cqw - var(--w)) * var(--fx,.5));top:calc((100cqh - var(--h)) * .5)}
-.reel video{display:block;width:100%;height:100%;object-fit:cover;background:var(--tile)}
+.reel{position:absolute;top:0;--h:calc(100cqh * 1080 / 962);--w:calc(var(--h) * 16 / 9);width:var(--w);height:var(--h);left:calc((100cqw - var(--w)) * var(--fx,.5))}
+.reel video{display:block;width:100%;height:100%;background:var(--tile)}
+.pop{z-index:2;pointer-events:none}
+.pop img{position:absolute;left:31.927%;top:88.704%;width:36.354%;height:auto;filter:drop-shadow(0 6px 8px rgba(0,0,0,.08))}
 .tag{position:absolute;z-index:3;left:var(--x);top:var(--y);translate:-14px -50%;display:flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 10px;border-radius:999px;font-size:12px;white-space:nowrap;transition:transform .3s var(--ease),background .3s}
 .tag.l{padding:0 10px 0 14px;translate:calc(-100% + 14px) -50%}
 .tag.l i{order:1}
@@ -407,14 +412,15 @@ details[open] .pm::after{transform:rotate(0)}
   .cats{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 calc(var(--x) * -1);padding:0 var(--x);scroll-padding:0 var(--x)}
   .cats::-webkit-scrollbar{display:none}
   .cat{flex:0 0 74%;aspect-ratio:4/5;scroll-snap-align:start}
-  .stage{height:auto;aspect-ratio:1/1;border-radius:22px}
+  .stage-box{aspect-ratio:1/1;margin-bottom:0}
+  .stage{border-radius:22px}
   .tag{height:28px;gap:7px;padding:0 10px 0 8px;font-size:11px;translate:-12px -50%}
   .reel{--fx:.55}
   .reel .tag{left:var(--px,var(--x))}
   .tag.l,.tag.pl{padding:0 8px 0 10px;translate:calc(-100% + 12px) -50%}
   .tag.pl i{order:1}
   .tag i{width:6px;height:6px;box-shadow:0 0 0 3px rgba(21,21,21,.12)}
-  .hero-card{position:static;width:auto;margin-top:10px;padding:18px 18px 16px}
+  .hero-card{position:static;width:auto;margin-top:46px;padding:18px 18px 16px}
   .hero-card .btn{flex:1}
   .quick{display:none}
   .heart{width:32px;height:32px;top:6px;right:6px}
@@ -1093,18 +1099,21 @@ V.home = () => {
   // hero: the owner's looping video; each price tag sits on a piece she wears, at a spot measured on the frame (% of width / height).
   // `l` puts the label to the left of the dot, `pl` does that on phones only.
   const tags = [
-    ['lv-snow-mask', '', 53.5, 16, 'l'],
+    ['lv-snow-mask', '', 63.5, 15, 'pl', 53.5],
     ['balenciaga-soccer-hoodie', 'pink', 71, 50, 'pl', 73],
     ['lv-keepall-55', 'monogram', 25, 70, '', 30],
-    ['margiela-future-high', '', 61.5, 85, 'pl'],
+    ['margiela-future-high', '', 61.5, 79, 'pl'],
   ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span></a>`; }).join('');
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   return `<section class="hero">
+    <div class="stage-box">
     <div class="stage">
       <div class="reel">
-        <video poster="assets/hero/hero.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero.mp4" type="video/mp4"><source src="assets/hero/hero.webm" type="video/webm"></video>
+        <video poster="assets/hero/hero-loop.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero-loop.mp4" type="video/mp4"><source src="assets/hero/hero-loop.webm" type="video/webm"></video>
         ${tags}
       </div>
+    </div>
+    <div class="reel pop" aria-hidden="true"><img src="assets/hero/hero-shoes.webp" alt="" width="698" height="98"></div>
     </div>
     <div class="hero-card glass">
         <span class="label">Autumn / Winter 26</span>
