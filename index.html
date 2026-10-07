@@ -241,6 +241,22 @@ main{flex:1;padding:0 var(--x);outline:none}
 
 /* ---------- catalog ---------- */
 .cat-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:44px 0 22px}
+/* Sale banners: one wide plate on top, two below it. A sketch for now: sale pieces stand on the tile grey under frosted
+   plates; the owner will send promo photos for them (then a photo fills the plate instead of the pieces). */
+.deals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding-top:24px}
+.deal{position:relative;border-radius:var(--r-tile);background:var(--tile);overflow:hidden;height:clamp(220px,21vw,320px)}
+.deal.main{grid-column:1/-1;border-radius:28px;height:clamp(300px,32vw,470px)}
+.deal .pics{position:absolute;inset:4% 3% 0 auto;display:flex;align-items:flex-end;justify-content:flex-end;width:62%}
+.deal:not(.main) .pics{width:64%;inset:8% 2% 0 auto}
+.deal .pics a{flex:0 1 auto;height:100%;aspect-ratio:3/4;margin-left:-7%;transition:transform .5s var(--ease);
+  -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.deal .pics a:hover{transform:translateY(-6px)}
+.deal .pics img{width:100%;height:100%;object-fit:cover}
+.deal-card{position:absolute;z-index:2;left:clamp(14px,2vw,26px);bottom:clamp(14px,2vw,26px);width:min(380px,calc(42% - 20px));border-radius:20px;padding:20px 20px 18px}
+.deal-card h2{font-size:clamp(24px,2.6vw,38px);line-height:1.05;font-weight:500;letter-spacing:-.025em;margin:8px 0 8px}
+.deal-card p{margin:0;color:var(--ink-2);font-size:13px;max-width:34ch}
+.deal:not(.main) .deal-card{width:min(260px,calc(40% - 14px));padding:16px 16px 14px}
+.deal:not(.main) .deal-card h2{font-size:clamp(18px,1.6vw,22px)}
 .cat-top .h-title{font-size:clamp(24px,2.6vw,34px)}
 .cat-top .muted{font-size:12.5px;margin-top:8px}
 .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -459,6 +475,17 @@ details[open] .pm::after{transform:rotate(0)}
   .tag i{width:6px;height:6px;box-shadow:0 0 0 3px rgba(21,21,21,.12)}
   .reel .tag span{display:none}
   .hero-card{position:static;width:auto;margin-top:46px;padding:18px 18px 16px}
+  .deals{gap:10px;padding-top:14px}
+  .deal{height:auto;aspect-ratio:4/5;border-radius:20px}
+  .deal.main{height:auto;aspect-ratio:1/1.05;border-radius:22px}
+  .deal .pics,.deal:not(.main) .pics{inset:4% 3% auto 3%;width:auto;height:62%;justify-content:center}
+  .deal:not(.main) .pics{height:58%}
+  .deal:not(.main) .pics a:nth-child(n+2),.deal.main .pics a:nth-child(n+3){display:none}
+  .deal-card,.deal:not(.main) .deal-card{left:10px;right:10px;bottom:10px;width:auto;padding:14px 14px 12px;border-radius:16px}
+  .deal-card h2{font-size:24px}
+  .deal:not(.main) .deal-card h2{font-size:15px;margin:5px 0 3px}
+  .deal:not(.main) .deal-card p{font-size:11.5px}
+  .deal:not(.main) .deal-card .label{font-size:10px}
   .hero-card .btn{flex:1}
   .quick{display:none}
   .heart{width:32px;height:32px;top:6px;right:6px}
@@ -1185,6 +1212,25 @@ V.home = () => {
   </section>`;
 };
 
+// Sale banners, a sketch: the texts are placeholders and the pieces stand in for the owner's promo photos
+const DEALS = {
+  main: { label: 'Sale', title: max => `Up to ${max}% off`, text: 'Selected pieces from Vetements, Burberry, Balenciaga, Gucci and more.',
+    ids: ['burberry-check-hood-puffer', 'balenciaga-3b-sports-hoodie', 'rick-owens-geobasket'] },
+  small: [
+    { label: 'Most wanted', title: 'Picked most often', text: 'The sale pieces people choose first.', ids: ['gucci-gg-messenger', 'balenciaga-runner-graffiti'] },
+    { label: 'Under $600', title: 'Small prices', text: list => `${list.filter(p => p.price < 600).length} pieces under $600.`, ids: list => list.filter(p => p.price < 600).slice(0, 2).map(p => p.id) },
+  ],
+};
+function dealsHTML(all) {
+  const val = (v, arg) => typeof v === 'function' ? v(arg) : v;
+  const pics = ids => `<div class="pics">${ids.map(id => BY[id]).filter(Boolean).map(p => `<a href="${vHref(p)}" aria-label="${esc(p.brand)} ${esc(p.name)}">${pic(p, undefined, false)}</a>`).join('')}</div>`;
+  const card = (b, h, arg) => `<div class="deal-card glass"><span class="label">${esc(b.label)}</span><${h}>${esc(val(b.title, arg))}</${h}><p>${esc(val(b.text, arg))}</p></div>`;
+  const max = Math.max(...all.map(off));
+  return `<section class="deals" aria-label="Sale highlights">
+    <div class="deal main">${pics(DEALS.main.ids)}${card(DEALS.main, 'h2', max)}</div>
+    ${DEALS.small.map(b => `<div class="deal">${pics(val(b.ids, all))}${card(b, 'h2', all)}</div>`).join('')}
+  </section>`;
+}
 let sortBy = 'featured', brandBy = 'all', brandList = '';
 const SORTS = { featured: 'Featured', low: 'Price: low to high', high: 'Price: high to low' };
 // a pill that opens a frosted list, in place of the browser's own select menu
@@ -1211,7 +1257,7 @@ V.list = key => {
   let list = brandBy === 'all' ? all : all.filter(p => p.brand === brandBy);
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
-  return `<div class="cat-top">
+  return `${key === 'sale' ? dealsHTML(all) : ''}<div class="cat-top">
       <div><h1 class="h-title">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note ? ', ' + L.note.toLowerCase() : ''}</div></div>
       <div class="tools">
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
