@@ -288,7 +288,10 @@ details[open] .pm::after{transform:rotate(0)}
 .opts{display:grid;gap:8px}
 .opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s}
 .opt:has(input:checked){border-color:var(--ink);background:#FAFAFA}
-.opt input{accent-color:var(--ink);margin:0;width:16px;height:16px}
+.opt input{appearance:none;-webkit-appearance:none;flex:none;display:grid;place-content:center;width:18px;height:18px;margin:0;border:1.5px solid #BDBDBD;border-radius:50%;background:#fff;cursor:pointer;transition:border-color .2s}
+.opt input::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ink);transform:scale(0);transition:transform .2s var(--ease)}
+.opt input:checked{border-color:var(--ink)}
+.opt input:checked::before{transform:scale(1)}
 .opt .t{flex:1;font-size:13.5px}
 .opt .t small{display:block;color:var(--ink-2);font-size:12px}
 .form-err{font-size:12px;color:var(--err);margin:-8px 0 0;min-height:0}
