@@ -148,24 +148,24 @@ main{flex:1;padding:0 var(--x);outline:none}
 .ph img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
 
 /* ---------- home ---------- */
-.hero{padding-top:14px}
-.stage{position:relative;height:clamp(500px,46vw,720px);border-radius:28px;background:var(--tile);overflow:hidden;isolation:isolate}
-.stage-ph{position:absolute;bottom:0;aspect-ratio:3/4;width:auto;z-index:1;-webkit-mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent),linear-gradient(transparent,#000 5%,#000 95%,transparent);-webkit-mask-composite:source-in;mask:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent),linear-gradient(transparent,#000 5%,#000 95%,transparent);mask-composite:intersect}
-.stage-ph img{width:100%;height:100%;object-fit:cover}
-.sp-dress{height:90%;left:4%;bottom:2%}
-.sp-coat{height:97%;left:50%;transform:translateX(-50%);bottom:-1%}
-.sp-shoe{height:60%;right:3%;bottom:5%}
-.tag{position:absolute;z-index:3;display:flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 10px;border-radius:999px;font-size:12px;white-space:nowrap;transition:transform .3s var(--ease),background .3s}
+.hero{position:relative;padding-top:14px}
+.stage{position:relative;height:clamp(500px,46vw,820px);border-radius:28px;background:var(--tile);overflow:hidden;isolation:isolate;container-type:size}
+/* the video fills the stage like object-fit: cover; the price tags ride on the same box, so they stay on the clothes at any size */
+.reel{position:absolute;--w:max(100cqw,100cqh * 16 / 9);--h:max(100cqh,100cqw * 9 / 16);width:var(--w);height:var(--h);left:calc((100cqw - var(--w)) * var(--fx,.5));top:calc((100cqh - var(--h)) * .5)}
+.reel video{display:block;width:100%;height:100%;object-fit:cover;background:var(--tile)}
+.tag{position:absolute;z-index:3;left:var(--x);top:var(--y);translate:-14px -50%;display:flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 10px;border-radius:999px;font-size:12px;white-space:nowrap;transition:transform .3s var(--ease),background .3s}
+.tag.l{padding:0 10px 0 14px;translate:calc(-100% + 14px) -50%}
+.tag.l i{order:1}
+.reel .tag{background:rgba(255,255,255,.74)}
+.reel .tag span{color:#5A5A5A}
 .tag:hover{transform:translateY(-2px);background:var(--glass-hi)}
 .tag i{width:8px;height:8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(21,21,21,.12);flex:none}
 .tag b{font-weight:500}
 .tag span{color:var(--ink-2)}
-.tg-coat{left:59%;top:21%}
-.tg-shoe{right:7%;top:49%}
-.tg-dress{left:6%;top:12%}
-.hero-card{position:absolute;z-index:4;left:clamp(14px,2.2vw,28px);bottom:clamp(14px,2.2vw,28px);width:min(400px,calc(100% - 28px));border-radius:22px;padding:24px 24px 22px}
-.hero-card h1{font-size:clamp(26px,2.5vw,36px);line-height:1.08;font-weight:500;letter-spacing:-.025em;margin:10px 0 10px;text-wrap:balance}
-.hero-card p{margin:0 0 20px;color:var(--ink-2);max-width:32ch}
+.hero-card{position:absolute;z-index:4;left:clamp(14px,2vw,24px);top:calc(14px + clamp(14px,2vw,24px));width:min(300px,calc(100% - 28px));border-radius:20px;padding:18px 18px 16px}
+.hero-card h1{font-size:clamp(20px,1.7vw,24px);line-height:1.1;font-weight:500;letter-spacing:-.02em;margin:8px 0 6px;text-wrap:balance}
+.hero-card p{margin:0 0 14px;color:var(--ink-2);font-size:13px;max-width:32ch}
+.hero-card .btn{height:34px;padding:0 16px;font-size:10.5px}
 .hero-card .row{display:flex;gap:8px;flex-wrap:wrap}
 .sec{padding-top:clamp(56px,7vw,96px)}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px}
@@ -407,12 +407,14 @@ details[open] .pm::after{transform:rotate(0)}
   .cats{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 calc(var(--x) * -1);padding:0 var(--x);scroll-padding:0 var(--x)}
   .cats::-webkit-scrollbar{display:none}
   .cat{flex:0 0 74%;aspect-ratio:4/5;scroll-snap-align:start}
-  .stage{height:auto;aspect-ratio:4/5.5;border-radius:22px}
-  .sp-dress,.tg-dress,.tg-shoe{display:none}
-  .sp-coat{height:62%;left:35%;top:3%;bottom:auto}
-  .sp-shoe{height:33%;right:-3%;top:20%;bottom:auto}
-  .tg-coat{left:auto;right:10px;top:10px;height:32px;font-size:11.5px}
-  .hero-card{left:10px;right:10px;bottom:10px;width:auto;padding:20px 18px 18px}
+  .stage{height:auto;aspect-ratio:1/1;border-radius:22px}
+  .tag{height:28px;gap:7px;padding:0 10px 0 8px;font-size:11px;translate:-12px -50%}
+  .reel{--fx:.55}
+  .reel .tag{left:var(--px,var(--x))}
+  .tag.l,.tag.pl{padding:0 8px 0 10px;translate:calc(-100% + 12px) -50%}
+  .tag.pl i{order:1}
+  .tag i{width:6px;height:6px;box-shadow:0 0 0 3px rgba(21,21,21,.12)}
+  .hero-card{position:static;width:auto;margin-top:10px;padding:18px 18px 16px}
   .hero-card .btn{flex:1}
   .quick{display:none}
   .heart{width:32px;height:32px;top:6px;right:6px}
@@ -1087,22 +1089,27 @@ const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join
 const V = {};
 
 V.home = () => {
-  // hero scene: a light piece on the left (it sits under the title card), the lead piece in the middle, a sneaker on the right
-  const dress = BY['burberry-check-hood-hoodie'], coat = BY['ch-horseshoe-zip-hoodie'], shoe = BY['balenciaga-track'];
+  // hero: the owner's looping video; each price tag sits on a piece she wears, at a spot measured on the frame (% of width / height).
+  // `l` puts the label to the left of the dot, `pl` does that on phones only.
+  const tags = [
+    ['lv-snow-mask', '', 53.5, 16, 'l'],
+    ['balenciaga-soccer-hoodie', 'pink', 71, 50, 'pl', 73],
+    ['lv-keepall-55', 'monogram', 25, 70, '', 30],
+    ['margiela-future-high', '', 61.5, 85, 'pl'],
+  ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span></a>`; }).join('');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   return `<section class="hero">
     <div class="stage">
-      <a class="stage-ph sp-dress" href="#p-${dress.id}" tabindex="-1" aria-hidden="true">${pic(dress, undefined, false)}</a>
-      <a class="stage-ph sp-coat" href="#p-${coat.id}" tabindex="-1" aria-hidden="true">${pic(coat, undefined, false)}</a>
-      <a class="stage-ph sp-shoe" href="#p-${shoe.id}" tabindex="-1" aria-hidden="true">${pic(shoe, undefined, false)}</a>
-      <a class="tag glass tg-dress" href="#p-${dress.id}"><i></i><b>${dress.brand}</b><span>${money(dress.price)}</span></a>
-      <a class="tag glass tg-coat" href="#p-${coat.id}"><i></i><b>${coat.brand}</b><span>${money(coat.price)}</span></a>
-      <a class="tag glass tg-shoe" href="#p-${shoe.id}"><i></i><b>${shoe.brand}</b><span>${money(shoe.price)}</span></a>
-      <div class="hero-card glass">
+      <div class="reel">
+        <video poster="assets/hero/hero.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero.mp4" type="video/mp4"><source src="assets/hero/hero.webm" type="video/webm"></video>
+        ${tags}
+      </div>
+    </div>
+    <div class="hero-card glass">
         <span class="label">Autumn / Winter 26</span>
         <h1>Chrome Hearts, Louis Vuitton and more.</h1>
         <p>Clothing, bags, shoes and belts from the houses you know, in one place.</p>
-        <div class="row"><a class="btn glass" href="#clothing">Shop clothing</a><a class="btn glass" href="#bags">Shop bags</a></div>
-      </div>
+      <div class="row"><a class="btn glass" href="#clothing">Shop clothing</a><a class="btn glass" href="#bags">Shop bags</a></div>
     </div>
   </section>
   <section class="sec">
