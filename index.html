@@ -531,6 +531,7 @@ const SHOE = ['7', '8', '8.5', '9', '9.5', '10', '10.5', '11', '12'];
 const WEAR = ['XS', 'S', 'M', 'L', 'XL'];
 const BELT = ['80', '85', '90', '95', '100', '105', '110'];
 const ONE = ['One size'];
+// bags take the house's own size name (LV and Goyard PM / MM / GM / BB, Keepall and Boeing 50 / 55 ...), OS when the model has none
 // views: [focus x %, focus y %, zoom, other photo] — photo 1 is the whole piece, the rest are close-ups or a second photo
 const TOP = [[50, 50, 1], [50, 32, 1.9], [50, 66, 1.9]];
 const BAG = [[50, 50, 1], [50, 40, 1.8], [32, 60, 1.9]];
@@ -545,7 +546,7 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: two('ch-horseshoe-zip-hoodie-2.webp', TOP),
     text: 'Black zip-up hoodie with the Chrome Hearts horseshoe logo on the chest and Floral Cross prints running down both sleeves.',
     details: ['Cotton fleece', 'Horseshoe logo on the chest', 'Floral Cross print on both sleeves', 'Full zip and hood'] },
-  { id: 'lv-keepall-50', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', cat: 'Travel bags', groups: ['bags'], price: 3250, sizes: ONE, out: [], isNew: true, views: BAG,
+  { id: 'lv-keepall-50', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', cat: 'Travel bags', groups: ['bags'], price: 3250, sizes: ['50'], out: [], isNew: true, views: BAG,
     text: 'The Keepall, Louis Vuitton’s original soft travel bag from the 1930s, in the smaller 50 cm size with a removable shoulder strap.',
     details: ['50 x 29 x 23 cm', 'Double zip with padlock', 'Removable, adjustable shoulder strap'],
     variants: [
@@ -572,11 +573,11 @@ const P = [
     text: 'Down vest in shiny black lacquered nylon with a hood, a zip front and the Moncler logo patch on the chest.',
     details: ['Lacquered nylon', 'Down filling', 'Hood', 'Zip front and zip pockets'] },
   { id: 'ysl-loulou-puffer', brand: 'Saint Laurent', name: 'Loulou Puffer Small', cat: 'Shoulder bags', groups: ['bags'], price: 2850, img: 'ysl-loulou-puffer.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], isNew: true, views: BAG,
+    color: { name: 'Black', hex: '#151515' }, sizes: ['Small'], out: [], isNew: true, views: BAG,
     text: 'Small shoulder bag in quilted black lambskin with a sliding chain strap and the gold-tone Cassandre logo.',
     details: ['Quilted lambskin', 'Gold-tone hardware', 'Sliding chain and leather strap', 'Flap closure'] },
   { id: 'lv-speedy-trunk-20', brand: 'Louis Vuitton', name: 'Speedy Trunk 20', cat: 'Handbags', groups: ['bags'], price: 13000, img: 'lv-speedy-trunk-20.webp',
-    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], isNew: true, views: BAG,
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ['20'], out: [], isNew: true, views: BAG,
     text: 'A small Speedy in Monogram canvas reworked as a trunk, with gold-tone studs along the edges, corner pieces and an S-lock.',
     details: ['Monogram coated canvas', 'Natural cowhide handles and strap', 'Gold-tone studs and corners', 'S-lock closure'] },
   { id: 'burberry-puffer', brand: 'Burberry', name: 'Down Puffer Jacket with Fur-Trim Hood', cat: 'Outerwear', groups: ['clothing'], price: 650, img: 'burberry-puffer.webp',
@@ -611,7 +612,7 @@ const P = [
     color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
     text: 'Black nubuck 6-inch Timberland boot finished with white leather cross patches and thick rope laces.',
     details: ['Nubuck upper', 'White leather cross patches', 'Padded collar', 'Lug rubber sole'] },
-  { id: 'lv-keepall-55', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, sizes: ONE, out: [], views: BAG,
+  { id: 'lv-keepall-55', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, sizes: ['55'], out: [], views: BAG,
     text: 'The Keepall, Louis Vuitton’s original soft travel bag, in the 55 cm size with a removable shoulder strap.',
     details: ['Coated canvas', 'Double zip with padlock', 'Removable shoulder strap'],
     variants: [
@@ -629,23 +630,23 @@ const P = [
         details: ['Damier Graphite coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
     ] },
   { id: 'lv-discovery-backpack', brand: 'Louis Vuitton', name: 'Discovery Backpack PM', cat: 'Backpacks', groups: ['bags'], price: 2940, img: 'lv-discovery-backpack.webp',
-    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ['PM'], out: [], views: BAG,
     text: 'Backpack in Monogram Eclipse canvas with a zipped front pocket, a leather logo patch and padded shoulder straps.',
     details: ['Monogram Eclipse coated canvas', 'Zipped front pocket', 'Padded adjustable straps', 'Two-way zip'] },
   { id: 'lv-district-pm', brand: 'Louis Vuitton', name: 'District PM', cat: 'Messenger bags', groups: ['bags'], price: 1760, img: 'lv-district-pm.webp',
-    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ['PM'], out: [], views: BAG,
     text: 'Compact messenger bag in Monogram Eclipse canvas with a flap front and an adjustable webbing strap.',
     details: ['Monogram Eclipse coated canvas', 'Flap front', 'Adjustable webbing strap', 'Metal LV logo on the flap'] },
   { id: 'lv-neverfull-mm', brand: 'Louis Vuitton', name: 'Neverfull MM', cat: 'Totes', groups: ['bags'], price: 2030, img: 'lv-neverfull-mm.webp',
-    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ['MM'], out: [], views: BAG,
     text: 'Roomy Monogram canvas tote with natural cowhide handles and side laces that cinch the shape.',
     details: ['Monogram coated canvas', 'Natural cowhide trim', 'Side laces', 'Open top with hook closure'] },
   { id: 'lv-alma-bb', brand: 'Louis Vuitton', name: 'Alma BB', cat: 'Handbags', groups: ['bags'], price: 1600, img: 'lv-alma-bb.webp',
-    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ['BB'], out: [], views: BAG,
     text: 'The compact Alma: a dome-shaped Monogram canvas handbag with natural cowhide handles, padlock and key bell.',
     details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Key bell'] },
   { id: 'lv-alma-pm', brand: 'Louis Vuitton', name: 'Alma PM', cat: 'Handbags', groups: ['bags'], price: 1800, img: 'lv-alma-pm.webp',
-    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ['PM'], out: [], views: BAG,
     text: 'The original 1934 Alma shape in Monogram canvas, with natural cowhide handles, padlock and key bell.',
     details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Key bell'] },
   { id: 'gucci-gg-belt', brand: 'Gucci', name: 'GG Supreme Belt with Interlocking G', cat: 'Belts', groups: ['accessories'], price: 480, img: 'gucci-gg-belt.webp',
@@ -851,7 +852,7 @@ const P = [
     text: 'Black rubber slides with a wide strap in Burberry Vintage check.',
     details: ['Vintage check strap', 'Moulded rubber sole', 'Slip-on', 'Open toe'] },
   // bags
-  { id: 'goyard-belvedere', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, sizes: ONE, out: [], views: BAG,
+  { id: 'goyard-belvedere', brand: 'Goyard', name: 'Belvedère II PM', cat: 'Messenger bags', groups: ['bags'], price: 2300, sizes: ['PM'], out: [], views: BAG,
     text: 'Goyard’s saddle-shaped messenger bag in Goyardine canvas with a leather flap and an adjustable strap.',
     details: ['Goyardine coated canvas', 'Leather flap and trim', 'Adjustable shoulder strap', 'Strap and buckle closure'],
     variants: [
@@ -864,7 +865,7 @@ const P = [
       { key: 'khaki', color: { name: 'Khaki', hex: '#6E6B3A' }, img: 'goyard-belvedere-khaki.webp' },
       { key: 'green', color: { name: 'Green', hex: '#1E5B3E' }, img: 'goyard-belvedere-green.webp' },
     ] },
-  { id: 'goyard-croisiere', brand: 'Goyard', name: 'Croisière 50', cat: 'Travel bags', groups: ['bags'], price: 3300, sizes: ONE, out: [], views: BAG,
+  { id: 'goyard-croisiere', brand: 'Goyard', name: 'Croisière 50', cat: 'Travel bags', groups: ['bags'], price: 3300, sizes: ['50'], out: [], views: BAG,
     text: 'Goyard’s soft Boston-style travel bag in Goyardine canvas with rolled leather handles.',
     details: ['Goyardine coated canvas', 'Leather handles and trim', 'Zip top', '50 cm wide'],
     variants: [
@@ -872,43 +873,43 @@ const P = [
       { key: 'burgundy', color: { name: 'Burgundy', hex: '#6B1F35' }, img: 'goyard-croisiere-burgundy.webp' },
     ] },
   { id: 'goyard-boeing-55', brand: 'Goyard', name: 'Boeing 55', cat: 'Travel bags', groups: ['bags'], price: 3940, img: 'goyard-boeing-55.webp',
-    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Black', hex: '#151515' }, sizes: ['55'], out: [], views: BAG,
     text: 'Large structured holdall in black Goyardine canvas with leather handles, made for weekends away.',
     details: ['Goyardine coated canvas', 'Leather handles and trim', 'Zip top', '55 cm wide'] },
   { id: 'goyard-alpin-green', brand: 'Goyard', name: 'Alpin MM Backpack', cat: 'Backpacks', groups: ['bags'], price: 3670, img: 'goyard-alpin-green.webp',
-    color: { name: 'Green', hex: '#1E5B3E' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Green', hex: '#1E5B3E' }, sizes: ['MM'], out: [], views: BAG,
     text: 'Goyard’s flap-top backpack in green Goyardine canvas and smooth green leather.',
     details: ['Goyardine coated canvas', 'Leather flap and straps', 'Top handle', 'Strap and buckle closure'] },
   { id: 'balenciaga-hourglass-graffiti', brand: 'Balenciaga', name: 'Hourglass Small Handbag Graffiti', cat: 'Handbags', groups: ['bags'], price: 3000, img: 'balenciaga-hourglass-graffiti.webp',
-    color: { name: 'Black / white', hex: '#151515' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Black / white', hex: '#151515' }, sizes: ['Small'], out: [], views: BAG,
     text: 'The Hourglass bag in black leather with the Balenciaga name scrawled across it in white graffiti and the curved B buckle.',
     details: ['Calf leather', 'White graffiti print', 'B buckle', 'Top handle and shoulder strap'] },
   { id: 'gucci-gg-messenger', brand: 'Gucci', name: 'GG Supreme Messenger Bag', cat: 'Messenger bags', groups: ['bags'], price: 1200, was: 1600, img: 'gucci-gg-messenger.webp',
-    color: { name: 'Beige / ebony', hex: '#B9A88C' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Beige / ebony', hex: '#B9A88C' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Flap messenger bag in beige and ebony GG Supreme canvas with a green and red Web strap.',
     details: ['GG Supreme canvas', 'Leather trim', 'Web shoulder strap', 'Flap front'] },
   { id: 'gucci-night-courrier', brand: 'Gucci', name: 'Night Courrier GG Supreme Messenger', cat: 'Messenger bags', groups: ['bags'], price: 1100, img: 'gucci-night-courrier.webp',
-    color: { name: 'Black / grey', hex: '#3A3A3D' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Black / grey', hex: '#3A3A3D' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Slim messenger in black and grey GG Supreme canvas covered in patches, with a striped Web strap.',
     details: ['GG Supreme canvas', 'Embroidered patches', 'Web shoulder strap', 'Zipped front pocket'] },
   { id: 'burberry-check-backpack', brand: 'Burberry', name: 'Vintage Check Backpack', cat: 'Backpacks', groups: ['bags'], price: 860, img: 'burberry-check-backpack.webp',
-    color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Backpack in Burberry Vintage check nylon with a logo on the front pocket.',
     details: ['Recycled nylon', 'Vintage check', 'Front pocket', 'Adjustable straps'] },
   { id: 'burberry-check-crossbody', brand: 'Burberry', name: 'Vintage Check Crossbody Bag', cat: 'Shoulder bags', groups: ['bags'], price: 840, was: 1200, img: 'burberry-check-crossbody.webp',
-    color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Archive beige', hex: '#C9B28A' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Compact crossbody in Burberry Vintage check with black leather trim and a logo shoulder strap.',
     details: ['Vintage check canvas', 'Black leather trim', 'Logo strap', 'Zip pockets'] },
   { id: 'ch-leather-cross-backpack', brand: 'Chrome Hearts', name: 'Leather Backpack with Cross Patches', cat: 'Backpacks', groups: ['bags'], price: 18400, img: 'ch-leather-cross-backpack.webp',
-    color: { name: 'Black / multicolour', hex: '#151515' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Black / multicolour', hex: '#151515' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Black leather backpack with a front pocket covered in multicoloured leather Chrome Hearts crosses.',
     details: ['Black leather', 'Multicolour leather cross patches', 'Front pocket', 'Top handle and straps'] },
   { id: 'ch-multicolor-cross-backpack', brand: 'Chrome Hearts', name: 'Multicolor Cross Patch Backpack', cat: 'Backpacks', groups: ['bags'], price: 18400, img: 'ch-multicolor-cross-backpack.webp',
-    color: { name: 'Multicolour', hex: '#C8102E' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Multicolour', hex: '#C8102E' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Backpack covered all over in multicoloured leather Chrome Hearts crosses.',
     details: ['Leather', 'Multicolour leather cross patches', 'Front pocket', 'Top handle and straps'] },
   { id: 'sprayground-shark-backpack', brand: 'Sprayground', name: 'Shark Check Backpack', cat: 'Backpacks', groups: ['bags'], price: 129, img: 'sprayground-shark-backpack.webp',
-    color: { name: 'Grey check', hex: '#4A4A4D' }, sizes: ONE, out: [], views: BAG,
+    color: { name: 'Grey check', hex: '#4A4A4D' }, sizes: ['OS'], out: [], views: BAG,
     text: 'Grey check backpack with Sprayground’s signature shark mouth across the front.',
     details: ['Coated canvas', 'Shark mouth print', 'Zipped compartments', 'Padded straps'] },
   // accessories
@@ -1038,7 +1039,7 @@ const blank = () => ({ bag: [], wish: [], user: null, orders: [], promo: null })
 let S = blank();
 try { S = Object.assign(blank(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
 S.bag = S.bag.filter(l => BY[l.id]);
-S.bag.forEach(l => { l.v = vOf(BY[l.id], l.v).key; });
+S.bag.forEach(l => { l.v = vOf(BY[l.id], l.v).key; if (BY[l.id].sizes.length === 1) l.size = BY[l.id].sizes[0]; });
 S.wish = S.wish.filter(id => BY[id]);
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
@@ -1390,7 +1391,7 @@ const PAGES = {
   faq: ['FAQ', `<div class="faq">${[
     ['How long does delivery take?', 'Standard shipping takes 3 to 5 business days and is free. Express takes 1 to 2 business days.'],
     ['Can I return an order?', 'Yes. Returns are free within 30 days of delivery, as long as the piece is unworn and has its tags.'],
-    ['How do I pick a size?', 'Clothing runs XS to XL, shoes use US sizes and belts are sized in centimetres. Bags and hats are one size.'],
+    ['How do I pick a size?', 'Clothing runs XS to XL, shoes use US sizes and belts are sized in centimetres. Bags come in the house’s own sizes, such as PM, MM or 55; hats are one size.'],
     ['Which payment methods do you accept?', 'Visa, Mastercard, UnionPay and American Express. You enter your card at checkout.'],
     ['How do I track my order?', 'Your orders are listed in your account. A tracking link arrives by email once the parcel ships.'],
   ].map(([q, a]) => `<details><summary>${q}<span class="pm"></span></summary><div class="body">${a}</div></details>`).join('')}</div>`],
