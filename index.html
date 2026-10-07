@@ -100,6 +100,11 @@ button{background:none;border:0;padding:0;cursor:pointer}
 
 /* ---------- telegram pill under the header ---------- */
 .tg-top{display:flex;justify-content:center;padding:12px var(--x) 0}
+/* Men / Women / Unisex: one pill like the Telegram one, the picked part white */
+.gpill{display:inline-flex;gap:2px;height:34px;padding:3px;border-radius:999px;background:var(--bar);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px var(--glass-edge)}
+.gpill button{padding:0 16px;border-radius:999px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);transition:background .25s,color .25s,box-shadow .25s}
+.gpill button:hover{color:var(--ink)}
+.gpill button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08),0 4px 14px -6px rgba(0,0,0,.18)}
 .tg-pill{display:inline-flex;align-items:center;gap:10px;max-width:100%;height:34px;padding:0 14px 0 6px;border-radius:999px;background:var(--bar);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px var(--glass-edge);font-size:12px;white-space:nowrap;transition:background .2s}
 .tg-pill:hover{background:var(--pill-hover)}
 .tg-pill>svg{width:24px;height:24px;flex:none}
@@ -548,7 +553,7 @@ details[open] .pm::after{transform:rotate(0)}
   </div>
 </header>
 
-<div class="tg-top"><a class="tg-pill" href="https://telegram.org" target="_blank" rel="noopener" aria-label="Join our Telegram channel: new drops land there first"><svg viewBox="2 2 20 20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg><span>New drops land in Telegram first</span><b>Join<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b></a></div>
+<div class="tg-top" id="strip" hidden></div>
 <div id="layer"></div>
 <main id="app" tabindex="-1"></main>
 
@@ -1048,6 +1053,19 @@ P.forEach(p => {
   Object.assign(p, { color: p.variants[0].color, img: p.variants[0].img, views: p.variants[0].views,
     price: Math.min(...prices), from: new Set(prices).size > 1 });
 });
+// Who a piece is for, as the houses list it; everything not named here is unisex. A placeholder until the owner checks it.
+const GENDER = {
+  women: ['ysl-loulou-puffer', 'lv-speedy-trunk-20', 'lv-neverfull-mm', 'lv-alma-bb', 'lv-alma-pm', 'balenciaga-hourglass-graffiti',
+    'burberry-check-hood-puffer'],
+  men: ['moncler-hooded-vest', 'moncler-maya', 'moncler-fur-hood-jacket', 'burberry-puffer', 'givenchy-destroyed-hoodie',
+    'burberry-check-hood-hoodie', 'rick-owens-gimp-jacket', 'cp-goggle-down-jacket', 'gucci-blind-for-love-hoodie', 'lv-planes-hoodie',
+    'rick-owens-champion-sweatshirt', 'stone-island-knit', 'gucci-snake-polo', 'burberry-check-collar-polo', 'amiri-mx1-jeans',
+    'amiri-cherub-jeans', 'rick-owens-geobasket', 'rick-owens-jumbo-lace', 'rick-owens-dr-martens', 'balenciaga-runner-graffiti',
+    'nike-alyx-af1-high', 'nike-acronym-lunar-force', 'lv-trainer', 'margiela-future-high', 'margiela-evolution', 'timberland-cross-boot',
+    'lv-district-pm', 'lv-discovery-backpack', 'gucci-gg-messenger', 'gucci-night-courrier', 'lv-initiales-40', 'hermes-h-belt',
+    'amiri-logo-belt', 'gucci-web-wallet', 'lv-damier-beanie', 'lv-damier-gloves'],
+};
+P.forEach(p => { p.gender = GENDER.women.includes(p.id) ? 'women' : GENDER.men.includes(p.id) ? 'men' : 'unisex'; });
 const BY = Object.fromEntries(P.map(p => [p.id, p]));
 // the piece in one color (the first color when the key is unknown)
 const vOf = (p, key) => ({ ...p, ...(p.variants.find(v => v.key === key) || p.variants[0]), from: false });
@@ -1160,6 +1178,15 @@ function card(p) {
     <div class="card-sub"><span>${esc(p.cat)}</span><span>${p.variants.length > 1 ? p.variants.length + ' colors' : esc(p.color.name)}</span></div>
   </article>`;
 }
+// The strip under the header: the Telegram pill on Home only (owner's request), the Men / Women / Unisex switch on the
+// catalog pages, nothing on the other pages.
+const TG = '<a class="tg-pill" href="https://telegram.org" target="_blank" rel="noopener" aria-label="Join our Telegram channel: new drops land there first"><svg viewBox="2 2 20 20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg><span>New drops land in Telegram first</span><b>Join<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b></a>';
+const GENDERS = [['all', 'All'], ['men', 'Men'], ['women', 'Women'], ['unisex', 'Unisex']];
+let genderBy = 'all';
+const genderHTML = () => `<div class="gpill" role="radiogroup" aria-label="Shop for">${GENDERS.map(([k, t]) =>
+  `<button role="radio" aria-checked="${k === genderBy}" class="${k === genderBy ? 'on' : ''}" data-act="gender" data-g="${k}">${t}</button>`).join('')}</div>`;
+// Men and Women include the unisex pieces, as most stores do; Unisex shows only those
+const genderOK = p => genderBy === 'all' || p.gender === genderBy || (genderBy !== 'unisex' && p.gender === 'unisex');
 const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join('')}</div>`;
 
 /* ---------- views ---------- */
@@ -1252,7 +1279,7 @@ function ddOpen(btn, open) {
 }
 V.list = key => {
   const L = LISTS[key];
-  const all = P.filter(L.pick);
+  const all = P.filter(p => L.pick(p) && genderOK(p));
   // the type filter: the kinds of piece in a section (Hats, Eyewear, Belts...); in New in and Sale, which mix the
   // sections, the sections themselves. Both choices belong to one section: a new section starts from all of them.
   const mixed = !['clothing', 'bags', 'shoes', 'accessories'].includes(key);
@@ -1283,7 +1310,7 @@ V.list = key => {
         ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true)}
       </div>
     </div>
-    ${grid(list)}`;
+    ${list.length ? grid(list) : `<div class="empty" style="padding-top:40px"><p>Nothing here for ${GENDERS.find(g => g[0] === genderBy)[1].toLowerCase()} yet.</p><button class="btn" data-act="gender" data-g="all">Show all</button></div>`}`;
 };
 
 let PV = { id: null, view: 0, size: null, v: '', hk: null };
@@ -1521,6 +1548,9 @@ function render(scroll) {
 function paint(r, key, scroll, fade) {
   const app = $('#app');
   const y = window.scrollY;
+  // the strip goes in before the page and the scroll, so a restored scroll position is not pushed down by it
+  const strip = $('#strip'), sh = r.name === 'home' ? TG : r.name === 'list' ? genderHTML() : '';
+  strip.innerHTML = sh; strip.hidden = !sh;
   app.innerHTML = `<div class="view${fade ? ' vt-in' : ''}">${V[r.name](r.arg, r.v)}</div>`;
   // photos already in the cache show at once; the rest fade in on load (the listener below)
   $$('img', app).forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
@@ -1805,6 +1835,7 @@ document.addEventListener('click', e => {
       save(); render(); break;
     }
     case 'search': openSearch(); break;
+    case 'gender': genderBy = d.g; render(); break;
     case 'guide': openGuide(d.k); break;
     case 'menu': openMenu(); break;
     case 'close': closeLayer(); break;
