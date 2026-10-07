@@ -6,7 +6,7 @@
 <title>Pale Store</title>
 <meta name="description" content="Pale Store: quiet clothes in light colors. Outerwear, knitwear, shirts and shoes.">
 <meta name="theme-color" content="#FFFFFF">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -4 17 17' shape-rendering='crispEdges'%3E%3Crect x='-2' y='-4' width='17' height='17' rx='3' fill='%23E7E7E7'/%3E%3Cpath fill='%23151515' d='M6 0h2v1H6zM5 1h1v1H5zM8 1h1v2H8zM7 3h1v1H7zM6 4h1v1H6zM4 5h2v1H4zM7 5h2v1H7zM2 6h2v1H2zM9 6h2v1H9zM0 7h2v1H0zM11 7h2v1h-2zM0 8h13v1H0z'/%3E%3C/svg%3E">
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
@@ -84,8 +84,7 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .nav a::after,.nav button::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
 .nav a:hover::after,.nav button:hover::after,.nav a.on::after{transform:scaleX(1)}
 .count{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 4px;margin-left:4px;border-radius:99px;background:var(--ink);color:#fff;font-size:9.5px;font-weight:600;letter-spacing:0;vertical-align:1px}
-.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
-.logo svg{width:26px;height:18px;flex:none}
+.logo{display:flex;align-items:center;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
 .hdr-m{display:none}
 .icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;position:relative}
 .icon-btn:hover{background:rgba(255,255,255,.55)}
@@ -418,7 +417,7 @@ details[open] .pm::after{transform:rotate(0)}
     <a href="#shoes" data-r="shoes">Shoes</a>
     <a href="#sale" data-r="sale">Sale</a>
   </nav>
-  <a class="logo" href="#home" aria-label="Pale Store, home"><svg viewBox="0 0 13 9" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M6 0h2v1H6zM5 1h1v1H5zM8 1h1v2H8zM7 3h1v1H7zM6 4h1v1H6zM4 5h2v1H4zM7 5h2v1H7zM2 6h2v1H2zM9 6h2v1H9zM0 7h2v1H0zM11 7h2v1h-2zM0 8h13v1H0z"/></svg><span>Pale Store</span></a>
+  <a class="logo" href="#home" aria-label="Pale Store, home">Pale Store</a>
   <nav class="nav r" aria-label="Account">
     <button data-act="search">Search</button>
     <a href="#account" data-r="account">Account</a>
@@ -444,8 +443,6 @@ details[open] .pm::after{transform:rotate(0)}
   </nav>
   <div class="side">
     <div class="soc">
-      <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.9"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/></svg></a>
-      <a href="https://x.com" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor"/><path fill="#fff" d="M15.6 6h1.9l-4.2 4.8 4.9 7.2h-3.8l-3-4.3L7.9 18H6l4.5-5.1L5.8 6h3.9l2.7 4zm-.7 10.8h1.1L9.1 7.1H8z"/></svg></a>
       <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg></a>
     </div>
     <span class="copy">Pale Store © <span id="year">2026</span></span>
