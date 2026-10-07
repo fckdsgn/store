@@ -3,10 +3,11 @@
 usage: python3 tools/hero-video.py assets/hero/hero-source.mp4 assets/hero   (needs ffmpeg, numpy, Pillow)
 
 Makes, in OUT:
-  hero-2560.mp4   wide screens: 2560 px, lightly denoised and sharpened, so Retina screens get a crisp picture
-  hero-1920.mp4   phones and smaller screens
-  hero-1920.webm  the same for browsers without H.264 (Chromium builds, some Linux Firefox)
-  hero-poster.jpg the first frame, shown until the video plays
+  hero-VER-2560.mp4   wide screens: 2560 px, lightly denoised and sharpened, so Retina screens get a crisp picture
+  hero-VER-1920.mp4   phones and smaller screens
+  hero-VER-1920.webm  the same for browsers without H.264 (Chromium builds, some Linux Firefox)
+  hero-VER-poster.jpg the first frame, shown until the video plays
+  (VER changes with every new cut: browsers and the preview keep old files cached under the same name)
   hero-shoes.png  the mask that lets the sneakers show below the plate (index.html: .reel video mask)
 
 The loop: the clip plays forward and then backward, so its last frame leads straight back into its first one (the
@@ -26,6 +27,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter
 
 SRC, OUT = sys.argv[1], sys.argv[2]
+VER = 'v3'
 W, H = 1920, 1080
 FROM, TO = 12, 230          # turnaround frames
 TONE = 0.93                 # backdrop ~248 * 0.93 = the tile grey 231
@@ -88,7 +90,7 @@ def shoes_mask():
 
 
 # read the loop's frames
-raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', SRC, '-vf', f'trim=start_frame={FROM}:end_frame={TO + 1}',
+raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', SRC, '-vf', f'trim=start_frame={FROM}:end_frame={TO + 1},setpts=PTS-STARTPTS',
                       '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], check=True, capture_output=True).stdout
 frames = np.frombuffer(raw, np.uint8).reshape(-1, H, W, 3)
 order = list(range(len(frames))) + list(range(len(frames) - 2, 0, -1))   # forward, then back without repeating ends
@@ -99,18 +101,18 @@ x264 = ['-c:v', 'libx264', '-preset', 'slow', '-tune', 'film', '-profile:v', 'hi
         '-movflags', '+faststart']
 enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}',
                         '-r', '24', '-i', '-', '-filter_complex', f'[0:v]split=2[a][b];[a]{hd}[hd];[b]{sd}[sd]',
-                        '-map', '[hd]', *x264, '-crf', '19', os.path.join(OUT, 'hero-2560.mp4'),
-                        '-map', '[sd]', *x264, '-crf', '19', os.path.join(OUT, 'hero-1920.mp4')],
+                        '-map', '[hd]', *x264, '-crf', '19', os.path.join(OUT, f'hero-{VER}-2560.mp4'),
+                        '-map', '[sd]', *x264, '-crf', '19', os.path.join(OUT, f'hero-{VER}-1920.mp4')],
                        stdin=subprocess.PIPE)
 for i in order:
     enc.stdin.write(tone(frames[i]).tobytes())
 enc.stdin.close()
 assert enc.wait() == 0
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, 'hero-1920.mp4'), '-c:v', 'libvpx-vp9',
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, f'hero-{VER}-1920.mp4'), '-c:v', 'libvpx-vp9',
                 '-b:v', '0', '-crf', '26', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '1',
-                os.path.join(OUT, 'hero-1920.webm')], check=True)
-subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, 'hero-2560.mp4'), '-frames:v', '1',
-                '-q:v', '2', os.path.join(OUT, 'hero-poster.jpg')], check=True)
+                os.path.join(OUT, f'hero-{VER}-1920.webm')], check=True)
+subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(OUT, f'hero-{VER}-2560.mp4'), '-frames:v', '1',
+                '-q:v', '2', os.path.join(OUT, f'hero-{VER}-poster.jpg')], check=True)
 
 mask, (x0, y0, x1, y1) = shoes_mask()
 mask.save(os.path.join(OUT, 'hero-shoes.png'), optimize=True)

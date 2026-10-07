@@ -168,7 +168,11 @@ main{flex:1;padding:0 var(--x);outline:none}
 .reel .tag span{color:#5A5A5A}
 .tag:hover,.tag.lit{transform:translateY(-2px);background:var(--glass-hi)}
 .hot{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
-.hot path{fill:transparent;pointer-events:visiblePainted;cursor:pointer}
+.hot a{outline:none;-webkit-tap-highlight-color:transparent}
+.hot a path{fill:transparent;pointer-events:visiblePainted;cursor:pointer}
+/* the press outline: a contrasting grey line along the piece (not the browser's blue focus box) */
+.hot-line{fill:none;stroke:#686868;stroke-width:3px;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none;opacity:0;transition:opacity .15s}
+.hot-line.on{opacity:1}
 .tag i{width:8px;height:8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(21,21,21,.12);flex:none}
 .tag b{font-weight:500}
 .tag span{color:var(--ink-2)}
@@ -1103,28 +1107,30 @@ const V = {};
 V.home = () => {
   // hero: the owner's looping video; each price tag sits on a piece she wears, at a spot measured on the frame (% of width / height).
   // `l` puts the label to the left of the dot, `pl` does that on phones only.
+  const OKEY = { 'lv-snow-mask': 'gog', 'balenciaga-soccer-hoodie': 'hood', 'lv-keepall-55': 'bag', 'margiela-future-high': 'shoes' };
   const tags = [
     ['lv-snow-mask', '', 63.5, 15, 'pl', 53.5],
     ['balenciaga-soccer-hoodie', 'pink', 71, 50, 'pl', 73],
     ['lv-keepall-55', 'monogram', 25, 70, '', 30],
     ['margiela-future-high', '', 61.5, 79, 'pl'],
-  ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span></a>`; }).join('');
-  // the same pieces are clickable on the video itself: outlines in frame pixels from tools/hero-hotspots.py
-  // (the hoodie and the bag cover every pose of the clip; later areas lie on top)
+  ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}" data-o="${OKEY[id]}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span></a>`; }).join('');
+  // the same pieces are clickable on the video itself: areas in frame pixels from tools/hero-hotspots.py
+  // (the hoodie and the bag cover every pose of the clip; later areas lie on top). Pressing one draws a grey line
+  // along the piece in the current frame (outlines from assets/hero/hero-outlines.json), then opens it.
   const HOT = [
-    ['balenciaga-soccer-hoodie', 'pink', 'M936 232L918 269L894 280L888 305L846 364L842 383L834 384L812 437L792 438L798 495L786 520L788 567L781 570L796 624L782 729L788 780L805 783L808 798L867 805L899 740L909 733L971 594L990 579L1025 579L1131 651L1237 752L1295 769L1333 865L1356 897L1394 907L1440 904L1461 913L1519 913L1522 919L1538 910L1531 903L1531 878L1545 844L1529 835L1529 792L1513 779L1491 720L1457 687L1429 633L1437 564L1429 550L1416 547L1417 508L1405 488L1380 475L1344 470L1333 479L1332 505L1295 540L1269 540L1264 530L1229 559L1163 560L1122 552L1101 526L1104 488L1099 477L1089 475L1092 434L1072 434L1064 424L1059 439L1029 440L1032 402L1019 399L1019 373L1079 333L1042 334L1016 348L992 348L989 309L1005 287L995 256Z'],
-    ['lv-keepall-55', 'monogram', 'M858 658L845 655L827 600L806 600L805 589L801 595L758 592L758 607L735 622L700 622L684 585L667 568L627 559L612 564L583 593L550 661L512 662L484 646L440 654L418 680L403 729L350 799L338 804L336 815L359 848L403 851L421 868L497 904L596 885L633 885L664 874L779 867L799 818L856 816L872 789L872 730Z'],
-    ['margiela-future-high', '', 'M612 1003L650 982L700 955L740 930L742 850L760 825L800 808L870 808L925 820L940 850L943 1008L925 1032L860 1040L780 1049L700 1047L640 1036L612 1018Z'],
-    ['margiela-future-high', '', 'M1000 880L1040 858L1110 850L1180 870L1250 890L1318 920L1314 965L1298 1010L1270 1046L1244 1054L1221 1053L1206 1050L1192 1030L1186 1007L1150 983L1080 967L1010 960L995 930Z'],
-    ['lv-snow-mask', '', 'M990 110L1060 88L1200 85L1258 110L1262 185L1240 222L1000 226L985 185Z'],
+    ['balenciaga-soccer-hoodie', 'pink', 'hood', 'M938 230L924 261L896 278L886 309L832 386L792 488L784 544L792 669L782 717L789 779L811 792L829 793L842 807L865 805L901 736L909 733L969 598L994 577L1021 577L1133 653L1233 749L1295 769L1350 893L1394 907L1441 904L1460 913L1519 913L1527 919L1535 911L1527 905L1527 880L1544 851L1529 835L1529 792L1511 775L1493 724L1455 685L1427 630L1437 565L1429 550L1415 547L1417 510L1405 488L1369 472L1339 471L1332 505L1303 531L1263 530L1229 560L1166 560L1112 550L1101 527L1103 490L1088 477L1092 433L1070 433L1064 424L1058 440L1028 440L1032 402L1014 399L1014 371L1078 334L992 346L989 309L1005 287L995 256Z'],
+    ['lv-keepall-55', 'monogram', 'bag', 'M855 658L841 657L840 639L814 630L811 611L797 610L792 598L738 620L737 637L705 637L704 623L671 572L655 563L623 561L586 592L564 647L551 650L550 665L496 668L480 647L450 651L428 667L408 710L408 728L396 733L338 815L346 827L362 828L362 848L406 845L418 865L445 879L469 879L481 893L497 895L498 903L600 881L638 883L690 865L732 866L740 857L743 814L772 792L815 779L823 728L859 706L863 692Z'],
+    ['margiela-future-high', '', 'shoes', 'M1087 862L1073 875L1056 910L1058 942L1064 960L1077 970L1135 982L1169 995L1182 1009L1188 1032L1203 1053L1221 1057L1232 1052L1276 1010L1311 961L1319 919L1316 907L1303 899L1213 884L1160 861L1132 854ZM936 857L834 809L807 810L761 892L764 899L689 956L628 983L613 1002L614 1014L623 1024L654 1039L719 1053L778 1049L929 1023L945 1009Z'],
+    ['lv-snow-mask', '', 'gog', 'M1235 117L1205 91L1150 81L1107 83L1056 92L1032 116L1019 153L1025 212L1052 226L1087 232L1142 217L1161 224L1217 210L1240 166Z'],
   ];
-  const hot = `<svg class="hot" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">${HOT.map(([id, v, d]) => { const p = vOf(BY[id], v); return `<a href="${vHref(p)}" tabindex="-1"><path d="${d}"/></a>`; }).join('')}</svg>`;
+  const hot = `<svg class="hot" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">${HOT.map(([id, v, o, d]) => { const p = vOf(BY[id], v); return `<a href="${vHref(p)}" data-o="${o}" tabindex="-1"><path d="${d}"/></a>`; }).join('')}<path class="hot-line" d=""/></svg>`;
+  loadOutlines();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   return `<section class="hero">
     <div class="stage-box">
       <div class="stage"></div>
       <div class="reel">
-        <video poster="assets/hero/hero-poster.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero-2560.mp4" type="video/mp4" media="(min-width: 901px)"><source src="assets/hero/hero-1920.mp4" type="video/mp4"><source src="assets/hero/hero-1920.webm" type="video/webm"></video>
+        <video poster="assets/hero/hero-v3-poster.jpg" muted loop playsinline preload="auto"${still ? '' : ' autoplay'} aria-label="A model in a pink hoodie, Louis Vuitton snow mask and white high-tops, next to a Keepall"><source src="assets/hero/hero-v3-2560.mp4" type="video/mp4" media="(min-width: 901px)"><source src="assets/hero/hero-v3-1920.mp4" type="video/mp4"><source src="assets/hero/hero-v3-1920.webm" type="video/webm"></video>
         ${hot}
         ${tags}
       </div>
@@ -1623,6 +1629,46 @@ document.addEventListener('click', e => {
     }
   }
 });
+/* ---------- home video: press outlines ---------- */
+let OUTL = null, outlLoading = false;
+function loadOutlines() {
+  // the outlines live in a file of their own (about 70 KB); without them a press still opens the piece
+  if (OUTL || outlLoading) return;
+  outlLoading = true;
+  try { fetch('assets/hero/hero-outlines.json').then(r => r.json()).then(d => { OUTL = d; }, () => { outlLoading = false; }); }
+  catch (err) { outlLoading = false; }
+}
+function outlineNow(key) {
+  // the loop is 436 frames at 24 fps: the first half plays forward, the second half the same frames backward
+  if (!OUTL || !OUTL[key]) return '';
+  if (typeof OUTL[key] === 'string') return OUTL[key];
+  const v = $('.reel video'), n = OUTL.half * 2 - 2;
+  const f = Math.round((v ? v.currentTime : 0) * 24) % n, src = f < OUTL.half ? f : n - f;
+  return OUTL[key][Math.min(OUTL[key].length - 1, Math.round(src / OUTL.step))];
+}
+let pressT;
+function pressLine(a, on) {
+  const line = $('.hot-line');
+  if (!line) return;
+  clearTimeout(pressT);
+  if (on) { const d = outlineNow(a.dataset.o); if (d) { line.setAttribute('d', d); line.classList.add('on'); } }
+  else pressT = setTimeout(() => line.classList.remove('on'), 120);
+}
+document.addEventListener('pointerdown', e => { const a = e.target.closest && e.target.closest('.hot a, .reel .tag'); if (a) pressLine(a, true); });
+let pressGo = false;
+// let go without a click (dragged off the piece): the outline fades
+for (const type of ['pointerup', 'pointercancel'])
+  document.addEventListener(type, () => setTimeout(() => { if (!pressGo) pressLine(null, false); }, 60));
+document.addEventListener('click', e => {
+  // keep the outline on screen for a moment before the product page opens
+  const a = e.target.closest('.hot a, .reel .tag');
+  if (!a) return;
+  e.preventDefault();
+  pressGo = true;
+  pressLine(a, true);
+  setTimeout(() => { pressGo = false; location.hash = a.getAttribute('href'); }, 220);
+});
+
 // a piece on the home video lights up its price tag while the pointer is over it
 for (const [type, on] of [['pointerover', true], ['pointerout', false]])
   document.addEventListener(type, e => {
