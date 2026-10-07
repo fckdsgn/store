@@ -188,11 +188,11 @@ main{flex:1;padding:0 var(--x);outline:none}
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
   -webkit-mask-size:100cqw 100cqh,37.5% auto;mask-size:100cqw 100cqh,37.5% auto;
   -webkit-mask-position:calc(var(--left) * -1) 0,calc(var(--w) * .31354) calc(var(--h) * .87593);mask-position:calc(var(--left) * -1) 0,calc(var(--w) * .31354) calc(var(--h) * .87593)}
-.tag{position:absolute;z-index:3;left:var(--x);top:var(--y);translate:-14px -50%;display:flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 10px;border-radius:999px;font-size:12px;white-space:nowrap;transition:transform .3s var(--ease),background .25s,color .25s,border-color .25s,box-shadow .25s}
+.tag{position:absolute;z-index:3;left:var(--x);top:var(--y);translate:-14px -50%;display:flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 10px;border-radius:999px;font-size:12px;white-space:nowrap;transition:transform .45s var(--ease),background .4s var(--ease),color .4s var(--ease),border-color .4s var(--ease),box-shadow .45s var(--ease)}
 .tag.l{padding:0 10px 0 14px;translate:calc(-100% + 14px) -50%}
 .tag.l i{order:1}
 .reel .tag{background:rgba(255,255,255,.74)}
-.reel .tag span{color:#5A5A5A}
+.reel .tag span{color:#5A5A5A;transition:color .4s var(--ease)}
 .tag:hover,.tag.lit{transform:translateY(-2px);background:var(--glass-hi)}
 /* on the home video a tag turns black under the pointer (owner's request), also while the pointer is on its piece */
 .reel .tag:hover,.reel .tag.lit{background:rgba(21,21,21,.9);color:#fff;border-color:rgba(255,255,255,.14);box-shadow:0 10px 26px -12px rgba(0,0,0,.45)}
@@ -202,19 +202,25 @@ main{flex:1;padding:0 var(--x);outline:none}
    behind a thin line, the arrow nudges and the dot pulses. Only where there is a pointer to hover with. */
 .tag .go{display:none}
 @media (hover:hover){
-  .reel .tag .go{display:inline-flex;align-items:center;gap:5px;max-width:0;margin-left:-10px;padding-left:0;overflow:hidden;opacity:0;border-left:1px solid rgba(255,255,255,.22);font-style:normal;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;transition:max-width .45s var(--ease),margin .45s var(--ease),padding .45s var(--ease),opacity .3s}
-  .reel .tag:hover .go,.reel .tag.lit .go{max-width:90px;margin-left:0;padding-left:10px;opacity:1;transition-delay:.05s}
+  /* "Shop" opens to its own width (a 0fr to 1fr grid column), so it starts closing the moment the pointer leaves; every
+     part of the tag moves at one pace */
+  .reel .tag .go{display:inline-grid;grid-template-columns:0fr;margin-left:-11px;padding-left:0;opacity:0;border-left:1px solid rgba(255,255,255,0);font-style:normal;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap;transition:grid-template-columns .45s var(--ease),margin .45s var(--ease),padding .45s var(--ease),opacity .35s var(--ease),border-color .4s var(--ease)}
+  .reel .tag .go small{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden;padding-right:3px;font-size:inherit}
+  .reel .tag:hover .go,.reel .tag.lit .go{grid-template-columns:1fr;margin-left:0;padding-left:10px;opacity:1;border-color:rgba(255,255,255,.22)}
   /* the nudge pauses where it is when the pointer leaves instead of snapping back, so the arrow leaves smoothly */
   .reel .tag .go svg{width:12px;height:12px;flex:none;animation:go-nudge 1.4s ease-in-out infinite paused}
   .reel .tag:hover .go svg,.reel .tag.lit .go svg{animation-play-state:running}
-  .reel .tag:hover i,.reel .tag.lit i{animation:go-ping 1.6s ease-out infinite}
+  /* the pulse runs on its own ring, which fades out with the pointer leaving instead of vanishing mid-pulse */
+  .reel .tag i{position:relative}
+  .reel .tag i::after{content:"";position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .4s var(--ease);animation:go-ping 1.6s ease-out infinite paused}
+  .reel .tag:hover i::after,.reel .tag.lit i::after{opacity:1;animation-play-state:running}
 }
 @keyframes go-nudge{0%,100%{transform:none}50%{transform:translateX(3px)}}
 @keyframes go-ping{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}80%,100%{box-shadow:0 0 0 9px rgba(255,255,255,0)}}
 .hot{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .hot a{outline:none;-webkit-tap-highlight-color:transparent}
 .hot a path{fill:transparent;pointer-events:visiblePainted;cursor:pointer}
-.tag i{width:8px;height:8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(21,21,21,.12);flex:none;transition:background .25s,box-shadow .25s}
+.tag i{width:8px;height:8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(21,21,21,.12);flex:none;transition:background .4s var(--ease),box-shadow .4s var(--ease)}
 .tag b{font-weight:500}
 .tag span{color:var(--ink-2)}
 .hero-card{position:absolute;z-index:4;left:clamp(14px,2vw,24px);top:calc(14px + clamp(14px,2vw,24px));width:min(300px,calc(100% - 28px));border-radius:20px;padding:18px 18px 16px}
@@ -1263,7 +1269,7 @@ V.home = () => {
     ['balenciaga-soccer-hoodie', 'pink', 71, 50, 'pl', 73],
     ['lv-keepall-55', 'monogram', 25, 70, '', 30],
     ['margiela-future-high', '', 61.5, 79, 'pl'],
-  ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span><em class="go" aria-hidden="true">Shop${I.arrow}</em></a>`; }).join('');
+  ].map(([id, v, x, y, side, px = x]) => { const p = vOf(BY[id], v); return `<a class="tag glass ${side}" style="--x:${x}%;--y:${y}%;--px:${px}%" href="${vHref(p)}"><i></i><b>${esc(p.brand)}</b><span>${money(p.price)}</span><em class="go" aria-hidden="true"><small>Shop${I.arrow}</small></em></a>`; }).join('');
   // the same pieces are clickable on the video itself: areas in frame pixels from tools/hero-hotspots.py
   // (the hoodie and the bag cover every pose of the clip; later areas lie on top). No frame on press (owner's request).
   const HOT = [
