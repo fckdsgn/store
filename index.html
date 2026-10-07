@@ -133,6 +133,17 @@ button{background:none;border:0;padding:0;cursor:pointer}
 /* ---------- main + footer ---------- */
 main{flex:1;padding:0 var(--x);outline:none}
 .view{animation:rise .45s var(--ease) backwards}
+/* Switching sections: the old page fades out while the new one fades in and settles (View Transitions), so there is
+   no blank frame between them and no jump to the top of the page. Browsers without it keep the rise above. */
+::view-transition-old(root){animation:vt-out .32s cubic-bezier(.4,0,.6,1) both}
+::view-transition-new(root){animation:vt-in .48s cubic-bezier(.4,0,.2,1) both}
+.view.vt-in{animation:settle .5s var(--ease) backwards}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0}}
+@keyframes settle{from{transform:translateY(10px)}}
+/* photos that are not in the cache yet fade in when they arrive instead of popping in (classes set in the script) */
+.view img:not(.ld):not(.ld0){opacity:0}
+.view img.ld{animation:fade .5s ease}
 .ftr{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:72px var(--x) calc(26px + env(safe-area-inset-bottom,0px))}
 .ftr nav{display:flex;flex-wrap:wrap;gap:8px 26px}
 .ftr nav a,.ftr .copy{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
@@ -1402,9 +1413,17 @@ function route() {
 let lastKey = '';
 function render(scroll) {
   const r = route(), key = r.name + ':' + (r.arg || '');
+  // a new section or page cross-fades with the old one; a redraw of the same page (sort, colour, bag) stays instant
+  if (lastKey && key !== lastKey && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.startViewTransition(() => paint(r, key, scroll, true));
+  } else paint(r, key, scroll, false);
+}
+function paint(r, key, scroll, fade) {
   const app = $('#app');
   const y = window.scrollY;
-  app.innerHTML = `<div class="view">${V[r.name](r.arg, r.v)}</div>`;
+  app.innerHTML = `<div class="view${fade ? ' vt-in' : ''}">${V[r.name](r.arg, r.v)}</div>`;
+  // photos already in the cache show at once; the rest fade in on load (the listener below)
+  $$('img', app).forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
   if (key === lastKey && !scroll) { app.firstElementChild.style.animation = 'none'; window.scrollTo(0, y); }
   else window.scrollTo(0, 0);
   lastKey = key;
@@ -1423,6 +1442,8 @@ function titleFor(r) {
   return r.name.charAt(0).toUpperCase() + r.name.slice(1) + ' | Pale Store';
 }
 window.addEventListener('hashchange', () => render(true));
+for (const type of ['load', 'error'])
+  document.addEventListener(type, e => { if (e.target.tagName === 'IMG' && !e.target.classList.contains('ld0')) e.target.classList.add('ld'); }, true);
 
 /* ---------- product page behaviour ---------- */
 function setView(i) {
