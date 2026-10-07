@@ -96,7 +96,9 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .hdr-m{display:none}
 .icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;position:relative}
 .icon-btn:hover{background:rgba(255,255,255,.55)}
-.icon-btn .count{position:absolute;top:4px;right:2px;margin:0}
+.icon-btn .count{position:absolute;top:3px;right:0;margin:0}
+/* header icons: a bit larger than the 18px icons inside the page, and larger again on phones */
+.hdr .icon-btn .ico{width:22px;height:22px;stroke-width:1.5}
 
 /* ---------- telegram pill under the header ---------- */
 .tg-top{display:flex;justify-content:center;padding:12px var(--x) 0}
@@ -453,6 +455,10 @@ details[open] .pm::after{transform:rotate(0)}
   .hdr{grid-template-columns:auto 1fr auto;padding:0 4px}
   .hdr .nav{display:none}
   .hdr-m{display:flex;align-items:center}
+  :root{--hdr:50px}
+  .hdr .icon-btn{width:44px;height:44px}
+  .hdr .icon-btn .ico{width:24px;height:24px}
+  .hdr .icon-btn .count{top:5px;right:4px}
   .hdr .logo{justify-self:center;font-size:17px;order:0;padding-left:0}
   .two{grid-template-columns:minmax(0,1fr);gap:28px;max-width:560px;margin:0 auto}
   .two .div{min-height:0;height:1px}
@@ -531,7 +537,7 @@ details[open] .pm::after{transform:rotate(0)}
 </head>
 <body>
 <header class="hdr" id="hdr">
-  <div class="hdr-m"><button class="icon-btn" data-act="menu" aria-label="Menu" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></svg></button></div>
+  <div class="hdr-m"><button class="icon-btn" data-act="menu" aria-label="Menu" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24"><path d="M4.5 8.75h15M4.5 15.25h15"/></svg></button></div>
   <nav class="nav" aria-label="Shop">
     <a href="#home" data-r="home">Home</a>
     <a href="#clothing" data-r="clothing">Clothing</a>
@@ -542,14 +548,14 @@ details[open] .pm::after{transform:rotate(0)}
   </nav>
   <a class="logo" href="#home" aria-label="Pale Store, home">Pale Store</a>
   <nav class="nav r" aria-label="Account">
-    <button class="icon-btn" data-act="search" aria-label="Search" title="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
-    <a class="icon-btn" href="#account" data-r="account" aria-label="Account" title="Account"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 19.5c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5"/></svg></a>
-    <a class="icon-btn" href="#wishlist" data-r="wishlist" aria-label="Wishlist" title="Wishlist"><svg class="ico" viewBox="0 0 24 24"><path d="M12 19.5s-7-4.3-7-9.7A3.9 3.9 0 0 1 12 7.4a3.9 3.9 0 0 1 7 2.4c0 5.4-7 9.7-7 9.7z"/></svg><span class="count" data-wish-count hidden></span></a>
-    <a class="icon-btn" href="#bag" data-r="bag" aria-label="Bag" title="Bag"><svg class="ico" viewBox="0 0 24 24"><path d="M5.5 8.5h13l-1 11.5h-11z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/></svg><span class="count" data-bag-count hidden></span></a>
+    <button class="icon-btn" data-act="search" aria-label="Search" title="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.75" cy="10.75" r="6.25"/><path d="m15.5 15.5 4.25 4.25"/></svg></button>
+    <a class="icon-btn" href="#account" data-r="account" aria-label="Account" title="Account"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.75"/><path d="M4.75 20c.6-3.6 3.6-6 7.25-6s6.65 2.4 7.25 6"/></svg></a>
+    <a class="icon-btn" href="#wishlist" data-r="wishlist" aria-label="Wishlist" title="Wishlist"><svg class="ico" viewBox="0 0 24 24"><path d="M12 20.25S3.75 15.4 3.75 9.4A4.65 4.65 0 0 1 8.4 4.75c1.5 0 2.85.7 3.6 1.95.75-1.25 2.1-1.95 3.6-1.95a4.65 4.65 0 0 1 4.65 4.65c0 6-8.25 10.85-8.25 10.85z"/></svg><span class="count" data-wish-count hidden></span></a>
+    <a class="icon-btn" href="#bag" data-r="bag" aria-label="Bag" title="Bag"><svg class="ico" viewBox="0 0 24 24"><path d="M5 8.25h14v10.5a2.25 2.25 0 0 1-2.25 2.25h-9.5A2.25 2.25 0 0 1 5 18.75z"/><path d="M9 11.25V7a3 3 0 0 1 6 0v4.25"/></svg><span class="count" data-bag-count hidden></span></a>
   </nav>
   <div class="hdr-m" style="justify-content:flex-end">
-    <button class="icon-btn" data-act="search" aria-label="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
-    <a class="icon-btn" href="#bag" aria-label="Bag"><svg class="ico" viewBox="0 0 24 24"><path d="M5.5 8.5h13l-1 11.5h-11z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/></svg><span class="count" data-bag-count hidden></span></a>
+    <button class="icon-btn" data-act="search" aria-label="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.75" cy="10.75" r="6.25"/><path d="m15.5 15.5 4.25 4.25"/></svg></button>
+    <a class="icon-btn" href="#bag" aria-label="Bag"><svg class="ico" viewBox="0 0 24 24"><path d="M5 8.25h14v10.5a2.25 2.25 0 0 1-2.25 2.25h-9.5A2.25 2.25 0 0 1 5 18.75z"/><path d="M9 11.25V7a3 3 0 0 1 6 0v4.25"/></svg><span class="count" data-bag-count hidden></span></a>
   </div>
 </header>
 
@@ -1123,14 +1129,14 @@ const priceHTML = p => `<span class="price num">${p.was ? `<s>${money(p.was)}</s
 const pic = (p, v = [50, 50, 1], lazy = true) =>
   `<img src="${IMG + (v[3] || p.img)}" alt="${esc(p.brand)} ${esc(p.name)}, ${esc(p.color.name)}" width="864" height="1152"${lazy ? ' loading="lazy"' : ''} decoding="async"${v[2] > 1 ? ` style="transform-origin:${v[0]}% ${v[1]}%;transform:scale(${v[2]})"` : ''}>`;
 const I = {
-  heart: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 19.5s-7-4.3-7-9.7A3.9 3.9 0 0 1 12 7.4a3.9 3.9 0 0 1 7 2.4c0 5.4-7 9.7-7 9.7z"/></svg>',
+  heart: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 20.25S3.75 15.4 3.75 9.4A4.65 4.65 0 0 1 8.4 4.75c1.5 0 2.85.7 3.6 1.95.75-1.25 2.1-1.95 3.6-1.95a4.65 4.65 0 0 1 4.65 4.65c0 6-8.25 10.85-8.25 10.85z"/></svg>',
   x: '<svg class="ico" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
   chev: '<svg class="ico" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>',
   arrow: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   plus: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   minus: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
   check: '<svg class="ico" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
-  search: '<svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>',
+  search: '<svg class="ico" viewBox="0 0 24 24"><circle cx="10.75" cy="10.75" r="6.25"/><path d="m15.5 15.5 4.25 4.25"/></svg>',
   ruler: '<svg class="ico" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v2"/></svg>',
 };
 
