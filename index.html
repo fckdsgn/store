@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pale Store</title>
-<meta name="description" content="Pale Store: quiet clothes in light colors. Outerwear, knitwear, shirts and shoes.">
+<meta name="description" content="Pale Store: clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler and more.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,7 +163,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 .sec{padding-top:clamp(56px,7vw,96px)}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 18px}
-.cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
 .cat{position:relative;display:block;border-radius:var(--r-tile);overflow:hidden;background:var(--tile);aspect-ratio:1/1}
 .cat img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transition:transform .9s var(--ease)}
 .cat:hover img{transform:scale(1.035)}
@@ -190,8 +190,10 @@ main{flex:1;padding:0 var(--x);outline:none}
 .quick-s button{min-width:30px;height:28px;padding:0 7px;border-radius:8px;background:rgba(255,255,255,.75);font-size:11.5px;transition:background .2s,color .2s}
 .quick-s button:hover{background:var(--ink);color:#fff}
 .quick-s button[disabled]{color:var(--ink-3);text-decoration:line-through;background:transparent;cursor:default}
-.card-meta{display:flex;justify-content:space-between;gap:12px;margin-top:12px;font-size:13.5px}
+.card-brand{display:block;margin-top:12px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+.card-meta{display:flex;justify-content:space-between;gap:12px;margin-top:3px;font-size:13.5px}
 .card-meta b{font-weight:500;min-width:0}
+.card-meta .price{flex:none;white-space:nowrap}
 .card-sub{display:flex;justify-content:space-between;gap:12px;margin-top:2px;font-size:12.5px;color:var(--ink-2)}
 .price s{color:var(--ink-3);margin-right:6px;font-weight:400}
 
@@ -392,7 +394,8 @@ details[open] .pm::after{transform:rotate(0)}
   .quick{display:none}
   .heart{width:32px;height:32px;top:6px;right:6px}
   .badge{top:8px;left:8px;height:24px;padding:0 9px}
-  .card-meta{font-size:13px;flex-direction:column;gap:2px;margin-top:10px}
+  .card-brand{margin-top:10px}
+  .card-meta{font-size:13px;flex-direction:column;gap:2px;margin-top:3px}
   .card-sub{display:none}
   .pdp{display:block;padding-top:14px}
   .thumbs{display:none}
@@ -427,9 +430,10 @@ details[open] .pm::after{transform:rotate(0)}
   <div class="hdr-m"><button class="icon-btn" data-act="menu" aria-label="Menu" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></svg></button></div>
   <nav class="nav" aria-label="Shop">
     <a href="#new" data-r="new">New in</a>
-    <a href="#women" data-r="women">Women</a>
-    <a href="#men" data-r="men">Men</a>
+    <a href="#clothing" data-r="clothing">Clothing</a>
+    <a href="#bags" data-r="bags">Bags</a>
     <a href="#shoes" data-r="shoes">Shoes</a>
+    <a href="#accessories" data-r="accessories">Accessories</a>
     <a href="#sale" data-r="sale">Sale</a>
   </nav>
   <a class="logo" href="#home" aria-label="Pale Store, home">Pale Store</a>
@@ -470,54 +474,156 @@ details[open] .pm::after{transform:rotate(0)}
 'use strict';
 
 /* ---------- data ---------- */
-const IMG = 'assets/img/';
+const IMG = 'assets/products/';
 const SHOE = ['7', '8', '8.5', '9', '9.5', '10', '10.5', '11', '12'];
 const WEAR = ['XS', 'S', 'M', 'L', 'XL'];
-// views: [focus x %, focus y %, zoom] — photo 1 is the whole piece, 2 and 3 are close-ups
+const BELT = ['80', '85', '90', '95', '100', '105', '110'];
+const ONE = ['One size'];
+// views: [focus x %, focus y %, zoom, other photo] — photo 1 is the whole piece, the rest are close-ups or a second photo
+const TOP = [[50, 50, 1], [50, 32, 1.9], [50, 66, 1.9]];
+const BAG = [[50, 50, 1], [50, 40, 1.8], [32, 60, 1.9]];
+const BELTV = [[50, 50, 1], [50, 50, 2.1], [24, 50, 2]];
+const SHOEV = [[50, 50, 1], [38, 48, 1.9], [62, 56, 1.9]];
+const two = (file, v) => [v[0], [50, 50, 1, file], v[1]];
+// Prices and sizes are placeholders taken from brand sites and resale listings; the owner sets the real ones.
 const P = [
-  { id: 'boucle-coat', name: 'Bouclé Wool Coat', cat: 'Outerwear', groups: ['women'], price: 640, img: 'coat.webp',
-    color: { name: 'Ivory', hex: '#EFE9DD' }, sizes: WEAR, out: ['XL'], isNew: true,
-    views: [[50, 50, 1], [50, 24, 2], [62, 60, 2.1]],
-    text: 'A short, boxy coat in soft bouclé wool. Dropped shoulders, notch lapels and two hidden pockets.',
-    details: ['70% wool, 30% polyamide', 'Fully lined', 'Relaxed fit, take your usual size', 'Dry clean'] },
-  { id: 'padded-high-top', name: 'Padded Strap High-Top', cat: 'Sneakers', groups: ['men', 'women', 'shoes'], price: 590, img: 'sneaker-white.webp',
-    color: { name: 'White', hex: '#F6F6F4' }, sizes: SHOE, out: ['7', '12'], isNew: true,
-    views: [[50, 50, 1], [58, 46, 2], [24, 70, 2.1]],
-    text: 'Smooth leather high-top with two padded straps and a stitched cupsole. Clean enough for tailoring, tough enough for every day.',
-    details: ['Calf leather upper', 'Leather lining', 'Rubber cupsole', 'Fits true to size'] },
-  { id: 'rib-knit-dress', name: 'Rib Knit Dress', cat: 'Knitwear', groups: ['women'], price: 290, img: 'knit-dress.webp',
-    color: { name: 'Oat', hex: '#D8CCB6' }, sizes: WEAR, out: [], isNew: true,
-    views: [[50, 50, 1], [50, 14, 2.1], [50, 86, 2]],
-    text: 'A relaxed midi dress knitted in a soft rib. Crew neck, dropped shoulders and ribbed cuffs.',
-    details: ['60% cotton, 40% merino wool', 'Midi length', 'Relaxed fit', 'Hand wash cold'] },
-  { id: 'poplin-shirt', name: 'Oversized Poplin Shirt', cat: 'Shirts', groups: ['men', 'women'], price: 180, img: 'shirt.webp',
-    color: { name: 'White', hex: '#FAFAFA' }, sizes: WEAR, out: ['XS'], isNew: true,
-    views: [[50, 50, 1], [50, 20, 2.1], [86, 80, 2.2]],
-    text: 'A crisp cotton poplin shirt cut wide through the body, with a soft collar and a curved hem.',
-    details: ['100% cotton poplin', 'Mother-of-pearl buttons', 'Oversized fit', 'Machine wash 30°C'] },
-  { id: 'pleated-trousers', name: 'Pleated Wool Trousers', cat: 'Trousers', groups: ['men', 'women'], price: 260, img: 'trousers.webp',
-    color: { name: 'Stone', hex: '#D5CBBC' }, sizes: WEAR, out: [],
-    views: [[50, 50, 1], [50, 14, 2.1], [50, 88, 2]],
-    text: 'High-waisted trousers in brushed wool flannel with a single front pleat and a wide, straight leg.',
-    details: ['80% wool, 20% polyester', 'Side and back pockets', 'Wide straight leg', 'Dry clean'] },
-  { id: 'heavy-hoodie', name: 'Heavyweight Hoodie', cat: 'Sweatshirts', groups: ['men'], price: 160, was: 200, img: 'hoodie.webp',
-    color: { name: 'Grey melange', hex: '#BEBEBE' }, sizes: WEAR, out: ['S'],
-    views: [[50, 50, 1], [50, 24, 2], [50, 68, 2]],
-    text: 'A boxy hoodie in dense brushed-back cotton fleece. Double-layer hood and a wide kangaroo pocket.',
-    details: ['100% cotton, 480 g/m²', 'Brushed inside', 'Boxy fit', 'Machine wash 30°C'] },
-  { id: 'lug-derby', name: 'Lug Sole Derby', cat: 'Shoes', groups: ['women', 'men', 'shoes'], price: 390, was: 520, img: 'derby.webp',
-    color: { name: 'Ivory', hex: '#EEE9DF' }, sizes: SHOE, out: ['8', '11'],
-    views: [[50, 50, 1], [56, 52, 2], [34, 76, 2]],
-    text: 'A classic derby in glossy leather set on a light, chunky lug sole.',
-    details: ['Polished calf leather', 'Leather lining', 'Rubber lug sole', 'Runs slightly large'] },
+  { id: 'ch-horseshoe-zip-hoodie', brand: 'Chrome Hearts', name: 'Horseshoe Floral Cross Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 3690, img: 'ch-horseshoe-zip-hoodie.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: two('ch-horseshoe-zip-hoodie-2.webp', TOP),
+    text: 'Black zip-up hoodie with the Chrome Hearts horseshoe logo on the chest and Floral Cross prints running down both sleeves.',
+    details: ['Cotton fleece', 'Horseshoe logo on the chest', 'Floral Cross print on both sleeves', 'Full zip and hood'] },
+  { id: 'lv-keepall-50-taigarama', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50 Taigarama', cat: 'Travel bags', groups: ['bags'], price: 3250, img: 'lv-keepall-50-taigarama.webp',
+    color: { name: 'Cobalt', hex: '#1F4EA8' }, sizes: ONE, out: [], isNew: true, views: BAG,
+    text: 'The Keepall, Louis Vuitton’s original soft travel bag from the 1930s, in cobalt Taïga leather with a band of Monogram canvas.',
+    details: ['Taïga cowhide leather and Monogram coated canvas', '50 x 29 x 23 cm', 'Double zip with padlock', 'Removable, adjustable shoulder strap'] },
+  { id: 'balenciaga-track', brand: 'Balenciaga', name: 'Track Sneaker', cat: 'Sneakers', groups: ['shoes'], price: 895, img: 'balenciaga-track.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], isNew: true, views: SHOEV,
+    text: 'The Track sneaker in all black: layered mesh and nylon panels, moulded rubber overlays and a multi-part sole.',
+    details: ['Mesh and nylon upper', 'Moulded rubber overlays', 'Logo on the side and the tongue', 'Multi-layer rubber sole'] },
+  { id: 'cp-goggle-beanie', brand: 'C.P. Company', name: 'Goggle Beanie', cat: 'Hats', groups: ['accessories'], price: 160, img: 'cp-goggle-beanie.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], isNew: true, views: [[50, 50, 1], [50, 60, 1.9], [50, 36, 1.9]],
+    text: 'Chunky ribbed beanie in extra fine merino wool with the signature C.P. Company goggle lenses set into the cuff.',
+    details: ['Extra fine merino wool', 'Goggle lenses on the cuff', 'Ribbed knit', 'One size'] },
+  { id: 'moncler-hooded-vest', brand: 'Moncler', name: 'Hooded Down Vest', cat: 'Outerwear', groups: ['clothing'], price: 980, img: 'moncler-hooded-vest.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: TOP,
+    text: 'Down vest in shiny black lacquered nylon with a hood, a zip front and the Moncler logo patch on the chest.',
+    details: ['Lacquered nylon', 'Down filling', 'Hood', 'Zip front and zip pockets'] },
+  { id: 'ysl-loulou-puffer', brand: 'Saint Laurent', name: 'Loulou Puffer Small', cat: 'Shoulder bags', groups: ['bags'], price: 2850, img: 'ysl-loulou-puffer.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], isNew: true, views: BAG,
+    text: 'Small shoulder bag in quilted black lambskin with a sliding chain strap and the gold-tone Cassandre logo.',
+    details: ['Quilted lambskin', 'Gold-tone hardware', 'Sliding chain and leather strap', 'Flap closure'] },
+  { id: 'lv-speedy-trunk-20', brand: 'Louis Vuitton', name: 'Speedy Trunk 20', cat: 'Handbags', groups: ['bags'], price: 13000, img: 'lv-speedy-trunk-20.webp',
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], isNew: true, views: BAG,
+    text: 'A small Speedy in Monogram canvas reworked as a trunk, with gold-tone studs along the edges, corner pieces and an S-lock.',
+    details: ['Monogram coated canvas', 'Natural cowhide handles and strap', 'Gold-tone studs and corners', 'S-lock closure'] },
+  { id: 'burberry-puffer', brand: 'Burberry', name: 'Down Puffer Jacket with Fur-Trim Hood', cat: 'Outerwear', groups: ['clothing'], price: 650, img: 'burberry-puffer.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], isNew: true, views: TOP,
+    text: 'Quilted down jacket with a detachable fur-trimmed hood lined in Burberry check and the Equestrian Knight logo on the chest.',
+    details: ['Down and feather filling', 'Detachable hood with fur trim', 'Check-lined hood and collar', 'Zip and snap front'] },
+  { id: 'givenchy-destroyed-hoodie', brand: 'Givenchy', name: 'Destroyed Logo Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 950, img: 'givenchy-destroyed-hoodie.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Black fleece hoodie with a GIVENCHY PARIS print on the chest and destroyed-effect cuts all over.',
+    details: ['Cotton fleece', 'Destroyed-effect cuts', 'Logo print on the chest', 'Drawstring hood'] },
+  { id: 'burberry-check-hood-hoodie', brand: 'Burberry', name: 'Check Hood Zip-Up Hoodie', cat: 'Hoodies', groups: ['clothing'], price: 990, img: 'burberry-check-hood-hoodie.webp',
+    color: { name: 'Pale grey melange', hex: '#C9C9C9' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Zip-up hoodie in pale grey cotton with a hood lined in Burberry check and an embroidered Equestrian Knight logo.',
+    details: ['Cotton jersey', 'Check-lined hood', 'Embroidered Equestrian Knight logo', 'Zip front and pockets'] },
+  { id: 'ch-cross-patch-jeans', brand: 'Chrome Hearts', name: 'Cross Patch Jeans', cat: 'Jeans', groups: ['clothing'], price: 30094, img: 'ch-cross-patch-jeans.webp',
+    color: { name: 'Black / grey', hex: '#6E6E6E' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Vintage Levi’s 501 jeans in a faded grey wash with black leather Chrome Hearts crosses sewn across the legs.',
+    details: ['Levi’s 501 denim', 'Leather cross patches', 'Straight leg', 'Button fly'] },
+  { id: 'vetements-anarchy-sweatpants', brand: 'Vetements', name: 'Anarchy Logo Sweatpants', cat: 'Trousers', groups: ['clothing'], price: 915, img: 'vetements-anarchy-sweatpants.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Wide, cropped sweatpants in black cotton with the Vetements anarchy logo printed down one leg.',
+    details: ['100% cotton', 'Elasticated drawstring waist', 'Side pockets and a back pocket', 'Raw-cut hems'] },
+  { id: 'mm6-numbers-tee', brand: 'MM6 Maison Margiela', name: 'Numbers Logo T-Shirt', cat: 'T-shirts', groups: ['clothing'], price: 230, img: 'mm6-numbers-tee.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: [[50, 50, 1], [50, 44, 2], [50, 26, 2.1]],
+    text: 'Black cotton T-shirt with the Maison Margiela number calendar printed large, the 6 circled.',
+    details: ['100% cotton', 'Crew neck, short sleeves', 'Numbers logo print', 'Four white stitches at the back neck'] },
+  { id: 'vetements-limited-tee', brand: 'Vetements', name: 'Limited Edition Logo T-Shirt', cat: 'T-shirts', groups: ['clothing'], price: 390, img: 'vetements-limited-tee.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: [[50, 50, 1], [50, 40, 2], [50, 24, 2.1]],
+    text: 'Oversized black T-shirt with the Vetements Limited Edition logo printed across the chest.',
+    details: ['Cotton jersey', 'Oversized fit', 'Logo print on the chest', 'Crew neck'] },
+  { id: 'timberland-cross-boot', brand: 'Timberland', name: '6-Inch Boot with Cross Patches', cat: 'Boots', groups: ['shoes'], price: 220, img: 'timberland-cross-boot.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
+    text: 'Black nubuck 6-inch Timberland boot finished with white leather cross patches and thick rope laces.',
+    details: ['Nubuck upper', 'White leather cross patches', 'Padded collar', 'Lug rubber sole'] },
+  { id: 'lv-keepall-55-monogram', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 3250, img: 'lv-keepall-55-monogram.webp',
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    text: 'The classic Keepall in Monogram canvas with natural cowhide handles, trim and shoulder strap.',
+    details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+  { id: 'lv-keepall-55-eclipse', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-55-eclipse.webp',
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: two('lv-keepall-55-eclipse-2.webp', BAG),
+    text: 'The Keepall in grey and black Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
+    details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+  { id: 'lv-keepall-55-macassar', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-55-macassar.webp',
+    color: { name: 'Monogram Macassar', hex: '#4A3426' }, sizes: ONE, out: [], views: two('lv-keepall-55-macassar-2.webp', BAG),
+    text: 'The Keepall in Monogram Macassar canvas, the brown Monogram paired with black leather trim.',
+    details: ['Monogram Macassar coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+  { id: 'lv-keepall-55-graphite', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 55', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-55-graphite.webp',
+    color: { name: 'Damier Graphite', hex: '#3A3A3D' }, sizes: ONE, out: [], views: BAG,
+    text: 'The Keepall in Damier Graphite canvas, the grey and black check, with black leather trim.',
+    details: ['Damier Graphite coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+  { id: 'lv-keepall-50-eclipse', brand: 'Louis Vuitton', name: 'Keepall Bandoulière 50', cat: 'Travel bags', groups: ['bags'], price: 2700, img: 'lv-keepall-50-eclipse.webp',
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
+    text: 'The smaller 50 cm Keepall in Monogram Eclipse canvas with black leather trim and a removable shoulder strap.',
+    details: ['Monogram Eclipse coated canvas', 'Black leather trim', 'Double zip with padlock', 'Removable shoulder strap'] },
+  { id: 'lv-discovery-backpack', brand: 'Louis Vuitton', name: 'Discovery Backpack PM', cat: 'Backpacks', groups: ['bags'], price: 2940, img: 'lv-discovery-backpack.webp',
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
+    text: 'Backpack in Monogram Eclipse canvas with a zipped front pocket, a leather logo patch and padded shoulder straps.',
+    details: ['Monogram Eclipse coated canvas', 'Zipped front pocket', 'Padded adjustable straps', 'Two-way zip'] },
+  { id: 'lv-district-pm', brand: 'Louis Vuitton', name: 'District PM', cat: 'Messenger bags', groups: ['bags'], price: 1760, img: 'lv-district-pm.webp',
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: ONE, out: [], views: BAG,
+    text: 'Compact messenger bag in Monogram Eclipse canvas with a flap front and an adjustable webbing strap.',
+    details: ['Monogram Eclipse coated canvas', 'Flap front', 'Adjustable webbing strap', 'Metal LV logo on the flap'] },
+  { id: 'lv-neverfull-mm', brand: 'Louis Vuitton', name: 'Neverfull MM', cat: 'Totes', groups: ['bags'], price: 2030, img: 'lv-neverfull-mm.webp',
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    text: 'Roomy Monogram canvas tote with natural cowhide handles and side laces that cinch the shape.',
+    details: ['Monogram coated canvas', 'Natural cowhide trim', 'Side laces', 'Open top with hook closure'] },
+  { id: 'lv-alma-bb', brand: 'Louis Vuitton', name: 'Alma BB', cat: 'Handbags', groups: ['bags'], price: 1600, img: 'lv-alma-bb.webp',
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    text: 'The compact Alma: a dome-shaped Monogram canvas handbag with natural cowhide handles, padlock and key bell.',
+    details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Key bell'] },
+  { id: 'lv-alma-pm', brand: 'Louis Vuitton', name: 'Alma PM', cat: 'Handbags', groups: ['bags'], price: 1800, img: 'lv-alma-pm.webp',
+    color: { name: 'Monogram', hex: '#5A3E2B' }, sizes: ONE, out: [], views: BAG,
+    text: 'The original 1934 Alma shape in Monogram canvas, with natural cowhide handles, padlock and key bell.',
+    details: ['Monogram coated canvas', 'Natural cowhide trim', 'Double zip with padlock', 'Key bell'] },
+  { id: 'gucci-gg-belt', brand: 'Gucci', name: 'GG Supreme Belt with Interlocking G', cat: 'Belts', groups: ['accessories'], price: 480, img: 'gucci-gg-belt.webp',
+    color: { name: 'Beige / ebony', hex: '#B9A88C' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Belt in beige and ebony GG Supreme canvas with black leather trim and the silver-tone Interlocking G buckle.',
+    details: ['GG Supreme canvas', 'Black leather trim', 'Interlocking G buckle', 'Sized in centimetres'] },
+  { id: 'ch-cross-belt', brand: 'Chrome Hearts', name: 'Cross Buckle Studded Belt', cat: 'Belts', groups: ['accessories'], price: 750, img: 'ch-cross-belt.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Black leather belt lined with metal studs and fastened with an ornate Chrome Hearts cross buckle.',
+    details: ['Black leather', 'Metal studs along the strap', 'Cross buckle', 'Sized in centimetres'] },
+  { id: 'lv-initiales-damier-graphite', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 635, img: 'lv-initiales-damier-graphite.webp',
+    color: { name: 'Damier Graphite', hex: '#3A3A3D' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible belt in Damier Graphite canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
+    details: ['Damier Graphite canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
+  { id: 'lv-initiales-eclipse', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 635, img: 'lv-initiales-eclipse.webp',
+    color: { name: 'Monogram Eclipse', hex: '#2B2B2E' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible belt in Monogram Eclipse canvas with plain leather on the other side, fastened with the LV Initiales buckle.',
+    details: ['Monogram Eclipse canvas, leather reverse', 'Reversible', 'LV Initiales buckle', '4 cm wide'] },
+  { id: 'lv-initiales-taurillon', brand: 'Louis Vuitton', name: 'LV Initiales 40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 820, img: 'lv-initiales-taurillon.webp',
+    color: { name: 'Grey Taurillon Monogram', hex: '#7A7A7A' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible belt in grey Taurillon leather embossed with the Monogram, fastened with a striped LV Initiales buckle.',
+    details: ['Taurillon Monogram leather, calf leather reverse', 'Reversible', 'Striped LV Initiales buckle', '4 cm wide'] },
+  { id: 'lv-belt-eclipse-reverse', brand: 'Louis Vuitton', name: '40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 800, img: 'lv-belt-eclipse-reverse.webp',
+    color: { name: 'Monogram Eclipse Reverse', hex: '#8A8A8E' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible belt in grey Monogram Eclipse Reverse canvas with a dark metal LV buckle.',
+    details: ['Monogram Eclipse Reverse canvas', 'Reversible', 'Dark metal LV buckle', '4 cm wide'] },
+  { id: 'lv-belt-white-monogram', brand: 'Louis Vuitton', name: '40mm Reversible Belt', cat: 'Belts', groups: ['accessories'], price: 800, img: 'lv-belt-white-monogram.webp',
+    color: { name: 'White Monogram', hex: '#EDEDED' }, sizes: BELT, out: [], views: BELTV,
+    text: 'Reversible belt in white Monogram canvas with a matching white LV buckle.',
+    details: ['White Monogram canvas', 'Reversible', 'White LV buckle', '4 cm wide'] },
 ];
 const BY = Object.fromEntries(P.map(p => [p.id, p]));
 const LISTS = {
   new: { title: 'New in', note: 'Fresh this season', pick: p => p.isNew },
-  women: { title: 'Women', pick: p => p.groups.includes('women') },
-  men: { title: 'Men', pick: p => p.groups.includes('men') },
+  clothing: { title: 'Clothing', pick: p => p.groups.includes('clothing') },
+  bags: { title: 'Bags', pick: p => p.groups.includes('bags') },
   shoes: { title: 'Shoes', pick: p => p.groups.includes('shoes') },
-  sale: { title: 'Sale', note: 'Up to 25% off', pick: p => !!p.was },
+  accessories: { title: 'Accessories', note: 'Belts and hats', pick: p => p.groups.includes('accessories') },
+  sale: { title: 'Sale', pick: p => !!p.was },
 };
 const PROMOS = { PALE10: 0.10 };
 const box = '<rect x=".5" y=".5" width="37" height="23" rx="4" fill="#fff" stroke="#DEDEDE"/>';
@@ -550,11 +656,13 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const money = n => '$ ' + n.toLocaleString('en-US');
 const money2 = n => '$ ' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const isShoe = p => p.sizes === SHOE;
-const sizeLabel = (p, s) => isShoe(p) ? 'US ' + s : s;
+const isBelt = p => p.sizes === BELT;
+const sizeLabel = (p, s) => isShoe(p) ? 'US ' + s : isBelt(p) ? s + ' cm' : s;
+const sizeKind = p => isShoe(p) ? 'US size' : isBelt(p) ? 'Size, cm' : 'Size';
 const off = p => p.was ? Math.round((1 - p.price / p.was) * 100) : 0;
 const priceHTML = p => `<span class="price num">${p.was ? `<s>${money(p.was)}</s>` : ''}${money(p.price)}</span>`;
 const pic = (p, v = [50, 50, 1], lazy = true) =>
-  `<img src="${IMG + p.img}" alt="${esc(p.name)}, ${esc(p.color.name)}" width="864" height="1152"${lazy ? ' loading="lazy"' : ''} decoding="async"${v[2] > 1 ? ` style="transform-origin:${v[0]}% ${v[1]}%;transform:scale(${v[2]})"` : ''}>`;
+  `<img src="${IMG + (v[3] || p.img)}" alt="${esc(p.brand)} ${esc(p.name)}, ${esc(p.color.name)}" width="864" height="1152"${lazy ? ' loading="lazy"' : ''} decoding="async"${v[2] > 1 ? ` style="transform-origin:${v[0]}% ${v[1]}%;transform:scale(${v[2]})"` : ''}>`;
 const I = {
   heart: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 19.5s-7-4.3-7-9.7A3.9 3.9 0 0 1 12 7.4a3.9 3.9 0 0 1 7 2.4c0 5.4-7 9.7-7 9.7z"/></svg>',
   x: '<svg class="ico" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
@@ -598,13 +706,14 @@ function toggleWish(id) {
 function card(p) {
   const w = S.wish.includes(p.id);
   return `<article class="card"><div class="media">
-    <a class="ph" href="#p-${p.id}" aria-label="${esc(p.name)}">${pic(p)}</a>
+    <a class="ph" href="#p-${p.id}" aria-label="${esc(p.brand)} ${esc(p.name)}">${pic(p)}</a>
     ${p.was ? `<span class="badge glass">−${off(p)}%</span>` : p.isNew ? `<span class="badge glass">New</span>` : ''}
     <button class="heart glass${w ? ' on' : ''}" data-act="wish" data-id="${p.id}" aria-pressed="${w}" aria-label="Wishlist: ${esc(p.name)}">${I.heart}</button>
     <div class="quick glass">
-      <span class="quick-l">Quick add${isShoe(p) ? ', US size' : ''}</span>
+      <span class="quick-l">Quick add${isShoe(p) ? ', US size' : isBelt(p) ? ', cm' : ''}</span>
       <div class="quick-s">${p.sizes.map(s => `<button data-act="quick" data-id="${p.id}" data-size="${s}"${p.out.includes(s) ? ' disabled aria-label="' + s + ', sold out"' : ''}>${s}</button>`).join('')}</div>
     </div></div>
+    <a class="card-brand" href="#p-${p.id}" tabindex="-1">${esc(p.brand)}</a>
     <a class="card-meta" href="#p-${p.id}"><b>${esc(p.name)}</b>${priceHTML(p)}</a>
     <div class="card-sub"><span>${esc(p.cat)}</span><span>${esc(p.color.name)}</span></div>
   </article>`;
@@ -615,20 +724,21 @@ const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join
 const V = {};
 
 V.home = () => {
-  const coat = BY['boucle-coat'], shoe = BY['padded-high-top'], dress = BY['rib-knit-dress'];
+  // hero scene: a light piece on the left (it sits under the title card), the lead piece in the middle, a sneaker on the right
+  const dress = BY['burberry-check-hood-hoodie'], coat = BY['ch-horseshoe-zip-hoodie'], shoe = BY['balenciaga-track'];
   return `<section class="hero">
     <div class="stage">
       <a class="stage-ph sp-dress" href="#p-${dress.id}" tabindex="-1" aria-hidden="true">${pic(dress, undefined, false)}</a>
       <a class="stage-ph sp-coat" href="#p-${coat.id}" tabindex="-1" aria-hidden="true">${pic(coat, undefined, false)}</a>
       <a class="stage-ph sp-shoe" href="#p-${shoe.id}" tabindex="-1" aria-hidden="true">${pic(shoe, undefined, false)}</a>
-      <a class="tag glass tg-dress" href="#p-${dress.id}"><i></i><b>${dress.name}</b><span>${money(dress.price)}</span></a>
-      <a class="tag glass tg-coat" href="#p-${coat.id}"><i></i><b>${coat.name}</b><span>${money(coat.price)}</span></a>
-      <a class="tag glass tg-shoe" href="#p-${shoe.id}"><i></i><b>${shoe.name}</b><span>${money(shoe.price)}</span></a>
+      <a class="tag glass tg-dress" href="#p-${dress.id}"><i></i><b>${dress.brand}</b><span>${money(dress.price)}</span></a>
+      <a class="tag glass tg-coat" href="#p-${coat.id}"><i></i><b>${coat.brand}</b><span>${money(coat.price)}</span></a>
+      <a class="tag glass tg-shoe" href="#p-${shoe.id}"><i></i><b>${shoe.brand}</b><span>${money(shoe.price)}</span></a>
       <div class="hero-card glass">
         <span class="label">Autumn / Winter 26</span>
-        <h1>Pale tones for the cold season.</h1>
-        <p>Wool, knit and leather in light colors, cut loose and easy to layer.</p>
-        <div class="row"><a class="btn glass" href="#women">Shop women</a><a class="btn glass" href="#men">Shop men</a></div>
+        <h1>Chrome Hearts, Louis Vuitton and more.</h1>
+        <p>Clothing, bags, shoes and belts from the houses you know, in one place.</p>
+        <div class="row"><a class="btn glass" href="#clothing">Shop clothing</a><a class="btn glass" href="#bags">Shop bags</a></div>
       </div>
     </div>
   </section>
@@ -639,7 +749,7 @@ V.home = () => {
   <section class="sec">
     <div class="sec-h"><h2 class="h-title">Shop by category</h2></div>
     <div class="cats">
-      ${[['women', 'rib-knit-dress'], ['men', 'heavy-hoodie'], ['shoes', 'lug-derby']].map(([k, id]) => {
+      ${[['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55-monogram'], ['shoes', 'timberland-cross-boot'], ['accessories', 'gucci-gg-belt']].map(([k, id]) => {
         const n = P.filter(LISTS[k].pick).length;
         return `<a class="cat" href="#${k}">${pic(BY[id])}<span class="cat-plate glass"><span><b>${LISTS[k].title}</b><span>${n} pieces</span></span><span class="arrow">${I.arrow}</span></span></a>`;
       }).join('')}
@@ -671,7 +781,7 @@ let PV = { id: null, view: 0, size: null };
 V.product = id => {
   const p = BY[id];
   if (!p) return V.missing();
-  if (PV.id !== id) PV = { id, view: 0, size: null };
+  if (PV.id !== id) PV = { id, view: 0, size: p.sizes.length === 1 ? p.sizes[0] : null };
   const w = S.wish.includes(p.id);
   const rel = P.filter(x => x.id !== p.id && x.groups.some(g => p.groups.includes(g))).slice(0, 4);
   return `<section class="pdp">
@@ -685,7 +795,7 @@ V.product = id => {
       <div class="dots" aria-hidden="true">${p.views.map((v, i) => `<i class="${i === PV.view ? 'on' : ''}"></i>`).join('')}</div>
     </div>
     <div class="info">
-      <span class="label">${esc(p.cat)}</span>
+      <span class="label">${esc(p.brand)}</span>
       <h1>${esc(p.name)}</h1>
       ${priceHTML(p)}
       <div class="swatches"><span class="sw on" style="--c:${p.color.hex}" title="${esc(p.color.name)}"></span></div>
@@ -693,7 +803,7 @@ V.product = id => {
       <div class="actions">
         <button class="btn size-btn" id="size-btn" data-act="size" aria-haspopup="listbox" aria-expanded="false"><span>${PV.size ? sizeLabel(p, PV.size) : 'Size'}</span>${I.chev}</button>
         <div class="size-pop glass${isShoe(p) ? '' : ' cl'}" id="size-pop" role="listbox" aria-label="Size" hidden>
-          <div class="pop-h"><span>${isShoe(p) ? 'US size' : 'Size'}</span><span>Crossed out: sold out</span></div>
+          <div class="pop-h"><span>${sizeKind(p)}</span><span>Crossed out: sold out</span></div>
           ${p.sizes.map(s => `<button role="option" aria-selected="${PV.size === s}" class="${PV.size === s ? 'on' : ''}" data-act="pick" data-size="${s}"${p.out.includes(s) ? ' disabled' : ''}>${s}</button>`).join('')}
         </div>
         <button class="btn wide" data-act="add">Add to bag</button>
@@ -845,12 +955,12 @@ V.account = () => {
 };
 
 const PAGES = {
-  about: ['About', `<p>Pale Store is a small shop for quiet clothes: light colors, natural fabrics and shapes that last longer than one season.</p><p>We choose every piece by hand and shoot it on the same grey backdrop, so you can compare colors and textures side by side.</p>`],
+  about: ['About', `<p>Pale Store brings together clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler, Balenciaga and other houses.</p><p>Every piece is shown on the same grey backdrop, so you can compare colors and details side by side.</p>`],
   contact: ['Contact', `<p>Questions about an order, sizing or returns? Write to us and we answer within one business day.</p><h2>Email</h2><div class="copy-row"><span id="mail">hello@palestore.shop</span><button class="btn" style="height:30px;font-size:10.5px" data-act="copy" data-t="mail">Copy</button></div><h2>Hours</h2><p>Monday to Friday, 10:00 to 19:00</p>`],
   faq: ['FAQ', `<div class="faq">${[
     ['How long does delivery take?', 'Standard shipping takes 3 to 5 business days and is free. Express takes 1 to 2 business days.'],
     ['Can I return an order?', 'Yes. Returns are free within 30 days of delivery, as long as the piece is unworn and has its tags.'],
-    ['How do I pick a size?', 'Each product page notes the fit. Shoes use US sizes; clothing runs XS to XL.'],
+    ['How do I pick a size?', 'Clothing runs XS to XL, shoes use US sizes and belts are sized in centimetres. Bags and hats are one size.'],
     ['Which payment methods do you accept?', 'Visa, Mastercard, UnionPay and American Express. You enter your card at checkout.'],
     ['How do I track my order?', 'Your orders are listed in your account. A tracking link arrives by email once the parcel ships.'],
   ].map(([q, a]) => `<details><summary>${q}<span class="pm"></span></summary><div class="body">${a}</div></details>`).join('')}</div>`],
@@ -887,7 +997,7 @@ function render(scroll) {
   if (r.name === 'product') mountProduct();
 }
 function titleFor(r) {
-  if (r.name === 'product' && BY[r.arg]) return BY[r.arg].name + ' | Pale Store';
+  if (r.name === 'product' && BY[r.arg]) return BY[r.arg].brand + ' ' + BY[r.arg].name + ' | Pale Store';
   if (r.name === 'list') return LISTS[r.arg].title + ' | Pale Store';
   if (r.name === 'page') return PAGES[r.arg][0] + ' | Pale Store';
   if (r.name === 'home') return 'Pale Store';
@@ -941,7 +1051,7 @@ function openSearch() {
   const l = $('#layer');
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <div class="sheet glass" role="dialog" aria-label="Search">
-      <form class="search-row" id="search-form" role="search">${I.search}<label class="sr" for="q">Search the store</label><input id="q" placeholder="Search coats, sneakers, knit…" autocomplete="off"><button type="button" class="icon-btn" data-act="close" aria-label="Close search">${I.x}</button></form>
+      <form class="search-row" id="search-form" role="search">${I.search}<label class="sr" for="q">Search the store</label><input id="q" placeholder="Search hoodies, Keepall, belts…" autocomplete="off"><button type="button" class="icon-btn" data-act="close" aria-label="Close search">${I.x}</button></form>
       <div id="sr-out"></div>
     </div>`;
   document.body.style.overflow = 'hidden';
@@ -953,21 +1063,21 @@ function searchOut(q) {
   q = q.trim().toLowerCase();
   const out = $('#sr-out');
   if (!q) {
-    out.innerHTML = `<div class="label sr-h">Popular</div><div class="chips">${['Coat', 'Sneakers', 'Knit', 'Hoodie', 'Wool', 'Sale'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
+    out.innerHTML = `<div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
       <div class="label sr-h">New in</div><div class="sr-list">${P.filter(p => p.isNew).map(srItem).join('')}</div>`;
     return;
   }
-  const hits = P.filter(p => (q === 'sale' && p.was) || [p.name, p.cat, p.color.name, p.text, ...p.groups].join(' ').toLowerCase().includes(q));
+  const hits = P.filter(p => (q === 'sale' && p.was) || [p.brand, p.name, p.cat, p.color.name, p.text, ...p.groups].join(' ').toLowerCase().includes(q));
   out.innerHTML = hits.length ? `<div class="label sr-h">${hits.length} ${hits.length === 1 ? 'result' : 'results'}</div><div class="sr-list">${hits.map(srItem).join('')}</div>`
     : `<p class="sr-empty">Nothing matches “${esc(q)}”. Try coat, knit or sneakers.</p>`;
 }
-const srItem = p => `<a class="sr-item" href="#p-${p.id}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.name)}</b><span>${esc(p.cat)}, ${money(p.price)}</span></span></a>`;
+const srItem = p => `<a class="sr-item" href="#p-${p.id}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${money(p.price)}</span></span></a>`;
 function openMenu() {
   const l = $('#layer');
   if (l.innerHTML) return closeLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <nav class="sheet glass menu" aria-label="Menu">
-      ${Object.keys(LISTS).map(k => `<a href="#${k}">${LISTS[k].title}</a>`).join('')}
+      ${Object.keys(LISTS).filter(k => P.some(LISTS[k].pick)).map(k => `<a href="#${k}">${LISTS[k].title}</a>`).join('')}
       <div class="menu-sub"><a href="#account">Account</a><a href="#wishlist">Wishlist${S.wish.length ? ' (' + S.wish.length + ')' : ''}</a><a href="#bag">Bag${bagCount() ? ' (' + bagCount() + ')' : ''}</a></div>
     </nav>`;
   document.body.style.overflow = 'hidden';
@@ -1144,6 +1254,8 @@ addEventListener('scroll', () => {
 }, { passive: true });
 
 $('#year').textContent = new Date().getFullYear();
+// Sale shows up in the menu only when something is on sale
+$$('[data-r="sale"]').forEach(a => { a.hidden = !P.some(LISTS.sale.pick); });
 render(true);
 })();
 </script>
