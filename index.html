@@ -89,6 +89,10 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .nav a:hover::after,.nav button:hover::after,.nav a.on::after{transform:scaleX(1)}
 .count{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 4px;margin-left:4px;border-radius:99px;background:var(--ink);color:#fff;font-size:9.5px;font-weight:600;letter-spacing:0;vertical-align:1px}
 .logo{display:flex;align-items:center;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
+/* desktop: name on the left, sections centred between the name and the icons */
+.hdr .logo{order:-1;padding-left:4px}
+.hdr{grid-template-columns:auto 1fr auto}
+.nav:not(.r){justify-content:center;padding:0 24px}
 .hdr-m{display:none}
 .icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;position:relative}
 .icon-btn:hover{background:rgba(255,255,255,.55)}
@@ -386,7 +390,7 @@ details[open] .pm::after{transform:rotate(0)}
   .hdr{grid-template-columns:auto 1fr auto;padding:0 4px}
   .hdr .nav{display:none}
   .hdr-m{display:flex;align-items:center}
-  .hdr .logo{justify-self:center;font-size:17px}
+  .hdr .logo{justify-self:center;font-size:17px;order:0;padding-left:0}
   .two{grid-template-columns:minmax(0,1fr);gap:28px;max-width:560px;margin:0 auto}
   .two .div{min-height:0;height:1px}
   .pdp{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"main info" "thumbs info";align-items:start;gap:16px 28px}
