@@ -80,7 +80,10 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .hdr{position:sticky;top:var(--top);z-index:40;margin:var(--top) var(--x) 0;height:var(--hdr);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 16px;border-radius:13px;background:var(--bar);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.9);transition:box-shadow .3s}
 .hdr.lift{box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 .5px var(--glass-edge),0 12px 32px -18px rgba(0,0,0,.28)}
 .nav{display:flex;gap:clamp(12px,1.6vw,22px);align-items:center}
-.nav.r{justify-content:flex-end}
+.nav.r{justify-content:flex-end;gap:2px;margin-right:-8px}
+.nav .icon-btn{padding:0;transition:background .2s}
+.nav .icon-btn::after{display:none}
+.nav .icon-btn.on{background:rgba(255,255,255,.55)}
 .nav a,.nav button{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;padding:6px 0;position:relative;white-space:nowrap}
 .nav a::after,.nav button::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
 .nav a:hover::after,.nav button:hover::after,.nav a.on::after{transform:scaleX(1)}
@@ -206,9 +209,18 @@ main{flex:1;padding:0 var(--x);outline:none}
 .cat-top .h-title{font-size:clamp(24px,2.6vw,34px)}
 .cat-top .muted{font-size:12.5px;margin-top:8px}
 .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.select{position:relative}
-.select select{max-width:100%;appearance:none;-webkit-appearance:none;height:36px;padding:0 34px 0 16px;border-radius:999px;border:0;background:var(--pill);font-size:12px;cursor:pointer}
-.select svg{position:absolute;right:12px;top:11px;width:14px;height:14px;pointer-events:none}
+.dd{position:relative}
+.dd-btn{display:inline-flex;align-items:center;gap:10px;height:36px;padding:0 12px 0 16px;border-radius:999px;background:var(--pill);font-size:12px;white-space:nowrap;transition:background .2s}
+.dd-btn:hover,.dd-btn[aria-expanded="true"]{background:var(--pill-hover)}
+.dd-btn .ico{width:14px;height:14px;transition:transform .25s var(--ease)}
+.dd-btn[aria-expanded="true"] .ico{transform:rotate(180deg)}
+.dd-pop{position:absolute;z-index:30;top:42px;left:0;min-width:100%;width:max-content;max-width:min(300px,calc(100vw - 32px));max-height:min(420px,60vh);overflow-y:auto;overscroll-behavior:contain;background:rgba(252,252,252,.94);border-radius:18px;padding:6px;display:flex;flex-direction:column;gap:2px;animation:pop .28s var(--ease) both}
+.dd.end .dd-pop{left:auto;right:0}
+.dd-pop button{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:34px;padding:0 12px;border-radius:11px;font-size:12.5px;text-align:left;transition:background .2s}
+.dd-pop button:hover,.dd-pop button:focus-visible{background:rgba(255,255,255,.85);outline:0}
+.dd-pop button .ico{width:14px;height:14px;flex:none;visibility:hidden}
+.dd-pop button.on{font-weight:500}
+.dd-pop button.on .ico{visibility:visible}
 .empty{display:grid;justify-items:center;text-align:center;gap:14px;padding:90px 0 40px}
 .empty p{margin:0;color:var(--ink-2);max-width:36ch}
 
@@ -445,10 +457,10 @@ details[open] .pm::after{transform:rotate(0)}
   </nav>
   <a class="logo" href="#home" aria-label="Pale Store, home">Pale Store</a>
   <nav class="nav r" aria-label="Account">
-    <button data-act="search">Search</button>
-    <a href="#account" data-r="account">Account</a>
-    <a href="#wishlist" data-r="wishlist">Wishlist<span class="count" data-wish-count hidden></span></a>
-    <a href="#bag" data-r="bag">Bag<span class="count" data-bag-count hidden></span></a>
+    <button class="icon-btn" data-act="search" aria-label="Search" title="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
+    <a class="icon-btn" href="#account" data-r="account" aria-label="Account" title="Account"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 19.5c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5"/></svg></a>
+    <a class="icon-btn" href="#wishlist" data-r="wishlist" aria-label="Wishlist" title="Wishlist"><svg class="ico" viewBox="0 0 24 24"><path d="M12 19.5s-7-4.3-7-9.7A3.9 3.9 0 0 1 12 7.4a3.9 3.9 0 0 1 7 2.4c0 5.4-7 9.7-7 9.7z"/></svg><span class="count" data-wish-count hidden></span></a>
+    <a class="icon-btn" href="#bag" data-r="bag" aria-label="Bag" title="Bag"><svg class="ico" viewBox="0 0 24 24"><path d="M5.5 8.5h13l-1 11.5h-11z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/></svg><span class="count" data-bag-count hidden></span></a>
   </nav>
   <div class="hdr-m" style="justify-content:flex-end">
     <button class="icon-btn" data-act="search" aria-label="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button>
@@ -1105,6 +1117,21 @@ V.home = () => {
 };
 
 let sortBy = 'featured', brandBy = 'all', brandList = '';
+const SORTS = { featured: 'Featured', low: 'Price: low to high', high: 'Price: high to low' };
+// a pill that opens a frosted list, in place of the browser's own select menu
+const dropdown = (key, label, cur, opts, end) => `<div class="dd${end ? ' end' : ''}">
+  <button class="dd-btn" id="dd-${key}" data-act="dd" aria-haspopup="listbox" aria-expanded="false" aria-label="${label}: ${esc(opts.find(o => o[0] === cur)[1])}"><span>${esc(opts.find(o => o[0] === cur)[1])}</span>${I.chev}</button>
+  <div class="dd-pop glass" role="listbox" aria-label="${label}" hidden>${opts.map(([v, t]) => `<button role="option" aria-selected="${v === cur}" class="${v === cur ? 'on' : ''}" data-act="dd-pick" data-dd="${key}" data-v="${esc(v)}"><span>${esc(t)}</span>${I.check}</button>`).join('')}</div>
+</div>`;
+function ddOpen(btn, open) {
+  $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; } });
+  if (!btn) return;
+  const pop = btn.nextElementSibling;
+  open = open === undefined ? pop.hidden : open;
+  pop.hidden = !open;
+  btn.setAttribute('aria-expanded', open);
+  if (open) { const o = $('button.on', pop) || $('button', pop); o.scrollIntoView({ block: 'nearest' }); o.focus({ preventScroll: true }); }
+}
 V.list = key => {
   const L = LISTS[key];
   const all = P.filter(L.pick);
@@ -1118,14 +1145,8 @@ V.list = key => {
   return `<div class="cat-top">
       <div><h1 class="h-title">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note ? ', ' + L.note.toLowerCase() : ''}</div></div>
       <div class="tools">
-        <label class="sr" for="brand">Brand</label>
-        <div class="select"><select id="brand" data-act="brand"><option value="all">All brands</option>${brands.map(b => `<option value="${esc(b)}"${b === brandBy ? ' selected' : ''}>${esc(b)} (${all.filter(p => p.brand === b).length})</option>`).join('')}</select>${I.chev}</div>
-        <label class="sr" for="sort">Sort</label>
-        <div class="select"><select id="sort" data-act="sort">
-          <option value="featured"${sortBy === 'featured' ? ' selected' : ''}>Featured</option>
-          <option value="low"${sortBy === 'low' ? ' selected' : ''}>Price: low to high</option>
-          <option value="high"${sortBy === 'high' ? ' selected' : ''}>Price: high to low</option>
-        </select>${I.chev}</div>
+        ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
+        ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true)}
       </div>
     </div>
     ${grid(list)}`;
@@ -1506,6 +1527,7 @@ document.addEventListener('click', e => {
   const a = e.target.closest('[data-act]');
   const pop = $('#size-pop');
   if (pop && !pop.hidden && !e.target.closest('#size-pop,#size-btn')) sizePop(false);
+  if (!e.target.closest('.dd')) ddOpen(null);
   if (!a) return;
   const d = a.dataset;
   switch (d.act) {
@@ -1513,6 +1535,13 @@ document.addEventListener('click', e => {
     case 'quick': e.preventDefault(); addToBag(d.id, d.size); break;
     case 'view': setView(+d.i); break;
     case 'size': sizePop(); break;
+    case 'dd': ddOpen(a); break;
+    case 'dd-pick': {
+      if (d.dd === 'brand') brandBy = d.v; else sortBy = d.v;
+      render();
+      $('#dd-' + d.dd)?.focus({ preventScroll: true });
+      break;
+    }
     case 'pick': {
       PV.size = d.size;
       const p = vOf(BY[PV.id], PV.v);
@@ -1565,8 +1594,6 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   const d = e.target.dataset;
-  if (d.act === 'sort') { sortBy = e.target.value; render(); }
-  if (d.act === 'brand') { brandBy = e.target.value; render(); }
   if (d.act === 'ship') { express = e.target.value === 'exp'; $('#co-sum').innerHTML = summaryRows(express, true); }
   if (d.act === 'pay') setPay(e.target.value);
 });
@@ -1582,7 +1609,17 @@ document.addEventListener('input', e => {
   const f = e.target.closest('.field.bad'); if (f) f.classList.remove('bad');
 });
 document.addEventListener('keydown', e => {
+  const dd = e.target.closest && e.target.closest('.dd');
+  if (e.key === 'Escape' && dd && !$('.dd-pop', dd).hidden) { ddOpen(null); $('.dd-btn', dd).focus(); return; }
   if (e.key === 'Escape') { closeLayer(); sizePop(false); }
+  // arrows walk the open list
+  if (dd && /^Arrow(Up|Down)$/.test(e.key)) {
+    e.preventDefault();
+    const btn = $('.dd-btn', dd), pop = $('.dd-pop', dd);
+    if (pop.hidden) return ddOpen(btn, true);
+    const o = $$('button', pop), i = o.indexOf(document.activeElement);
+    o[Math.max(0, Math.min(o.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1)))].focus();
+  }
   if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
 });
 const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
