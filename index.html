@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-2 -4 17 17' shape-rendering='crispEdges'%3E%3Crect x='-2' y='-4' width='17' height='17' rx='3' fill='%23E7E7E7'/%3E%3Cpath fill='%23151515' d='M6 0h2v1H6zM5 1h1v1H5zM8 1h1v2H8zM7 3h1v1H7zM6 4h1v1H6zM4 5h2v1H4zM7 5h2v1H7zM2 6h2v1H2zM9 6h2v1H9zM0 7h2v1H0zM11 7h2v1h-2zM0 8h13v1H0z'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Pixelify+Sans:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 <style>
 /* Layout: a white page, one grey studio tone behind every photo, frosted glass for everything that floats over it */
 :root{
@@ -31,7 +31,6 @@
   --err:#B42318;
   --ok:#1F7A3D;
   --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --f-pix:"Pixelify Sans","Inter",ui-monospace,Menlo,monospace;
   --x:clamp(16px,4.4vw,64px);
   --top:calc(env(safe-area-inset-top,0px) + 12px);
   --hdr:42px;
@@ -59,9 +58,8 @@ button{background:none;border:0;padding:0;cursor:pointer}
   border:1px solid var(--glass-rim);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 0 0 .5px var(--glass-edge),var(--shadow);
 }
-.pix{font-family:var(--f-pix);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.label{font-family:var(--f-pix);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink)}
-.h-pix{font-family:var(--f-pix);font-weight:600;font-size:20px;line-height:1.1;text-transform:uppercase;letter-spacing:.03em;margin:0}
+.label{font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink)}
+.h-title{font-weight:500;font-size:20px;line-height:1.1;text-transform:uppercase;letter-spacing:.01em;margin:0}
 .up{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 22px;border-radius:999px;background:var(--pill);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;transition:background .2s,transform .2s var(--ease)}
 .btn:hover{background:var(--pill-hover)}
@@ -86,7 +84,7 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .nav a::after,.nav button::after{content:"";position:absolute;left:0;right:0;bottom:2px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
 .nav a:hover::after,.nav button:hover::after,.nav a.on::after{transform:scaleX(1)}
 .count{display:inline-grid;place-items:center;min-width:16px;height:16px;padding:0 4px;margin-left:4px;border-radius:99px;background:var(--ink);color:#fff;font-size:9.5px;font-weight:600;letter-spacing:0;vertical-align:1px}
-.logo{display:flex;align-items:center;gap:9px;font-family:var(--f-pix);font-weight:600;font-size:21px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
 .logo svg{width:26px;height:18px;flex:none}
 .hdr-m{display:none}
 .icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;position:relative}
@@ -159,7 +157,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 .cat img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transition:transform .9s var(--ease)}
 .cat:hover img{transform:scale(1.035)}
 .cat-plate{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 14px 18px;border-radius:16px}
-.cat-plate b{display:block;color:var(--ink);font-family:var(--f-pix);font-weight:600;font-size:16px;text-transform:uppercase;letter-spacing:.03em}
+.cat-plate b{display:block;color:var(--ink);font-weight:500;font-size:15px;text-transform:uppercase;letter-spacing:.01em}
 .cat-plate span{font-size:12px;color:var(--ink-2)}
 .arrow{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--glass-hi);flex:none;transition:transform .35s var(--ease)}
 .cat:hover .arrow{transform:translateX(3px)}
@@ -188,7 +186,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 
 /* ---------- catalog ---------- */
 .cat-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:44px 0 22px}
-.cat-top .h-pix{font-size:clamp(24px,2.6vw,34px)}
+.cat-top .h-title{font-size:clamp(24px,2.6vw,34px)}
 .cat-top .muted{font-size:12.5px;margin-top:8px}
 .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .select{position:relative}
@@ -243,7 +241,7 @@ details[open] .pm::after{transform:rotate(0)}
 /* ---------- bag + checkout ---------- */
 .two{display:grid;grid-template-columns:minmax(0,480px) 1px minmax(0,300px);gap:0 clamp(32px,4.5vw,64px);justify-content:center;padding-top:44px}
 .two .div{background:var(--line);min-height:320px}
-.two .h-pix{margin-bottom:16px}
+.two .h-title{margin-bottom:16px}
 .sum-h{font-size:15px;font-weight:500;text-transform:uppercase;letter-spacing:.01em;margin:0 0 20px}
 .items{display:flex;flex-direction:column;gap:10px}
 .item{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:12px;padding:6px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);animation:rise .4s var(--ease) backwards}
@@ -295,6 +293,9 @@ details[open] .pm::after{transform:rotate(0)}
 .opt .t{flex:1;font-size:13.5px}
 .opt .t small{display:block;color:var(--ink-2);font-size:12px}
 .form-err{font-size:12px;color:var(--err);margin:-8px 0 0;min-height:0}
+.pays{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:6px}
+.opt .mark{width:38px;height:24px;flex:none}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .done{max-width:520px;margin:0 auto;padding-top:64px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
 .done .stamp{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin-bottom:6px}
 .done .stamp svg{width:26px;height:26px}
@@ -350,7 +351,7 @@ details[open] .pm::after{transform:rotate(0)}
   .hdr{grid-template-columns:auto 1fr auto;padding:0 4px}
   .hdr .nav{display:none}
   .hdr-m{display:flex;align-items:center}
-  .hdr .logo{justify-self:center;font-size:19px}
+  .hdr .logo{justify-self:center;font-size:17px}
   .two{grid-template-columns:minmax(0,1fr);gap:28px;max-width:560px;margin:0 auto}
   .two .div{min-height:0;height:1px}
   .pdp{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"main info" "thumbs info";align-items:start;gap:16px 28px}
@@ -506,6 +507,17 @@ const LISTS = {
   sale: { title: 'Sale', note: 'Up to 25% off', pick: p => !!p.was },
 };
 const PROMOS = { PALE10: 0.10 };
+const box = '<rect x=".5" y=".5" width="37" height="23" rx="4" fill="#fff" stroke="#DEDEDE"/>';
+const CARDS = {
+  visa: { name: 'Visa', re: /^4/, len: [13, 16, 19], cvc: 3,
+    mark: box + '<text x="19" y="16" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="11" font-weight="700" font-style="italic" fill="#1A1F71">VISA</text>' },
+  mc: { name: 'Mastercard', re: /^(5[1-5]|2[2-7])/, len: [16], cvc: 3,
+    mark: box + '<circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path fill="#FF5F00" d="M19 6.26a7 7 0 0 1 0 11.48a7 7 0 0 1 0-11.48z"/>' },
+  unionpay: { name: 'UnionPay', re: /^(62|81)/, len: [16, 17, 18, 19], cvc: 3, noLuhn: true,
+    mark: box + '<path fill="#E21836" d="M9.5 5h8l-3.2 14h-8z"/><path fill="#00447C" d="M16 5h8l-3.2 14h-8z"/><path fill="#007B84" d="M22.5 5h8l-3.2 14h-8z"/>' },
+  amex: { name: 'American Express', re: /^3[47]/, len: [15], cvc: 4,
+    mark: '<rect width="38" height="24" rx="4" fill="#1F72CD"/><text x="19" y="15.5" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="8.5" font-weight="700" fill="#fff">AMEX</text>' },
+};
 const FREE_FROM = 0; // every order ships free
 const EXPRESS = 25;
 
@@ -608,11 +620,11 @@ V.home = () => {
     </div>
   </section>
   <section class="sec">
-    <div class="sec-h"><h2 class="h-pix">New in</h2><a class="link" href="#new">View all</a></div>
+    <div class="sec-h"><h2 class="h-title">New in</h2><a class="link" href="#new">View all</a></div>
     ${grid(P.filter(p => p.isNew).slice(0, 4), 'four')}
   </section>
   <section class="sec">
-    <div class="sec-h"><h2 class="h-pix">Shop by category</h2></div>
+    <div class="sec-h"><h2 class="h-title">Shop by category</h2></div>
     <div class="cats">
       ${[['women', 'rib-knit-dress'], ['men', 'heavy-hoodie'], ['shoes', 'lug-derby']].map(([k, id]) => {
         const n = P.filter(LISTS[k].pick).length;
@@ -629,7 +641,7 @@ V.list = key => {
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   return `<div class="cat-top">
-      <div><h1 class="h-pix">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note ? ', ' + L.note.toLowerCase() : ''}</div></div>
+      <div><h1 class="h-title">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note ? ', ' + L.note.toLowerCase() : ''}</div></div>
       <div class="tools">
         <label class="sr" for="sort">Sort</label>
         <div class="select"><select id="sort" data-act="sort">
@@ -682,7 +694,7 @@ V.product = id => {
     </div>
   </section>
   <div class="pbar glass" id="pbar"><div><b>${esc(p.name)}</b><span>${money(p.price)}${PV.size ? ', ' + sizeLabel(p, PV.size) : ''}</span></div><button class="btn" data-act="add">Add to bag</button></div>
-  ${rel.length ? `<section class="sec"><div class="sec-h"><h2 class="h-pix">You may also like</h2></div>${grid(rel, 'four')}</section>` : ''}`;
+  ${rel.length ? `<section class="sec"><div class="sec-h"><h2 class="h-title">You may also like</h2></div>${grid(rel, 'four')}</section>` : ''}`;
 };
 
 function summaryRows(express, atCheckout) {
@@ -697,10 +709,10 @@ function summaryRows(express, atCheckout) {
 }
 
 V.bag = () => {
-  if (!S.bag.length) return `<div class="empty"><h1 class="h-pix">Your bag is empty</h1><p>Pieces you add will wait for you here.</p><a class="btn" href="#new">Shop new in</a></div>`;
+  if (!S.bag.length) return `<div class="empty"><h1 class="h-title">Your bag is empty</h1><p>Pieces you add will wait for you here.</p><a class="btn" href="#new">Shop new in</a></div>`;
   return `<div class="two">
     <section>
-      <h1 class="h-pix">Bag <span class="muted">(${bagCount()})</span></h1>
+      <h1 class="h-title">Bag <span class="muted">(${bagCount()})</span></h1>
       <div class="items">${S.bag.map(l => {
         const p = BY[l.id], k = lineKey(l);
         return `<div class="item">
@@ -727,15 +739,15 @@ V.bag = () => {
   </div>`;
 };
 
-let express = false;
+let express = false, payBy = 'visa';
 V.checkout = () => {
   if (!S.bag.length) return V.bag();
   const u = S.user || {};
-  const f = (id, label, type = 'text', ac = '', full = false, val = '') =>
-    `<div class="field${full ? ' full' : ''}"><input id="${id}" name="${id}" type="${type}" placeholder=" " autocomplete="${ac}" value="${esc(val)}" required><label for="${id}">${label}</label></div>`;
+  const f = (id, label, type = 'text', ac = '', full = false, val = '', more = '') =>
+    `<div class="field${full ? ' full' : ''}"><input id="${id}" name="${id}" type="${type}" placeholder=" " autocomplete="${ac}" value="${esc(val)}"${more} required><label for="${id}">${label}</label></div>`;
   return `<div class="two">
     <section>
-      <h1 class="h-pix">Checkout</h1>
+      <h1 class="h-title">Checkout</h1>
       <form class="form" id="co-form" novalidate>
         <fieldset class="fs"><legend>Contact</legend>${f('email', 'Email', 'email', 'email', true, u.email || '')}</fieldset>
         <fieldset class="fs"><legend>Shipping address</legend>
@@ -750,6 +762,12 @@ V.checkout = () => {
             <label class="opt"><input type="radio" name="ship" value="exp"${express ? ' checked' : ''} data-act="ship"><span class="t">Express<small>1 to 2 business days</small></span><span class="num">${money(EXPRESS)}</span></label>
           </div>
         </fieldset>
+        <fieldset class="fs"><legend>Payment</legend>
+          <div class="opts pays full">${Object.entries(CARDS).map(([k, c]) => `<label class="opt"><input type="radio" name="pay" value="${k}"${k === payBy ? ' checked' : ''} data-act="pay"><span class="t">${c.name}</span><svg class="mark" viewBox="0 0 38 24" aria-hidden="true">${c.mark}</svg></label>`).join('')}</div>
+          ${f('cc-num', 'Card number', 'text', 'cc-number', true, '', ' inputmode="numeric" maxlength="23"')}
+          <div class="pair full">${f('cc-exp', 'Expiry (MM/YY)', 'text', 'cc-exp', false, '', ' inputmode="numeric" maxlength="5"')}${f('cc-cvc', 'Security code', 'text', 'cc-csc', false, '', ` inputmode="numeric" maxlength="${CARDS[payBy].cvc}"`)}</div>
+          ${f('cc-name', 'Name on card', 'text', 'cc-name', true)}
+        </fieldset>
         <p class="form-err" id="co-err" aria-live="polite"></p>
       </form>
     </section>
@@ -759,7 +777,7 @@ V.checkout = () => {
       <div class="sum-items">${S.bag.map(l => { const p = BY[l.id]; return `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>`; }).join('')}</div>
       <div id="co-sum">${summaryRows(express, true)}</div>
       <button class="btn wide" style="margin-top:24px" type="submit" form="co-form">Place order</button>
-      <p class="muted" style="font-size:12px;margin:10px 2px 0">Payment step is not connected yet. Placing an order here saves it to your account.</p>
+      <p class="muted" style="font-size:12px;margin:10px 2px 0">Test mode: no money is taken and card details are not saved. Placing an order here saves it to your account.</p>
     </section>
   </div>`;
 };
@@ -769,12 +787,13 @@ V.order = n => {
   if (!o) return V.missing();
   return `<div class="done">
     <span class="stamp glass">${I.check}</span>
-    <h1 class="h-pix">Thank you</h1>
+    <h1 class="h-title">Thank you</h1>
     <p class="muted" style="margin:0">Order ${esc(o.n)} is placed for ${esc(o.email)}. You can find it in your account.</p>
     <div class="items">${o.lines.map(l => { const p = BY[l.id]; return p ? `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>` : ''; }).join('')}</div>
     <div class="rows num" style="width:100%">
       ${o.disc ? `<div><span>Subtotal</span><span>${money2(o.sub)}</span></div><div class="disc"><span>Promo ${esc(o.promo || '')}</span><span>−${money2(o.disc)}</span></div>` : ''}
       <div><span>Shipping</span><span>${o.ship ? money2(o.ship) : 'Free'}</span></div>
+      ${o.pay ? `<div><span>Payment</span><span>${esc(o.pay.brand)} •••• ${esc(o.pay.last4)}</span></div>` : ''}
       <div class="tot"><span>Order total</span><span>${money2(o.total)}</span></div>
     </div>
     <a class="btn" href="#home" style="margin-top:18px">Continue shopping</a>
@@ -783,15 +802,15 @@ V.order = n => {
 
 V.wishlist = () => {
   const list = S.wish.map(id => BY[id]).filter(Boolean);
-  if (!list.length) return `<div class="empty"><h1 class="h-pix">Wishlist</h1><p>Tap the heart on any piece to save it here.</p><a class="btn" href="#new">Shop new in</a></div>`;
-  return `<div class="cat-top"><div><h1 class="h-pix">Wishlist</h1><div class="muted">${list.length} saved</div></div></div>${grid(list)}`;
+  if (!list.length) return `<div class="empty"><h1 class="h-title">Wishlist</h1><p>Tap the heart on any piece to save it here.</p><a class="btn" href="#new">Shop new in</a></div>`;
+  return `<div class="cat-top"><div><h1 class="h-title">Wishlist</h1><div class="muted">${list.length} saved</div></div></div>${grid(list)}`;
 };
 
 let accTab = 'in';
 V.account = () => {
   if (S.user) {
     return `<div class="narrow" style="max-width:520px">
-      <h1 class="h-pix">Account</h1>
+      <h1 class="h-title">Account</h1>
       <div class="acc-card"><span class="label">Signed in</span><p style="margin:8px 0 0"><b>${esc(S.user.name)}</b><br><span class="muted">${esc(S.user.email)}</span></p></div>
       <h2 class="sum-h" style="font-size:13px;margin-bottom:12px">Orders</h2>
       ${S.orders.length ? `<div class="orders">${S.orders.slice().reverse().map(o => `<a class="order" href="#order-${o.n}"><span>${esc(o.n)}<small>${new Date(o.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, ${o.lines.reduce((a, l) => a + l.qty, 0)} items</small></span><span class="num">${money2(o.total)}</span></a>`).join('')}</div>` : `<p class="muted">No orders yet.</p>`}
@@ -800,7 +819,7 @@ V.account = () => {
   }
   const up = accTab === 'up';
   return `<div class="narrow">
-    <h1 class="h-pix" style="text-align:center">Account</h1>
+    <h1 class="h-title" style="text-align:center">Account</h1>
     <div class="seg${up ? ' r' : ''}" role="tablist"><i></i><button role="tab" aria-selected="${!up}" class="${up ? '' : 'on'}" data-act="tab" data-t="in">Sign in</button><button role="tab" aria-selected="${up}" class="${up ? 'on' : ''}" data-act="tab" data-t="up">Create account</button></div>
     <form class="stack" id="acc-form" novalidate>
       ${up ? `<div class="field"><input id="a-name" placeholder=" " autocomplete="name" required><label for="a-name">Full name</label></div>` : ''}
@@ -819,14 +838,14 @@ const PAGES = {
     ['How long does delivery take?', 'Standard shipping takes 3 to 5 business days and is free. Express takes 1 to 2 business days.'],
     ['Can I return an order?', 'Yes. Returns are free within 30 days of delivery, as long as the piece is unworn and has its tags.'],
     ['How do I pick a size?', 'Each product page notes the fit. Shoes use US sizes; clothing runs XS to XL.'],
-    ['Which payment methods do you accept?', 'Cards, Apple Pay and Google Pay. The payment step will open at checkout.'],
+    ['Which payment methods do you accept?', 'Visa, Mastercard, UnionPay and American Express. You enter your card at checkout.'],
     ['How do I track my order?', 'Your orders are listed in your account. A tracking link arrives by email once the parcel ships.'],
   ].map(([q, a]) => `<details><summary>${q}<span class="pm"></span></summary><div class="body">${a}</div></details>`).join('')}</div>`],
   privacy: ['Privacy', `<p>We keep only what we need to deliver your order: your name, email and shipping address.</p><p>We never sell your data. Your bag and wishlist are stored in this browser.</p><p>To delete your account and data, write to hello@palestore.shop.</p>`],
   app: ['Mobile app', `<p>The Pale Store app for iPhone and Android is in the works. Until then, this site works the same on your phone: add it to your home screen from the browser menu.</p>`],
 };
-V.page = k => `<div class="page"><h1 class="h-pix">${PAGES[k][0]}</h1><div style="margin-top:18px">${PAGES[k][1]}</div></div>`;
-V.missing = () => `<div class="empty"><h1 class="h-pix">Not found</h1><p>This page moved or never existed.</p><a class="btn" href="#home">Back to the store</a></div>`;
+V.page = k => `<div class="page"><h1 class="h-title">${PAGES[k][0]}</h1><div style="margin-top:18px">${PAGES[k][1]}</div></div>`;
+V.missing = () => `<div class="empty"><h1 class="h-title">Not found</h1><p>This page moved or never existed.</p><a class="btn" href="#home">Back to the store</a></div>`;
 
 /* ---------- router ---------- */
 function route() {
@@ -952,6 +971,47 @@ function toast(p, size) {
   toastT = setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 300); }, 3600);
 }
 
+/* ---------- card fields: format as you type, pick the brand from the number. Nothing here is saved or sent. ---------- */
+const digits = v => v.replace(/\D/g, '');
+const cardOf = n => Object.keys(CARDS).find(k => CARDS[k].re.test(n));
+const luhn = n => [...n].reverse().reduce((s, c, i) => { let d = +c; if (i % 2) { d *= 2; if (d > 9) d -= 9; } return s + d; }, 0) % 10 === 0;
+const groupCard = (n, k) => (k === 'amex' ? [n.slice(0, 4), n.slice(4, 10), n.slice(10)] : n.match(/.{1,4}/g) || []).filter(Boolean).join(' ');
+function reformat(i, text) {
+  // keep the caret after the same digit it was after
+  const at = digits(i.value.slice(0, i.selectionStart)).length;
+  i.value = text;
+  let c = 0;
+  for (let k = 0; c < text.length && k < at; c++) if (/\d/.test(text[c])) k++;
+  i.setSelectionRange(c, c);
+}
+function setPay(k) {
+  payBy = k;
+  const r = $(`input[name="pay"][value="${k}"]`); if (r) r.checked = true;
+  const num = $('#cc-num'), cvc = $('#cc-cvc');
+  if (num) num.value = groupCard(digits(num.value), k);
+  if (cvc) { cvc.maxLength = CARDS[k].cvc; cvc.value = cvc.value.slice(0, CARDS[k].cvc); }
+  $$('#cc-num, #cc-cvc').forEach(i => i.parentElement.classList.remove('bad'));
+}
+const FILL = 'Fill in the highlighted fields';
+function fieldErr(i) {
+  const v = i.value.trim(), c = CARDS[payBy];
+  if (!v) return FILL;
+  if (i.type === 'email' && !emailOk(v)) return 'Check the email address';
+  if (i.id === 'cc-num') {
+    const n = digits(v), k = cardOf(n);
+    if (!k) return 'We accept Visa, Mastercard, UnionPay and American Express';
+    if (k !== payBy) return `This is not a ${c.name} card`;
+    if (!c.len.includes(n.length) || (!c.noLuhn && !luhn(n))) return 'Check the card number';
+  }
+  if (i.id === 'cc-exp') {
+    const m = v.match(/^(\d\d)\/(\d\d)$/), now = new Date();
+    const when = m ? (2000 + +m[2]) * 12 + +m[1] : 0, today = now.getFullYear() * 12 + now.getMonth() + 1;
+    if (!m || +m[1] < 1 || +m[1] > 12 || when < today || when > today + 240) return 'Check the expiry date';
+  }
+  if (i.id === 'cc-cvc' && digits(v).length !== c.cvc) return 'Check the security code';
+  return '';
+}
+
 /* ---------- events ---------- */
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-act]');
@@ -1007,9 +1067,17 @@ document.addEventListener('change', e => {
   const d = e.target.dataset;
   if (d.act === 'sort') { sortBy = e.target.value; render(); }
   if (d.act === 'ship') { express = e.target.value === 'exp'; $('#co-sum').innerHTML = summaryRows(express, true); }
+  if (d.act === 'pay') setPay(e.target.value);
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') searchOut(e.target.value);
+  if (e.target.id === 'cc-num') {
+    const n = digits(e.target.value).slice(0, 19), k = cardOf(n);
+    reformat(e.target, groupCard(n, k || payBy));
+    if (k && k !== payBy) setPay(k);
+  }
+  if (e.target.id === 'cc-exp') { const n = digits(e.target.value).slice(0, 4); reformat(e.target, n.length > 2 ? n.slice(0, 2) + '/' + n.slice(2) : n); }
+  if (e.target.id === 'cc-cvc') reformat(e.target, digits(e.target.value).slice(0, CARDS[payBy].cvc));
   const f = e.target.closest('.field.bad'); if (f) f.classList.remove('bad');
 });
 document.addEventListener('keydown', e => {
@@ -1031,17 +1099,19 @@ document.addEventListener('submit', e => {
     const m = $('#promo-msg'); m.className = 'promo-msg ok'; m.textContent = `${c} applied: ${PROMOS[c] * 100}% off`;
   }
   if (f.id === 'co-form') {
-    let bad = null;
+    let bad = null, msg = '';
     $$('input[required]', f).forEach(i => {
-      const ok = i.type === 'email' ? emailOk(i.value.trim()) : i.value.trim().length > 0;
-      i.parentElement.classList.toggle('bad', !ok);
-      if (!ok && !bad) bad = i;
+      const m = fieldErr(i);
+      i.parentElement.classList.toggle('bad', !!m);
+      if (m && !bad) { bad = i; msg = m; }
     });
-    if (bad) { $('#co-err').textContent = bad.type === 'email' && bad.value ? 'Check the email address' : 'Fill in the highlighted fields'; bad.focus(); return; }
+    if (bad) { $('#co-err').textContent = msg; bad.focus(); return; }
     const sub = subtotal(), d = discount(), ship = express ? EXPRESS : 0;
     const n = 'PS-' + (1041 + S.orders.length);
-    S.orders.push({ n, at: Date.now(), email: $('#email').value.trim(), lines: S.bag.map(l => ({ ...l })), sub, disc: d, promo: S.promo, ship, total: sub - d + ship });
-    S.bag = []; S.promo = null; express = false; save();
+    // only the brand and the last 4 digits are kept, as on a receipt
+    const pay = { brand: CARDS[payBy].name, last4: digits($('#cc-num').value).slice(-4) };
+    S.orders.push({ n, at: Date.now(), email: $('#email').value.trim(), lines: S.bag.map(l => ({ ...l })), sub, disc: d, promo: S.promo, ship, pay, total: sub - d + ship });
+    S.bag = []; S.promo = null; express = false; payBy = 'visa'; save();
     location.hash = 'order-' + n;
   }
   if (f.id === 'acc-form') {
