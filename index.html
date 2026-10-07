@@ -171,7 +171,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 .hot a{outline:none;-webkit-tap-highlight-color:transparent}
 .hot a path{fill:transparent;pointer-events:visiblePainted;cursor:pointer}
 /* the press outline: a contrasting grey line along the piece (not the browser's blue focus box) */
-.hot-line{fill:none;stroke:#686868;stroke-width:3px;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke;pointer-events:none;opacity:0;transition:opacity .15s}
+.hot-line{fill:none;stroke:#686868;stroke-width:2.5px;vector-effect:non-scaling-stroke;pointer-events:none;opacity:0;transition:opacity .15s}
 .hot-line.on{opacity:1}
 .tag i{width:8px;height:8px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 4px rgba(21,21,21,.12);flex:none}
 .tag b{font-weight:500}
@@ -1123,7 +1123,7 @@ V.home = () => {
     ['margiela-future-high', '', 'shoes', 'M1087 862L1073 875L1056 910L1058 942L1064 960L1077 970L1135 982L1169 995L1182 1009L1188 1032L1203 1053L1221 1057L1232 1052L1276 1010L1311 961L1319 919L1316 907L1303 899L1213 884L1160 861L1132 854ZM936 857L834 809L807 810L761 892L764 899L689 956L628 983L613 1002L614 1014L623 1024L654 1039L719 1053L778 1049L929 1023L945 1009Z'],
     ['lv-snow-mask', '', 'gog', 'M1235 117L1205 91L1150 81L1107 83L1056 92L1032 116L1019 153L1025 212L1052 226L1087 232L1142 217L1161 224L1217 210L1240 166Z'],
   ];
-  const hot = `<svg class="hot" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">${HOT.map(([id, v, o, d]) => { const p = vOf(BY[id], v); return `<a href="${vHref(p)}" data-o="${o}" tabindex="-1"><path d="${d}"/></a>`; }).join('')}<path class="hot-line" d=""/></svg>`;
+  const hot = `<svg class="hot" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">${HOT.map(([id, v, o, d]) => { const p = vOf(BY[id], v); return `<a href="${vHref(p)}" data-o="${o}" tabindex="-1"><path d="${d}"/></a>`; }).join('')}<rect class="hot-line" rx="6"/></svg>`;
   loadOutlines();
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   return `<section class="hero">
@@ -1647,11 +1647,34 @@ function outlineNow(key) {
   return OUTL[key][Math.min(OUTL[key].length - 1, Math.round(src / OUTL.step))];
 }
 let pressT;
+// the bounds of an outline path ('M x y l dx dy ... z', several pieces allowed), in frame pixels
+function boxOf(d) {
+  if (!d) return null;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const sub of d.split('z')) {
+    const m = sub.match(/^M(-?\d+) (-?\d+)l(.*)$/);
+    if (!m) continue;
+    let x = +m[1], y = +m[2];
+    const n = m[3].match(/-?\d+/g) || [];
+    for (let i = -2; i < n.length; i += 2) {
+      if (i >= 0) { x += +n[i]; y += +n[i + 1]; }
+      x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y);
+    }
+  }
+  return x0 < Infinity ? [x0, y0, x1, y1] : null;
+}
 function pressLine(a, on) {
   const line = $('.hot-line');
   if (!line) return;
   clearTimeout(pressT);
-  if (on) { const d = outlineNow(a.dataset.o); if (d) { line.setAttribute('d', d); line.classList.add('on'); } }
+  if (on) {
+    // a square frame around the piece as it is in this frame (the owner asked for a box, in grey)
+    const b = boxOf(outlineNow(a.dataset.o)), pad = 12;
+    if (b) {
+      for (const [k, v] of Object.entries({ x: b[0] - pad, y: b[1] - pad, width: b[2] - b[0] + 2 * pad, height: b[3] - b[1] + 2 * pad })) line.setAttribute(k, v);
+      line.classList.add('on');
+    }
+  }
   else pressT = setTimeout(() => line.classList.remove('on'), 120);
 }
 document.addEventListener('pointerdown', e => { const a = e.target.closest && e.target.closest('.hot a, .reel .tag'); if (a) pressLine(a, true); });
