@@ -167,7 +167,6 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .crow:hover{background:rgba(0,0,0,.035)}
 .crow>span:first-child{flex:1}
 .crow .ico{width:16px;height:16px;color:var(--ink-3);transition:translate .3s var(--ease)}
-.crow:hover .ico{translate:3px 0}
 .menu{overflow-x:hidden}
 .menu .crow{display:flex;font-size:22px;letter-spacing:-.01em;padding:12px 4px}
 .menu .crow .ico{width:20px;height:20px}
@@ -191,12 +190,13 @@ main{flex:1;padding:0 var(--x);outline:none}
 .view{animation:rise .45s var(--ease) backwards}
 /* Switching sections: the old page fades out while the new one fades in and settles (View Transitions), so there is
    no blank frame between them and no jump to the top of the page. Browsers without it keep the rise above. */
-::view-transition-old(root){animation:vt-out .32s cubic-bezier(.4,0,.6,1) both}
-::view-transition-new(root){animation:vt-in .48s cubic-bezier(.4,0,.2,1) both}
+/* the old page stays put underneath while the new one dissolves in over it: both are never half see-through at once,
+   which made the screen flash pale (owner: "дёргается") */
+::view-transition-old(root){animation:none}
+::view-transition-new(root){animation:vt-in .34s cubic-bezier(.4,0,.2,1) both}
 .view.vt-in{animation:settle .5s var(--ease) backwards}
-@keyframes vt-out{to{opacity:0}}
 @keyframes vt-in{from{opacity:0}}
-@keyframes settle{from{transform:translateY(10px)}}
+@keyframes settle{from{transform:translateY(6px)}}
 /* photos that are not in the cache yet fade in when they arrive instead of popping in (classes set in the script) */
 .view img:not(.ld):not(.ld0){opacity:0}
 .view img.ld{animation:fade .5s ease}
@@ -236,11 +236,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 .tag.l i{order:1}
 .reel .tag{background-color:rgba(255,255,255,.74)}
 .reel .tag span{color:#5A5A5A;transition:color .4s var(--ease)}
-.tag:hover,.tag.lit{transform:translateY(-2px);background-color:var(--glass-hi)}
 /* on the home video a tag turns black under the pointer (owner's request), also while the pointer is on its piece */
-.reel .tag:hover,.reel .tag.lit{background-color:rgba(21,21,21,.9);background-image:none;color:#fff;border-color:rgba(255,255,255,.14);box-shadow:0 10px 26px -12px rgba(0,0,0,.45)}
-.reel .tag:hover span,.reel .tag.lit span{color:rgba(255,255,255,.66)}
-.reel .tag:hover i,.reel .tag.lit i{background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.2)}
 /* a hint that the tag opens the piece (owner's request): under the pointer "Shop" with an arrow slides out of the tag
    behind a thin line, the arrow nudges and the dot pulses. Only where there is a pointer to hover with. */
 .tag .go{display:none}
@@ -290,12 +286,10 @@ main{flex:1;padding:0 var(--x);outline:none}
 .cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
 .cat{position:relative;display:block;border-radius:var(--r-tile);overflow:hidden;background:var(--tile);aspect-ratio:1/1}
 .cat img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transition:transform .9s var(--ease)}
-.cat:hover img{transform:scale(1.035)}
 .cat-plate{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 14px 18px;border-radius:16px}
 .cat-plate b{display:block;color:var(--ink);font-weight:500;font-size:15px;text-transform:uppercase;letter-spacing:.01em}
 .cat-plate span{font-size:12px;color:var(--ink-2)}
 .arrow{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.06);flex:none;transition:transform .35s var(--ease)}
-.cat:hover .arrow{transform:translateX(3px)}
 
 /* ---------- product card ---------- */
 .card{position:relative;min-width:0}
@@ -312,10 +306,8 @@ main{flex:1;padding:0 var(--x);outline:none}
 .cdots-ph i{width:5px;height:5px;border-radius:99px;background:rgba(21,21,21,.22);box-shadow:0 0 0 1px rgba(255,255,255,.5);transition:width .35s var(--ease),background .35s}
 .cdots-ph i.on{width:14px;background:rgba(21,21,21,.7)}
 @media (hover:hover){.media:hover .cdots-ph{opacity:0}}
-.card:hover .ph img{transform:scale(1.035)}
 .badge{position:absolute;z-index:2;top:10px;left:10px;height:26px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;font-size:11px;font-weight:500;letter-spacing:.02em;box-shadow:var(--glass-shadow-sm)}
 .heart{position:absolute;z-index:2;top:8px;right:8px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;box-shadow:var(--glass-shadow-sm);transition:transform .25s var(--ease)}
-.heart:hover{transform:scale(1.06)}
 .heart .ico{width:16px;height:16px}
 .heart.on .ico,.wish-btn.on .ico{fill:var(--ink)}
 .quick{position:absolute;z-index:2;left:8px;right:8px;bottom:8px;border-radius:14px;padding:10px;background-color:rgba(255,255,255,.78);opacity:0;transform:translateY(10px);transition:opacity .3s,transform .4s var(--ease);pointer-events:none}
@@ -347,7 +339,6 @@ main{flex:1;padding:0 var(--x);outline:none}
 .deal:not(.main) .pics{width:64%;inset:8% 2% 0 auto}
 .deal .pics a{flex:0 1 auto;height:100%;aspect-ratio:3/4;margin-left:-7%;transition:transform .5s var(--ease);
   -webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.deal .pics a:hover{transform:translateY(-6px)}
 .deal .pics img{width:100%;height:100%;object-fit:cover}
 .deal-card{position:absolute;z-index:2;left:clamp(14px,2vw,26px);bottom:clamp(14px,2vw,26px);width:min(380px,calc(42% - 20px));border-radius:20px;padding:20px 20px 18px}
 .deal-card h2{font-size:clamp(24px,2.6vw,38px);line-height:1.05;font-weight:500;letter-spacing:-.025em;margin:8px 0 8px}
@@ -405,7 +396,6 @@ main{flex:1;padding:0 var(--x);outline:none}
 .back{display:inline-flex;align-items:center;gap:6px;height:32px;margin-top:18px;padding:0 14px 0 10px;border-radius:999px;background:var(--pill);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;transition:background .25s}
 .back:hover{background:var(--pill-hover)}
 .back .ico{width:14px;height:14px;transition:translate .35s var(--ease)}
-.back:hover .ico{translate:-3px 0}
 .back + .pdp{padding-top:14px}
 .back + .two,.back + .page,.back + .cat-top{padding-top:22px}
 .back + .narrow{padding-top:26px}
@@ -677,6 +667,21 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   .ftr .side{width:100%;justify-content:space-between}
   .toast{right:16px}
   body.has-pbar .ftr{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
+/* hover moves only where there is a pointer to hover with: on phones a tap left them stuck (a zoomed photo, a lifted
+   tag) when coming back to the page */
+@media (hover:hover){
+  .reel .tag:hover,.reel .tag.lit{background-color:rgba(21,21,21,.9);background-image:none;color:#fff;border-color:rgba(255,255,255,.14);box-shadow:0 10px 26px -12px rgba(0,0,0,.45)}
+  .reel .tag:hover span,.reel .tag.lit span{color:rgba(255,255,255,.66)}
+  .reel .tag:hover i,.reel .tag.lit i{background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.2)}
+  .tag:hover,.tag.lit{transform:translateY(-2px);background-color:var(--glass-hi)}
+  .cat:hover img{transform:scale(1.035)}
+  .cat:hover .arrow{transform:translateX(3px)}
+  .card:hover .ph img{transform:scale(1.035)}
+  .heart:hover{transform:scale(1.06)}
+  .deal .pics a:hover{transform:translateY(-6px)}
+  .crow:hover .ico{translate:3px 0}
+  .back:hover .ico{translate:-3px 0}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -1506,7 +1511,7 @@ function refreshList(wait) {
     t.innerHTML = V.list(r.arg);
     $('#lcount').innerHTML = $('#lcount', t).innerHTML;
     $('#lgrid').replaceWith($('#lgrid', t));
-    $$('#lgrid img').forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
+    markSeen($('#lgrid'));
   });
 }
 // a range changed: the catalog redraws its pieces, search its results; typed prices wait until the typing pauses
@@ -1846,9 +1851,10 @@ function paint(r, key, scroll, fade) {
     $$('button', gp).forEach(b => { const on = b.dataset.g === genderBy; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
     placeG(true);
   } else { strip.innerHTML = sh; strip.hidden = !sh; placeG(); placeTG(); }
-  app.innerHTML = `<div class="view${fade ? ' vt-in' : ''}">${V[r.name](r.arg, r.v)}</div>`;
-  // photos already in the cache show at once; the rest fade in on load (the listener below)
-  $$('img', app).forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
+  // Back and Forward return to a page as it was: no settling move, which looked like a jump after the restored scroll
+  const traverse = !!(history.state && history.state.k);
+  app.innerHTML = `<div class="view${fade && !traverse ? ' vt-in' : ''}"${traverse ? ' style="animation:none"' : ''}>${V[r.name](r.arg, r.v)}</div>`;
+  markSeen(app);
   // the same page redrawn (the Men / Women switch included) does not settle, so the title and filters that stay put do not shift
   if (key === lastKey && !scroll) { app.firstElementChild.style.animation = 'none'; window.scrollTo(0, y); }
   else { const [k, back] = stepKey(); window.scrollTo(0, back && SCROLL[k] || 0); }
@@ -1868,8 +1874,16 @@ function titleFor(r) {
   return r.name.charAt(0).toUpperCase() + r.name.slice(1) + ' | Pale Store';
 }
 window.addEventListener('hashchange', () => render(true));
+// Photos already shown once show at once when a page is drawn again (Back, a filter); the rest fade in when they arrive.
+// The list of shown photos is kept because Safari reports even cached lazy photos as not loaded yet.
+const SEEN = new Set();
+function markSeen(root) { $$('img', root).forEach(i => { if (SEEN.has(i.getAttribute('src')) || (i.complete && i.naturalWidth)) i.classList.add('ld0'); }); }
 for (const type of ['load', 'error'])
-  document.addEventListener(type, e => { if (e.target.tagName === 'IMG' && !e.target.classList.contains('ld0')) e.target.classList.add('ld'); }, true);
+  document.addEventListener(type, e => {
+    if (e.target.tagName !== 'IMG') return;
+    if (type === 'load') SEEN.add(e.target.getAttribute('src'));
+    if (!e.target.classList.contains('ld0')) e.target.classList.add('ld');
+  }, true);
 
 /* ---------- product page behaviour ---------- */
 function setView(i) {
