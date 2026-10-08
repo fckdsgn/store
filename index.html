@@ -115,10 +115,6 @@ button{background:none;border:0;padding:0;cursor:pointer}
 /* the white part slides to the picked button (placed by placeG() in the script), like the switch on the account page */
 .gpill>i{position:absolute;top:3px;bottom:3px;left:0;width:var(--gw,0);transform:translateX(var(--gx,0));border-radius:999px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.08),0 4px 12px -4px rgba(0,0,0,.16)}
 .gpill.ready>i{transition:transform .45s var(--ease),width .45s var(--ease)}
-/* while the pieces cross-fade after a switch, the pill stays live so its slide is seen, not a fade */
-html.g-switch .gpill{view-transition-name:gpill}
-::view-transition-old(gpill){display:none}
-::view-transition-new(gpill){animation:none}
 .tg-pill{display:inline-flex;align-items:center;max-width:100%;height:34px;padding:0 14px 0 6px;border-radius:999px;font-size:12px;white-space:nowrap;transition:background .4s var(--ease)}
 .tg-pill:hover{background-color:rgba(255,255,255,.92)}
 .tg-row{display:flex;align-items:center;gap:10px;min-width:0}
@@ -1734,15 +1730,29 @@ function stepKey() {
   try { history.replaceState({ ...(st || {}), k, d }, ''); } catch (err) {}
   return [k, false];
 }
-function render(scroll, fade) {
+function render(scroll) {
   const r = route(), key = r.name + ':' + (r.arg || '');
-  // a new section or page cross-fades with the old one, and so does the Men / Women switch (`fade`, owner's request);
-  // other redraws of the same page (sort, color, bag) stay instant
-  if ((fade || lastKey && key !== lastKey) && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const root = document.documentElement;
-    root.classList.toggle('g-switch', !!fade);
-    document.startViewTransition(() => paint(r, key, scroll, true)).finished.finally(() => root.classList.remove('g-switch'));
+  // a new section or page cross-fades with the old one; a redraw of the same page (sort, color, bag) stays instant
+  if (lastKey && key !== lastKey && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.startViewTransition(() => paint(r, key, scroll, true));
   } else paint(r, key, scroll, false);
+}
+// The Men / Women switch (owner's request: smooth, not torn): the white part slides at once, the pieces under it fade
+// out and come back with the new choice. No view transition here: its snapshot of the glass pill is a rectangle, which
+// cut the pill's blur and shadow into square corners for a moment.
+let gT = 0;
+function switchGender(g) {
+  genderBy = g;
+  $$('.gpill button').forEach(b => { const on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  placeG(true);
+  const v = $('#app .view');
+  if (!v || !v.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return render();
+  const n = ++gT;
+  v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-out', fill: 'forwards' }).finished.then(() => {
+    if (n !== gT) return;
+    render();
+    $('#app .view').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: 'ease-out' });
+  });
 }
 function paint(r, key, scroll, fade) {
   const app = $('#app');
@@ -2088,7 +2098,7 @@ document.addEventListener('click', e => {
       save(); render(); break;
     }
     case 'search': openSearch(); break;
-    case 'gender': if (d.g !== genderBy) { genderBy = d.g; render(false, true); } break;
+    case 'gender': if (d.g !== genderBy) switchGender(d.g); break;
     case 'resend': startResend(); { const b = $('.code-box'); if (b) b.focus(); } break;
     case 'guide': openGuide(d.k); break;
     case 'menu': openMenu(); break;
