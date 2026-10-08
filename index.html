@@ -157,12 +157,15 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .menu a{display:block;font-size:22px;font-weight:500;padding:8px 4px;letter-spacing:-.01em}
 /* Men / Women first, then the sections (owner's reference): in search the switch sits under the field with the
    sections listed under it; the phone menu goes in two steps, Women / Men / All, then the sections for that choice */
-.stabs{margin:14px 0 2px}
+.utabs{position:relative;display:flex;gap:26px;margin:16px 2px 0;border-bottom:1px solid rgba(0,0,0,.08)}
+.utabs button{padding:10px 0 11px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2);transition:color .3s}
+.utabs button:hover,.utabs button.on{color:var(--ink)}
+.utabs>i{position:absolute;left:0;bottom:-1px;height:1.5px;width:var(--gw,0);transform:translateX(var(--gx,0));background:var(--ink)}
+.utabs.ready>i{transition:transform .45s var(--ease),width .45s var(--ease)}
 .crows{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0 28px;margin-top:6px}
 .crow{display:flex;align-items:center;gap:10px;padding:13px 8px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px;font-weight:500;text-align:left;width:100%;transition:background .2s}
 .crow:hover{background:rgba(0,0,0,.035)}
 .crow>span:first-child{flex:1}
-.crow-n{font-size:12px;font-weight:400;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .crow .ico{width:16px;height:16px;color:var(--ink-3);transition:translate .3s var(--ease)}
 .crow:hover .ico{translate:3px 0}
 .menu{overflow-x:hidden}
@@ -170,7 +173,7 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .menu .crow .ico{width:20px;height:20px}
 .mclip{overflow:hidden}
 .mtrack{display:flex;align-items:flex-start;width:200%;transition:transform .45s var(--ease)}
-.mstep .menu-sub{border-top:0;margin-top:4px}
+.menu .mstep .menu-sub{border-top:0;margin-top:4px}
 .menu.two .mtrack{transform:translateX(-50%)}
 .mstep{width:50%;min-width:0}
 .mstep + .mstep{padding-left:2px}
@@ -368,8 +371,9 @@ main{flex:1;padding:0 var(--x);outline:none}
 .pr{padding:8px 8px 12px;margin-bottom:4px;border-bottom:1px solid rgba(0,0,0,.06)}
 .pr-h{display:flex;align-items:center;justify-content:space-between;min-height:22px;margin:0 2px 8px}
 .pr-h .label{color:var(--ink-2)}
-.dd-pop .pr-reset{min-height:0;padding:0;font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;background:none}
-.dd-pop .pr-reset:hover{background:none;color:var(--ink)}
+.pr-reset,.dd-pop .pr-reset{min-height:0;padding:0;font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;background:none}
+.pr-reset:hover,.dd-pop .pr-reset:hover{background:none;color:var(--ink)}
+.pr.in-sheet{max-width:420px;margin:0;padding:16px 2px 4px;border:0}
 .pr-f{display:flex;align-items:center;gap:8px}
 .pr-f>i{width:8px;height:1px;background:var(--ink-3);flex:none}
 .pr-in{flex:1;display:flex;align-items:center;gap:2px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;transition:border-color .2s,box-shadow .2s}
@@ -1343,7 +1347,7 @@ const placeG = slide => placeSeg($('#strip .gpill'), slide);
 const gOK = g => p => g === 'all' || p.gender === g || (g !== 'unisex' && p.gender === 'unisex');
 const SECTIONS = ['new', 'clothing', 'bags', 'shoes', 'accessories', 'sale'];
 const catRows = g => SECTIONS.map(k => [k, P.filter(p => LISTS[k].pick(p) && gOK(g)(p)).length]).filter(([, n]) => n)
-  .map(([k, n]) => `<a class="crow" href="#${k}" data-act="mgo" data-g="${g}"><span>${LISTS[k].title}</span><span class="crow-n">${n}</span>${I.chevR}</a>`).join('');
+  .map(([k]) => `<a class="crow" href="#${k}" data-act="mgo" data-g="${g}"><span>${LISTS[k].title}</span>${I.chevR}</a>`).join('');
 // the Telegram pill: at rest its icon and line are shifted right by half the room "Join" takes (plus the difference of
 // the side paddings, 14 - 6), so they sit in the middle of the pill
 function placeTG() {
@@ -1431,21 +1435,25 @@ function dealsHTML(all) {
   </section>`;
 }
 let sortBy = 'featured', brandBy = 'all', typeBy = 'all', brandList = '';
-// Price range of a section (null = no limit), and the section's own lowest and highest price for the slider. The slider
-// runs on a log scale: prices go from $129 to $30,094 and most pieces cost under $4,000, so the low end gets fine steps.
-let priceMin = null, priceMax = null, priceLo = 0, priceHi = 0;
+// Price ranges (null = no limit) with the lowest and highest price for their slider: one for the catalog section (in
+// its sort list), one for search. The slider runs on a log scale: prices go from $129 to $30,094 and most pieces cost
+// under $4,000, so the low end gets fine steps.
+const PR = { list: { min: null, max: null, lo: 0, hi: 0 }, search: { min: null, max: null, lo: 0, hi: 0 } };
+let carry = null; // a range set in search, taken into the section opened from it
 const SLIDE = 1000;
 const nice = n => n < 1000 ? Math.round(n / 10) * 10 : n < 10000 ? Math.round(n / 50) * 50 : Math.round(n / 100) * 100;
-const priceAt = t => t <= 0 ? priceLo : t >= SLIDE ? priceHi : Math.min(priceHi, Math.max(priceLo, nice(priceLo * Math.pow(priceHi / priceLo, t / SLIDE))));
-const slideAt = n => n == null ? null : priceHi <= priceLo ? 0 : Math.round(Math.min(SLIDE, Math.max(0, SLIDE * Math.log(n / priceLo) / Math.log(priceHi / priceLo))));
-const priceOK = p => (priceMin == null || p.price >= priceMin) && (priceMax == null || p.price <= priceMax);
-const priceText = () => priceMin != null && priceMax != null ? `${money(priceMin)} – ${money(priceMax)}` : priceMin != null ? `from ${money(priceMin)}` : `up to ${money(priceMax)}`;
-const priceBox = () => {
-  const t0 = slideAt(priceMin) ?? 0, t1 = slideAt(priceMax) ?? SLIDE;
-  return `<div class="pr" style="--a:${t0 / 10}%;--b:${t1 / 10}%">
-    <div class="pr-h"><span class="label">Price</span><button type="button" class="pr-reset" data-act="price-reset"${priceMin == null && priceMax == null ? ' hidden' : ''}>Reset</button></div>
-    <div class="pr-f"><label class="pr-in"><span>$</span><input id="pr-lo" inputmode="numeric" autocomplete="off" placeholder="${priceLo.toLocaleString('en-US')}" value="${priceMin ?? ''}" aria-label="Lowest price"></label><i></i><label class="pr-in"><span>$</span><input id="pr-hi" inputmode="numeric" autocomplete="off" placeholder="${priceHi.toLocaleString('en-US')}" value="${priceMax ?? ''}" aria-label="Highest price"></label></div>
-    <div class="pr-s"><span class="pr-track"><b></b></span><input type="range" id="pr-r0" min="0" max="${SLIDE}" value="${t0}" aria-label="Lowest price"><input type="range" id="pr-r1" min="0" max="${SLIDE}" value="${t1}" aria-label="Highest price"></div>
+const priceAt = (st, t) => t <= 0 ? st.lo : t >= SLIDE ? st.hi : Math.min(st.hi, Math.max(st.lo, nice(st.lo * Math.pow(st.hi / st.lo, t / SLIDE))));
+const slideAt = (st, n) => n == null ? null : st.hi <= st.lo ? 0 : Math.round(Math.min(SLIDE, Math.max(0, SLIDE * Math.log(n / st.lo) / Math.log(st.hi / st.lo))));
+const priceOK = st => p => (st.min == null || p.price >= st.min) && (st.max == null || p.price <= st.max);
+const priced = st => st.min != null || st.max != null;
+const priceText = st => st.min != null && st.max != null ? `${money(st.min)} – ${money(st.max)}` : st.min != null ? `from ${money(st.min)}` : `up to ${money(st.max)}`;
+const setBounds = (st, list) => { st.lo = Math.min(...list.map(p => p.price)); st.hi = Math.max(...list.map(p => p.price)); };
+const priceBox = (scope, cls = '') => {
+  const st = PR[scope], t0 = slideAt(st, st.min) ?? 0, t1 = slideAt(st, st.max) ?? SLIDE;
+  return `<div class="pr ${cls}" data-scope="${scope}" style="--a:${t0 / 10}%;--b:${t1 / 10}%">
+    <div class="pr-h"><span class="label">Price</span><button type="button" class="pr-reset" data-act="price-reset"${priced(st) ? '' : ' hidden'}>Reset</button></div>
+    <div class="pr-f"><label class="pr-in"><span>$</span><input class="pr-lo" inputmode="numeric" autocomplete="off" placeholder="${st.lo.toLocaleString('en-US')}" value="${st.min ?? ''}" aria-label="Lowest price"></label><i></i><label class="pr-in"><span>$</span><input class="pr-hi" inputmode="numeric" autocomplete="off" placeholder="${st.hi.toLocaleString('en-US')}" value="${st.max ?? ''}" aria-label="Highest price"></label></div>
+    <div class="pr-s"><span class="pr-track"><b></b></span><input type="range" class="pr-r0" min="0" max="${SLIDE}" value="${t0}" aria-label="Lowest price"><input type="range" class="pr-r1" min="0" max="${SLIDE}" value="${t1}" aria-label="Highest price"></div>
   </div>`;
 };
 const SORTS = { featured: 'Featured', low: 'Price: low to high', high: 'Price: high to low' };
@@ -1477,18 +1485,26 @@ function refreshList(wait) {
     $('#lcount').innerHTML = $('#lcount', t).innerHTML;
     $('#lgrid').replaceWith($('#lgrid', t));
     $$('#lgrid img').forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
-    const reset = $('.pr-reset'); if (reset) reset.hidden = priceMin == null && priceMax == null;
   });
 }
+// a range changed: the catalog redraws its pieces, search its results; typed prices wait until the typing pauses
+let srW = 0;
+function applyPrice(pr, wait) {
+  const scope = pr ? pr.dataset.scope : 'list', reset = pr && $('.pr-reset', pr);
+  if (reset) reset.hidden = !priced(PR[scope]);
+  if (scope === 'list') return refreshList(wait);
+  clearTimeout(srW);
+  srW = setTimeout(() => { const q = $('#q'); if (q) searchOut(q.value); }, wait || 0);
+}
 // move the slider handles and the filled part to the current range; `fields` also writes the numbers into the fields
-function syncPrice(fields) {
-  const t0 = slideAt(priceMin) ?? 0, t1 = slideAt(priceMax) ?? SLIDE, pr = $('.pr');
+function syncPrice(pr, fields) {
   if (!pr) return;
-  $('#pr-r0').value = t0; $('#pr-r1').value = t1;
+  const st = PR[pr.dataset.scope], t0 = slideAt(st, st.min) ?? 0, t1 = slideAt(st, st.max) ?? SLIDE;
+  $('.pr-r0', pr).value = t0; $('.pr-r1', pr).value = t1;
   pr.style.setProperty('--a', t0 / 10 + '%'); pr.style.setProperty('--b', t1 / 10 + '%');
   // two handles at the top end: the lower one goes on top so it can still be dragged down
-  $('#pr-r0').style.zIndex = t0 > SLIDE / 2 && t1 - t0 < 20 ? 2 : '';
-  if (fields) { $('#pr-lo').value = priceMin ?? ''; $('#pr-hi').value = priceMax ?? ''; }
+  $('.pr-r0', pr).style.zIndex = t0 > SLIDE / 2 && t1 - t0 < 20 ? 2 : '';
+  if (fields) { $('.pr-lo', pr).value = st.min ?? ''; $('.pr-hi', pr).value = st.max ?? ''; }
 }
 V.list = key => {
   const L = LISTS[key];
@@ -1498,7 +1514,7 @@ V.list = key => {
   const mixed = !['clothing', 'bags', 'shoes', 'accessories'].includes(key);
   const typeOf = p => mixed ? p.groups[0] : p.cat;
   const typeName = t => mixed ? LISTS[t].title : t;
-  if (brandList !== key) { brandBy = 'all'; typeBy = 'all'; priceMin = priceMax = null; }
+  if (brandList !== key) { brandBy = 'all'; typeBy = 'all'; PR.list.min = carry ? carry.min : null; PR.list.max = carry ? carry.max : null; carry = null; }
   brandList = key;
   const tally = {};
   all.forEach(p => { tally[typeOf(p)] = (tally[typeOf(p)] || 0) + 1; });
@@ -1512,20 +1528,20 @@ V.list = key => {
   if (!brands.includes(brandBy)) brandBy = 'all';
   const byBrand = brandBy === 'all' ? all : all.filter(p => p.brand === brandBy);
   const typesHere = types.filter(t => byBrand.some(p => typeOf(p) === t));
-  priceLo = Math.min(...all.map(p => p.price)); priceHi = Math.max(...all.map(p => p.price));
-  const priced = priceMin != null || priceMax != null;
-  let list = byType.filter(p => (brandBy === 'all' || p.brand === brandBy) && priceOK(p));
+  setBounds(PR.list, all);
+  const hasPrice = priced(PR.list);
+  let list = byType.filter(p => (brandBy === 'all' || p.brand === brandBy) && priceOK(PR.list)(p));
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   return `${key === 'sale' ? dealsHTML(all) : ''}<div class="cat-top">
-      <div><h1 class="h-title">${L.title}</h1><div class="muted" id="lcount">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${priced ? ', ' + priceText() : L.note && typeBy === 'all' && brandBy === 'all' ? ', ' + L.note.toLowerCase() : ''}</div></div>
+      <div><h1 class="h-title">${L.title}</h1><div class="muted" id="lcount">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${hasPrice ? ', ' + priceText(PR.list) : L.note && typeBy === 'all' && brandBy === 'all' ? ', ' + L.note.toLowerCase() : ''}</div></div>
       <div class="tools">
         ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
-        ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true, all.length > 1 ? priceBox() : '')}
+        ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true, all.length > 1 ? priceBox('list') : '')}
       </div>
     </div>
-    <div id="lgrid">${list.length ? grid(list) : priced ? `<div class="empty" style="padding-top:40px"><p>Nothing in this price range.</p><button class="btn" data-act="price-reset">Reset price</button></div>` : `<div class="empty" style="padding-top:40px"><p>Nothing here for ${GENDERS.find(g => g[0] === genderBy)[1].toLowerCase()} yet.</p><button class="btn" data-act="gender" data-g="all">Show all</button></div>`}</div>`;
+    <div id="lgrid">${list.length ? grid(list) : hasPrice ? `<div class="empty" style="padding-top:40px"><p>Nothing in this price range.</p><button class="btn" data-act="price-reset">Reset price</button></div>` : `<div class="empty" style="padding-top:40px"><p>Nothing here for ${GENDERS.find(g => g[0] === genderBy)[1].toLowerCase()} yet.</p><button class="btn" data-act="gender" data-g="all">Show all</button></div>`}</div>`;
 };
 
 let PV = { id: null, view: 0, size: null, v: '', hk: null };
@@ -1958,11 +1974,14 @@ function openGuide(k) {
 let sg = 'all';
 function openSearch() {
   sg = genderBy === 'unisex' ? 'all' : genderBy;
+  PR.search.min = PR.search.max = null;
+  setBounds(PR.search, P.filter(gOK(sg)));
   const l = $('#layer');
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <div class="sheet glass" role="dialog" aria-label="Search">
       <form class="search-row" id="search-form" role="search">${I.search}<label class="sr" for="q">Search the store</label><input id="q" placeholder="Search hoodies, Keepall, belts…" autocomplete="off"><button type="button" class="icon-btn" data-act="close" aria-label="Close search">${I.x}</button></form>
-      <div class="gpill stabs" id="sg" role="radiogroup" aria-label="Shop for"><i aria-hidden="true"></i>${GENDERS.slice(0, 3).map(([k, t]) => `<button role="radio" aria-checked="${k === sg}" class="${k === sg ? 'on' : ''}" data-act="sg" data-g="${k}">${t}</button>`).join('')}</div>
+      <div class="utabs" id="sg" role="radiogroup" aria-label="Shop for"><i aria-hidden="true"></i>${GENDERS.slice(0, 3).map(([k, t]) => `<button role="radio" aria-checked="${k === sg}" class="${k === sg ? 'on' : ''}" data-act="sg" data-g="${k}">${t}</button>`).join('')}</div>
+      <div id="sr-pr">${priceBox('search', 'in-sheet')}</div>
       <div id="sr-out"></div>
     </div>`;
   document.body.style.overflow = 'hidden';
@@ -2006,15 +2025,19 @@ function searchOut(q) {
   q = fold(q.trim());
   const out = $('#sr-out');
   if (!q) {
+    // with a price range set the pieces in it show; otherwise the new ones, as before
+    const pool = P.filter(p => gOK(sg)(p) && priceOK(PR.search)(p)), some = priced(PR.search) ? pool : pool.filter(p => p.isNew);
     out.innerHTML = `<div class="crows">${catRows(sg)}</div>
-      <div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>`;
+      <div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
+      ${some.length ? `<div class="label sr-h">${priced(PR.search) ? `${some.length} ${some.length === 1 ? 'piece' : 'pieces'}, ${priceText(PR.search)}` : 'New in'}</div><div class="sr-list">${some.map(srItem).join('')}</div>`
+        : priced(PR.search) ? `<p class="sr-empty">Nothing in this price range.</p>` : ''}`;
     return;
   }
   // every word of the query has to match the start of a word ("lv" finds LV, not "silver"); pieces that match by name,
   // brand, category or color come before those that match only in the description. A piece found by a color other
   // than its first opens in that color.
   const terms = words(q).map(alts);
-  const hits = P.filter(gOK(sg)).map(p => {
+  const hits = P.filter(p => gOK(sg)(p) && priceOK(PR.search)(p)).map(p => {
     let best = null;
     p.variants.forEach((v, i) => {
       const strong = words([p.brand, p.name, p.cat, ...p.groups, p.was ? 'sale' : '', p.isNew ? 'new' : '', v.color.name].join(' '));
@@ -2038,7 +2061,7 @@ function openMenu() {
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <nav class="sheet glass menu" aria-label="Menu"><div class="mclip"><div class="mtrack">
       <div class="mstep">
-        ${[['women', 'Women'], ['men', 'Men'], ['all', 'All']].map(([k, t]) => `<button class="crow" data-act="mstep" data-g="${k}"><span>${t}</span><span class="crow-n">${P.filter(gOK(k)).length}</span>${I.chevR}</button>`).join('')}
+        ${[['women', 'Women'], ['men', 'Men'], ['all', 'All']].map(([k, t]) => `<button class="crow" data-act="mstep" data-g="${k}"><span>${t}</span>${I.chevR}</button>`).join('')}
         <div class="menu-sub"><a href="#home">Home</a><a href="#account">Account</a><a href="#wishlist">Wishlist${S.wish.length ? ' (' + S.wish.length + ')' : ''}</a><a href="#bag">Bag${bagCount() ? ' (' + bagCount() + ')' : ''}</a></div>
       </div>
       <div class="mstep" id="mstep2" inert></div>
@@ -2118,7 +2141,15 @@ document.addEventListener('click', e => {
     case 'size': sizePop(); break;
     case 'dd': ddOpen(a); break;
     case 'back': if (history.state && history.state.d > 0) history.back(); else location.hash = d.to; break;
-    case 'sg': if (d.g !== sg) { sg = d.g; $$('#sg button').forEach(b => { const on = b.dataset.g === sg; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }); placeSeg($('#sg'), true); searchOut($('#q').value); } break;
+    case 'sg': if (d.g !== sg) {
+      sg = d.g;
+      $$('#sg button').forEach(b => { const on = b.dataset.g === sg; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+      placeSeg($('#sg'), true);
+      // the price slider spans the prices of the new choice
+      setBounds(PR.search, P.filter(gOK(sg)));
+      $('#sr-pr').innerHTML = priceBox('search', 'in-sheet');
+      searchOut($('#q').value);
+    } break;
     case 'mstep': {
       const m = $('.menu'), s2 = $('#mstep2'), t = { women: 'Women', men: 'Men', all: 'All' }[d.g];
       s2.innerHTML = `<button class="mback" data-act="mback">${I.chevL}<span>${t}</span></button>${catRows(d.g)}`;
@@ -2134,8 +2165,14 @@ document.addEventListener('click', e => {
       break;
     }
     // a section opened from search or the menu takes the Men / Women choice made there
-    case 'mgo': genderBy = d.g; if (location.hash === a.getAttribute('href')) setTimeout(() => render(), 0); break;
-    case 'price-reset': priceMin = priceMax = null; syncPrice(true); refreshList(); break;
+    case 'mgo':
+      genderBy = d.g;
+      // a fresh start in the section, with the price range set in search if there is one
+      carry = a.closest('#sr-out') && priced(PR.search) ? { min: PR.search.min, max: PR.search.max } : null;
+      brandList = '';
+      if (location.hash === a.getAttribute('href')) setTimeout(() => render(), 0);
+      break;
+    case 'price-reset': { const pr = a.closest('.pr'), st = PR[pr ? pr.dataset.scope : 'list']; st.min = st.max = null; syncPrice(pr, true); applyPrice(pr); break; }
     case 'dd-pick': {
       if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
       render();
@@ -2204,7 +2241,7 @@ document.addEventListener('pointerdown', e => {
   const s = e.target.closest && e.target.closest('.pr-s');
   if (!s || e.target.tagName === 'INPUT') return;
   e.preventDefault();
-  const r = s.getBoundingClientRect(), r0 = $('#pr-r0', s), r1 = $('#pr-r1', s);
+  const r = s.getBoundingClientRect(), r0 = $('.pr-r0', s), r1 = $('.pr-r1', s);
   const at = x => Math.round(Math.min(1, Math.max(0, (x - r.left - 9) / (r.width - 18))) * SLIDE);
   const t = at(e.clientX), v0 = +r0.value, v1 = +r1.value;
   const el = Math.abs(t - v0) < Math.abs(t - v1) || (v0 === v1 && t < v0) ? r0 : r1;
@@ -2240,20 +2277,22 @@ document.addEventListener('input', e => {
   }
   if (e.target.id === 'cc-exp') { const n = digits(e.target.value).slice(0, 4); reformat(e.target, n.length > 2 ? n.slice(0, 2) + '/' + n.slice(2) : n); }
   if (e.target.id === 'cc-cvc') reformat(e.target, digits(e.target.value).slice(0, CARDS[payBy].cvc));
-  if (e.target.id === 'pr-r0' || e.target.id === 'pr-r1') {
-    let t0 = +$('#pr-r0').value, t1 = +$('#pr-r1').value;
-    if (t0 > t1) { if (e.target.id === 'pr-r0') t0 = t1; else t1 = t0; }
-    priceMin = t0 > 0 ? priceAt(t0) : null;
-    priceMax = t1 < SLIDE ? priceAt(t1) : null;
-    syncPrice(true);
-    refreshList();
+  const pr = e.target.closest && e.target.closest('.pr'), cl = e.target.classList;
+  if (pr && (cl.contains('pr-r0') || cl.contains('pr-r1'))) {
+    const st = PR[pr.dataset.scope];
+    let t0 = +$('.pr-r0', pr).value, t1 = +$('.pr-r1', pr).value;
+    if (t0 > t1) { if (cl.contains('pr-r0')) t0 = t1; else t1 = t0; }
+    st.min = t0 > 0 ? priceAt(st, t0) : null;
+    st.max = t1 < SLIDE ? priceAt(st, t1) : null;
+    syncPrice(pr, true);
+    applyPrice(pr);
   }
-  if (e.target.id === 'pr-lo' || e.target.id === 'pr-hi') {
-    const v = digits(e.target.value).slice(0, 6);
+  if (pr && (cl.contains('pr-lo') || cl.contains('pr-hi'))) {
+    const st = PR[pr.dataset.scope], v = digits(e.target.value).slice(0, 6);
     e.target.value = v;
-    if (e.target.id === 'pr-lo') priceMin = v ? +v : null; else priceMax = v ? +v : null;
-    syncPrice(false);
-    refreshList(350);
+    if (cl.contains('pr-lo')) st.min = v ? +v : null; else st.max = v ? +v : null;
+    syncPrice(pr, false);
+    applyPrice(pr, 350);
   }
   if (e.target.classList.contains('code-box')) {
     const boxes = $$('.code-box'), i = boxes.indexOf(e.target), v = digits(e.target.value);
