@@ -171,12 +171,16 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .menu{overflow-x:hidden}
 .menu .crow{display:flex;font-size:22px;letter-spacing:-.01em;padding:12px 4px}
 .menu .crow .ico{width:20px;height:20px}
-.mclip{overflow:hidden}
-.mtrack{display:flex;align-items:flex-start;width:200%;transition:transform .45s var(--ease)}
+/* the two steps of the phone menu: the one in view is in the flow and sets the height, the other lies over it, moved
+   aside and faded out; on a switch the old one drifts away and fades while the new one comes in, and the height eases
+   from one to the other (switchStep) */
+.mclip{position:relative;overflow:hidden}
+.mstep{transition:transform .42s var(--ease),opacity .3s var(--ease),visibility 0s .42s}
+.mstep.m2,.menu.two .mstep.m1{position:absolute;top:0;left:0;right:0;opacity:0;visibility:hidden;pointer-events:none}
+.mstep.m2{transform:translateX(28%)}
+.menu.two .mstep.m1{transform:translateX(-22%)}
+.menu:not(.two) .mstep.m1,.menu.two .mstep.m2{position:relative;transform:none;opacity:1;visibility:visible;pointer-events:auto;transition:transform .42s var(--ease),opacity .32s var(--ease) .06s,visibility 0s}
 .menu .mstep .menu-sub{border-top:0;margin-top:4px}
-.menu.two .mtrack{transform:translateX(-50%)}
-.mstep{width:50%;min-width:0}
-.mstep + .mstep{padding-left:2px}
 .mback{display:inline-flex;align-items:center;gap:6px;margin:0 0 6px;padding:6px 4px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
 .mback .ico{width:14px;height:14px}
 .menu .menu-sub{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,.07)}
@@ -2061,16 +2065,28 @@ function openMenu() {
   const l = $('#layer');
   if (l.innerHTML) return closeLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
-    <nav class="sheet glass menu" aria-label="Menu"><div class="mclip"><div class="mtrack">
-      <div class="mstep">
+    <nav class="sheet glass menu" aria-label="Menu"><div class="mclip">
+      <div class="mstep m1">
         ${[['women', 'Women'], ['men', 'Men'], ['all', 'All']].map(([k, t]) => `<button class="crow" data-act="mstep" data-g="${k}"><span>${t}</span>${I.chevR}</button>`).join('')}
         <div class="menu-sub"><a href="#home">Home</a><a href="#account">Account</a><a href="#wishlist">Wishlist${S.wish.length ? ' (' + S.wish.length + ')' : ''}</a><a href="#bag">Bag${bagCount() ? ' (' + bagCount() + ')' : ''}</a></div>
       </div>
-      <div class="mstep" id="mstep2" inert></div>
-    </div></div></nav>`;
+      <div class="mstep m2" id="mstep2" inert></div>
+    </div></nav>`;
   document.body.style.overflow = 'hidden';
   dropToast();
   $$('[data-act="menu"]').forEach(b => b.setAttribute('aria-expanded', 'true'));
+}
+// the phone menu's two steps: the height of the menu eases from the old step to the new one while they swap
+function switchStep(two) {
+  const m = $('.menu'), clip = $('.mclip', m);
+  if (!m) return;
+  const h0 = clip.offsetHeight;
+  m.classList.toggle('two', two);
+  $('.m1', m).inert = two; $('.m2', m).inert = !two;
+  const h1 = clip.offsetHeight;
+  if (clip.animate && h0 !== h1 && !matchMedia('(prefers-reduced-motion: reduce)').matches)
+    clip.animate([{ height: h0 + 'px' }, { height: h1 + 'px' }], { duration: 420, easing: 'cubic-bezier(.22,.8,.24,1)' });
+  const f = (two ? $('.m2 .crow', m) : $('.m1 .crow', m)); if (f) f.focus({ preventScroll: true });
 }
 let toastT;
 function toast(p, size) {
@@ -2153,19 +2169,12 @@ document.addEventListener('click', e => {
       searchOut($('#q').value);
     } break;
     case 'mstep': {
-      const m = $('.menu'), s2 = $('#mstep2'), t = { women: 'Women', men: 'Men', all: 'All' }[d.g];
-      s2.innerHTML = `<button class="mback" data-act="mback">${I.chevL}<span>${t}</span></button>${catRows(d.g)}`;
-      s2.inert = false; $('.mstep', m).inert = true;
-      m.classList.add('two');
+      const t = { women: 'Women', men: 'Men', all: 'All' }[d.g];
+      $('#mstep2').innerHTML = `<button class="mback" data-act="mback">${I.chevL}<span>${t}</span></button>${catRows(d.g)}`;
+      switchStep(true);
       break;
     }
-    case 'mback': {
-      const m = $('.menu'), s2 = $('#mstep2');
-      m.classList.remove('two'); s2.inert = true; $('.mstep', m).inert = false;
-      // empty the second step once it has slid away, so the menu shrinks back to the first step's height
-      setTimeout(() => { if (!m.classList.contains('two')) s2.innerHTML = ''; }, 460);
-      break;
-    }
+    case 'mback': switchStep(false); break;
     // a section opened from search or the menu takes the Men / Women choice made there
     case 'mgo':
       genderBy = d.g;
