@@ -187,23 +187,11 @@ button{background:none;border:0;padding:0;cursor:pointer}
 
 /* ---------- main + footer ---------- */
 main{flex:1;padding:0 var(--x);outline:none}
-.view{animation:rise .45s var(--ease) backwards}
-/* Switching sections: the old page fades out while the new one fades in and settles (View Transitions), so there is
-   no blank frame between them and no jump to the top of the page. Browsers without it keep the rise above. */
-/* the old page fades out quickly and the new one fades in right after, with only a short overlap: a sparse page (bag,
-   account) let the old grid show through for a long while when the new one dissolved over a still old one, and both at
-   half opacity for long made the screen flash pale (owner: "рваная анимация") */
-::view-transition-old(root){animation:vt-out .16s cubic-bezier(.4,0,1,1) both}
-::view-transition-new(root){animation:vt-in .28s cubic-bezier(0,0,.2,1) .08s both}
-@keyframes vt-out{to{opacity:0}}
-/* the header is the same on every page, so it stays still above the change instead of fading out and back */
-.hdr{view-transition-name:hdr}
-::view-transition-group(hdr){animation:none}
-::view-transition-old(hdr){display:none}
-::view-transition-new(hdr){animation:none}
-.view.vt-in{animation:settle .5s var(--ease) backwards}
-@keyframes vt-in{from{opacity:0}}
-@keyframes settle{from{transform:translateY(6px)}}
+/* Changing pages: the page (and the strip under the header) fades out, the new one is drawn and scrolled while it is
+   invisible, then fades in (render() in the script). The header is never part of it and stays still. The browser's
+   View Transitions were used before; on iPhones (Safari, the Claude app) their snapshots made the change look torn
+   and the header lag, so the change is done by hand the same way in every browser. Opacity only: a transform on
+   #app would move the fixed bars inside the page (the phone "Add to bag" bar, the size sheet). */
 /* photos that are not in the cache yet fade in when they arrive instead of popping in (classes set in the script) */
 .view img:not(.ld):not(.ld0){opacity:0}
 .view img.ld{animation:fade .5s ease}
@@ -579,7 +567,6 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 .toast small{display:block;color:var(--ink-2);font-size:12px;margin-bottom:8px}
 .toast .btn{height:30px;padding:0 14px;font-size:10.5px}
 
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 @keyframes drop{from{opacity:0;transform:translateY(-8px) scale(.99)}to{opacity:1;transform:none}}
 @keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
@@ -1809,12 +1796,24 @@ function stepKey() {
   try { history.replaceState({ ...(st || {}), k, d }, ''); } catch (err) {}
   return [k, false];
 }
+let navN = 0;
 function render(scroll) {
   const r = route(), key = r.name + ':' + (r.arg || '');
-  // a new section or page cross-fades with the old one; a redraw of the same page (sort, color, bag) stays instant
-  if (lastKey && key !== lastKey && document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.startViewTransition(() => paint(r, key, scroll, true));
-  } else paint(r, key, scroll, false);
+  // a redraw of the same page (sort, color, bag) stays instant here (its own helpers fade it); so does Back / Forward,
+  // which brings the page back at once where it was, without fighting the phone's own back swipe
+  const traverse = !!(history.state && history.state.k);
+  const app = $('#app'), parts = [app, $('#strip')];
+  if (!lastKey || key === lastKey || traverse || still() || !app.animate) {
+    navN++;
+    parts.forEach(e => e.getAnimations().forEach(a => a.cancel()));
+    return paint(r, key, scroll);
+  }
+  const n = ++navN;
+  Promise.all(parts.map(e => e.animate([{ opacity: 0 }], { duration: 120, easing: 'cubic-bezier(.4,0,1,1)', fill: 'forwards' }).finished)).then(() => {
+    if (n !== navN) return;
+    paint(r, key, scroll);
+    parts.forEach(e => { e.getAnimations().forEach(a => a.cancel()); e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, easing: 'cubic-bezier(0,0,.2,1)' }); });
+  });
 }
 // The Men / Women switch (owner's request: smooth, not torn): the white part slides at once, the pieces under it fade
 // out and come back with the new choice. No view transition here: its snapshot of the glass pill is a rectangle, which
@@ -1847,7 +1846,7 @@ function switchGender(g) {
   placeG(true);
   fadeSwap('#app .view');
 }
-function paint(r, key, scroll, fade) {
+function paint(r, key, scroll) {
   const app = $('#app');
   const y = window.scrollY;
   // the strip goes in before the page and the scroll, so a restored scroll position is not pushed down by it
@@ -1858,12 +1857,9 @@ function paint(r, key, scroll, fade) {
     $$('button', gp).forEach(b => { const on = b.dataset.g === genderBy; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
     placeG(true);
   } else { strip.innerHTML = sh; strip.hidden = !sh; placeG(); placeTG(); }
-  // Back and Forward return to a page as it was: no settling move, which looked like a jump after the restored scroll
-  const traverse = !!(history.state && history.state.k);
-  app.innerHTML = `<div class="view${fade && !traverse ? ' vt-in' : ''}"${traverse ? ' style="animation:none"' : ''}>${V[r.name](r.arg, r.v)}</div>`;
+  app.innerHTML = `<div class="view">${V[r.name](r.arg, r.v)}</div>`;
   markSeen(app);
-  // the same page redrawn (the Men / Women switch included) does not settle, so the title and filters that stay put do not shift
-  if (key === lastKey && !scroll) { app.firstElementChild.style.animation = 'none'; window.scrollTo(0, y); }
+  if (key === lastKey && !scroll) window.scrollTo(0, y);
   else { const [k, back] = stepKey(); window.scrollTo(0, back && SCROLL[k] || 0); }
   lastKey = key;
   $$('.nav [data-r]').forEach(a => a.classList.toggle('on', a.dataset.r === (r.arg || r.name)));
