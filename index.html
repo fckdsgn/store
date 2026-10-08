@@ -190,10 +190,17 @@ main{flex:1;padding:0 var(--x);outline:none}
 .view{animation:rise .45s var(--ease) backwards}
 /* Switching sections: the old page fades out while the new one fades in and settles (View Transitions), so there is
    no blank frame between them and no jump to the top of the page. Browsers without it keep the rise above. */
-/* the old page stays put underneath while the new one dissolves in over it: both are never half see-through at once,
-   which made the screen flash pale (owner: "дёргается") */
-::view-transition-old(root){animation:none}
-::view-transition-new(root){animation:vt-in .34s cubic-bezier(.4,0,.2,1) both}
+/* the old page fades out quickly and the new one fades in right after, with only a short overlap: a sparse page (bag,
+   account) let the old grid show through for a long while when the new one dissolved over a still old one, and both at
+   half opacity for long made the screen flash pale (owner: "рваная анимация") */
+::view-transition-old(root){animation:vt-out .16s cubic-bezier(.4,0,1,1) both}
+::view-transition-new(root){animation:vt-in .28s cubic-bezier(0,0,.2,1) .08s both}
+@keyframes vt-out{to{opacity:0}}
+/* the header is the same on every page, so it stays still above the change instead of fading out and back */
+.hdr{view-transition-name:hdr}
+::view-transition-group(hdr){animation:none}
+::view-transition-old(hdr){display:none}
+::view-transition-new(hdr){animation:none}
 .view.vt-in{animation:settle .5s var(--ease) backwards}
 @keyframes vt-in{from{opacity:0}}
 @keyframes settle{from{transform:translateY(6px)}}
@@ -481,7 +488,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 .two .h-title{margin-bottom:16px}
 .sum-h{font-size:15px;font-weight:500;text-transform:uppercase;letter-spacing:.01em;margin:0 0 20px}
 .items{display:flex;flex-direction:column;gap:10px}
-.item{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:12px;padding:6px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg);animation:rise .4s var(--ease) backwards}
+.item{display:grid;grid-template-columns:58px minmax(0,1fr) auto;gap:12px;padding:6px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--bg)}
 .item .ph{border-radius:10px;aspect-ratio:auto;height:96px}
 .item .mid{display:flex;flex-direction:column;justify-content:space-between;padding:4px 0;min-width:0}
 .item .mid b{font-weight:500;font-size:14.5px}
