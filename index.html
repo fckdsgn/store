@@ -594,6 +594,8 @@ details[open] .pm::after{transform:rotate(0)}
   .hdr{grid-template-columns:auto 1fr auto;padding:0 4px}
   .hdr .nav{display:none}
   .hdr-m{display:flex;align-items:center}
+  /* no Men / Women switch under the header on phones (owner's request): there the menu and search pick it */
+  #strip:has(.gpill){display:none}
   :root{--hdr:50px}
   .hdr .icon-btn{width:44px;height:44px}
   .hdr .icon-btn .ico{width:24px;height:24px}
