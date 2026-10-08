@@ -354,7 +354,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 .pr-in span{color:var(--ink-3)}
 .pr-in input{width:100%;min-width:0;border:0;outline:none;background:none;font-size:12.5px;font-variant-numeric:tabular-nums}
 .pr-in input::placeholder{color:var(--ink-3)}
-.pr-s{position:relative;height:22px;margin:14px 0 0}
+.pr-s{position:relative;height:22px;margin:14px 0 0;cursor:pointer;touch-action:none}
 .pr-track{position:absolute;left:9px;right:9px;top:50%;height:3px;margin-top:-1.5px;border-radius:3px;background:#DEDEDE}
 .pr-track b{position:absolute;top:0;bottom:0;left:var(--a,0%);right:calc(100% - var(--b,100%));border-radius:3px;background:var(--ink)}
 .pr-s input{position:absolute;inset:0;width:100%;height:22px;margin:0;background:none;-webkit-appearance:none;appearance:none;pointer-events:none;outline:none}
@@ -2085,6 +2085,24 @@ document.addEventListener('scroll', e => {
   const i = Math.round(cs.scrollLeft / cs.clientWidth);
   cs.parentElement.querySelectorAll('.cdots-ph i').forEach((d, k) => d.classList.toggle('on', k === i));
 }, true);
+// a press on the price slider's bar brings the nearer handle there, and it follows the pointer until let go
+// (the handles themselves are dragged by the browser)
+document.addEventListener('pointerdown', e => {
+  const s = e.target.closest && e.target.closest('.pr-s');
+  if (!s || e.target.tagName === 'INPUT') return;
+  e.preventDefault();
+  const r = s.getBoundingClientRect(), r0 = $('#pr-r0', s), r1 = $('#pr-r1', s);
+  const at = x => Math.round(Math.min(1, Math.max(0, (x - r.left - 9) / (r.width - 18))) * SLIDE);
+  const t = at(e.clientX), v0 = +r0.value, v1 = +r1.value;
+  const el = Math.abs(t - v0) < Math.abs(t - v1) || (v0 === v1 && t < v0) ? r0 : r1;
+  const move = x => { el.value = at(x); el.dispatchEvent(new Event('input', { bubbles: true })); };
+  move(e.clientX);
+  el.focus({ preventScroll: true });
+  s.setPointerCapture(e.pointerId);
+  const mv = ev => move(ev.clientX);
+  const up = () => { s.removeEventListener('pointermove', mv); s.removeEventListener('pointerup', up); s.removeEventListener('pointercancel', up); };
+  s.addEventListener('pointermove', mv); s.addEventListener('pointerup', up); s.addEventListener('pointercancel', up);
+});
 // a piece on the home video lights up its price tag while the pointer is over it
 for (const [type, on] of [['pointerover', true], ['pointerout', false]])
   document.addEventListener(type, e => {
