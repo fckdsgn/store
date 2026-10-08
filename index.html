@@ -1740,6 +1740,28 @@ function render(scroll) {
 // The Men / Women switch (owner's request: smooth, not torn): the white part slides at once, the pieces under it fade
 // out and come back with the new choice. No view transition here: its snapshot of the glass pill is a rectangle, which
 // cut the pill's blur and shadow into square corners for a moment.
+// Sign in / Create account, the same way: the white part slides in place, the form fades out, comes back as the other
+// form, and its height eases to the new one (Create account has one field more). Only the form is redrawn.
+let tT = 0;
+function switchTab(t) {
+  accTab = t;
+  const seg = $('.seg'), f = $('#acc-form');
+  if (!seg || !f || !f.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return render();
+  seg.classList.toggle('r', t === 'up');
+  $$('button', seg).forEach(b => { const on = b.dataset.t === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  const n = ++tT;
+  f.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-out', fill: 'forwards' }).finished.then(() => {
+    if (n !== tT) return;
+    const tmp = document.createElement('div');
+    tmp.innerHTML = V.account();
+    const nf = $('#acc-form', tmp), h0 = f.offsetHeight;
+    f.replaceWith(nf);
+    const h1 = nf.offsetHeight;
+    nf.style.overflow = 'hidden';
+    nf.animate([{ opacity: 0, height: h0 + 'px' }, { opacity: 1, height: h1 + 'px' }], { duration: 320, easing: 'cubic-bezier(.22,.8,.24,1)' })
+      .finished.then(() => { nf.style.overflow = ''; });
+  });
+}
 let gT = 0;
 function switchGender(g) {
   genderBy = g;
@@ -2104,7 +2126,7 @@ document.addEventListener('click', e => {
     case 'menu': openMenu(); break;
     case 'close': closeLayer(); break;
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
-    case 'tab': accTab = d.t; render(); break;
+    case 'tab': if (d.t !== accTab) switchTab(d.t); break;
     case 'signout': S.user = null; save(); render(); break;
     case 'copy': {
       const el = document.getElementById(d.t);
