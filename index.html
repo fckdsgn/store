@@ -273,6 +273,15 @@ main{flex:1;padding:0 var(--x);outline:none}
 @supports (grid-template-rows:subgrid){.grid{grid-auto-rows:auto}.card{display:grid;grid-row:span 4;grid-template-rows:subgrid;row-gap:0;align-content:start}}
 .media{position:relative}
 .card .ph{display:block}
+/* the photos of a piece swipe sideways inside its card (owner's request): a finger on phones, two fingers on a trackpad;
+   the dots show which photo is up. A tap still opens the piece. */
+.cs{display:flex;height:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.cs::-webkit-scrollbar{display:none}
+.cs>span{flex:0 0 100%;height:100%;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always}
+.cdots-ph{position:absolute;z-index:1;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:5px;pointer-events:none;transition:opacity .3s}
+.cdots-ph i{width:5px;height:5px;border-radius:99px;background:rgba(21,21,21,.22);box-shadow:0 0 0 1px rgba(255,255,255,.5);transition:width .35s var(--ease),background .35s}
+.cdots-ph i.on{width:14px;background:rgba(21,21,21,.7)}
+@media (hover:hover){.media:hover .cdots-ph{opacity:0}}
 .card:hover .ph img{transform:scale(1.035)}
 .badge{position:absolute;z-index:2;top:10px;left:10px;height:26px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;font-size:11px;font-weight:500;letter-spacing:.02em;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 0 0 .5px var(--glass-edge)}
 .heart{position:absolute;z-index:2;top:8px;right:8px;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 0 0 .5px var(--glass-edge);transition:transform .25s var(--ease)}
@@ -1238,7 +1247,7 @@ function toggleWish(id) {
 function card(p) {
   const w = S.wish.includes(p.id);
   return `<article class="card"><div class="media">
-    <a class="ph" href="#p-${p.id}" aria-label="${esc(p.brand)} ${esc(p.name)}">${pic(p)}</a>
+    <a class="ph" href="#p-${p.id}" aria-label="${esc(p.brand)} ${esc(p.name)}"><span class="cs">${p.views.map(v => `<span>${pic(p, v)}</span>`).join('')}</span>${p.views.length > 1 ? `<span class="cdots-ph" aria-hidden="true">${p.views.map((v, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</span>` : ''}</a>
     ${p.was ? `<span class="badge glass">−${off(p)}%</span>` : p.isNew ? `<span class="badge glass">New</span>` : ''}
     <button class="heart glass${w ? ' on' : ''}" data-act="wish" data-id="${p.id}" aria-pressed="${w}" aria-label="Wishlist: ${esc(p.name)}">${I.heart}</button>
     <div class="quick glass">
@@ -1997,6 +2006,13 @@ document.addEventListener('click', e => {
     }
   }
 });
+// the dots under the photos in a card follow the swipe
+document.addEventListener('scroll', e => {
+  const cs = e.target;
+  if (!cs.classList || !cs.classList.contains('cs')) return;
+  const i = Math.round(cs.scrollLeft / cs.clientWidth);
+  cs.parentElement.querySelectorAll('.cdots-ph i').forEach((d, k) => d.classList.toggle('on', k === i));
+}, true);
 // a piece on the home video lights up its price tag while the pointer is over it
 for (const [type, on] of [['pointerover', true], ['pointerout', false]])
   document.addEventListener(type, e => {
