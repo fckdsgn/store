@@ -366,6 +366,18 @@ main{flex:1;padding:0 var(--x);outline:none}
 .pr-s input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(0,0,0,.12)}
 .empty{display:grid;justify-items:center;text-align:center;gap:14px;padding:90px 0 40px}
 .empty p{margin:0;color:var(--ink-2);max-width:36ch}
+/* Back (owner's request) on the pages one goes into: a piece, bag, checkout, wishlist, account and the footer pages.
+   It steps back like the browser's own button; with no earlier step on the site it goes to the page above. The page
+   under it starts a little higher, so the button does not add a gap. */
+.back{display:inline-flex;align-items:center;gap:6px;height:32px;margin-top:18px;padding:0 14px 0 10px;border-radius:999px;background:var(--pill);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;transition:background .25s}
+.back:hover{background:var(--pill-hover)}
+.back .ico{width:14px;height:14px;transition:translate .35s var(--ease)}
+.back:hover .ico{translate:-3px 0}
+.back + .pdp{padding-top:14px}
+.back + .two,.back + .page,.back + .cat-top{padding-top:22px}
+.back + .narrow{padding-top:26px}
+.back + .empty{padding-top:56px}
+@media (max-width:719px){.back{margin-top:12px}.back + .pdp{padding-top:12px}}
 
 /* ---------- product page ---------- */
 .pdp{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px;padding-top:22px;min-height:calc(100vh - var(--top) - var(--hdr) - 150px)}
@@ -1233,6 +1245,7 @@ const I = {
   x: '<svg class="ico" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
   chev: '<svg class="ico" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>',
   arrow: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  back: '<svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
   plus: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   minus: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
   check: '<svg class="ico" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
@@ -1313,6 +1326,8 @@ const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join
 
 /* ---------- views ---------- */
 const V = {};
+// the Back button; `to` is where it goes when there is no earlier step on the site (a link opened from outside)
+const backBtn = to => `<button class="back" data-act="back" data-to="${to}">${I.back}<span>Back</span></button>`;
 
 V.home = () => {
   // hero: the owner's looping video; each price tag sits on a piece she wears, at a spot measured on the frame (% of width / height).
@@ -1496,7 +1511,7 @@ V.product = (id, key = '') => {
   const rel = P.filter(x => x.id !== p.id && x.groups.some(g => p.groups.includes(g)))
     .map(x => ({ x, s: (x.cat === p.cat ? 2 : 0) + (x.brand === p.brand ? 1 : 0), d: Math.abs(P.indexOf(x) - at) }))
     .sort((a, b) => b.s - a.s || a.d - b.d).slice(0, 4).map(r => r.x);
-  return `<section class="pdp">
+  return `${backBtn(base.groups[0])}<section class="pdp">
     <div class="thumbs" role="tablist" aria-label="Photos">
       ${p.views.map((v, i) => `<button class="th${i === PV.view ? ' on' : ''}" role="tab" aria-selected="${i === PV.view}" aria-label="Photo ${i + 1}" data-act="view" data-i="${i}">${pic(p, v, false)}</button>`).join('')}
     </div>
@@ -1546,8 +1561,8 @@ function summaryRows(express, atCheckout) {
 }
 
 V.bag = () => {
-  if (!S.bag.length) return `<div class="empty"><h1 class="h-title">Your bag is empty</h1><p>Pieces you add will wait for you here.</p><a class="btn" href="#new">Shop new in</a></div>`;
-  return `<div class="two">
+  if (!S.bag.length) return `${backBtn('home')}<div class="empty"><h1 class="h-title">Your bag is empty</h1><p>Pieces you add will wait for you here.</p><a class="btn" href="#new">Shop new in</a></div>`;
+  return `${backBtn('home')}<div class="two">
     <section>
       <h1 class="h-title">Bag <span class="muted">(${bagCount()})</span></h1>
       <div class="items">${S.bag.map(l => {
@@ -1584,7 +1599,7 @@ V.checkout = () => {
   const u = S.user || {};
   const f = (id, label, type = 'text', ac = '', full = false, val = '', more = '') =>
     `<div class="field${full ? ' full' : ''}"><input id="${id}" name="${id}" type="${type}" placeholder=" " autocomplete="${ac}" value="${esc(val)}"${more} required><label for="${id}">${label}</label></div>`;
-  return `<div class="two">
+  return `${backBtn('bag')}<div class="two">
     <section>
       <h1 class="h-title">Checkout</h1>
       <form class="form" id="co-form" novalidate>
@@ -1641,14 +1656,14 @@ V.order = n => {
 
 V.wishlist = () => {
   const list = S.wish.map(id => BY[id]).filter(Boolean);
-  if (!list.length) return `<div class="empty"><h1 class="h-title">Wishlist</h1><p>Tap the heart on any piece to save it here.</p><a class="btn" href="#new">Shop new in</a></div>`;
-  return `<div class="cat-top"><div><h1 class="h-title">Wishlist</h1><div class="muted">${list.length} saved</div></div></div>${grid(list)}`;
+  if (!list.length) return `${backBtn('home')}<div class="empty"><h1 class="h-title">Wishlist</h1><p>Tap the heart on any piece to save it here.</p><a class="btn" href="#new">Shop new in</a></div>`;
+  return `${backBtn('home')}<div class="cat-top"><div><h1 class="h-title">Wishlist</h1><div class="muted">${list.length} saved</div></div></div>${grid(list)}`;
 };
 
 let accTab = 'in';
 V.account = () => {
   if (S.user) {
-    return `<div class="narrow" style="max-width:520px">
+    return `${backBtn('home')}<div class="narrow" style="max-width:520px">
       <h1 class="h-title">Account</h1>
       <div class="acc-card"><span class="label">Signed in</span><p style="margin:8px 0 0"><b>${esc(S.user.name)}</b><br><span class="muted">${esc(S.user.email)}</span></p></div>
       <h2 class="sum-h" style="font-size:13px;margin-bottom:12px">Orders</h2>
@@ -1657,7 +1672,7 @@ V.account = () => {
     </div>`;
   }
   const up = accTab === 'up';
-  return `<div class="narrow">
+  return `${backBtn('home')}<div class="narrow">
     <h1 class="h-title" style="text-align:center">Account</h1>
     <div class="seg${up ? ' r' : ''}" role="tablist"><i></i><button role="tab" aria-selected="${!up}" class="${up ? '' : 'on'}" data-act="tab" data-t="in">Sign in</button><button role="tab" aria-selected="${up}" class="${up ? 'on' : ''}" data-act="tab" data-t="up">Create account</button></div>
     <form class="stack" id="acc-form" novalidate>
@@ -1683,7 +1698,7 @@ const PAGES = {
   privacy: ['Privacy', `<p>We keep only what we need to deliver your order: your name, email and shipping address.</p><p>We never sell your data. Your bag and wishlist are stored in this browser.</p><p>To delete your account and data, write to hello@palestore.shop.</p>`],
   app: ['Mobile app', `<p>The Pale Store app for iPhone and Android is in the works. Until then, this site works the same on your phone: add it to your home screen from the browser menu.</p>`],
 };
-V.page = k => `<div class="page"><h1 class="h-title">${PAGES[k][0]}</h1><div style="margin-top:18px">${PAGES[k][1]}</div></div>`;
+V.page = k => `${backBtn('home')}<div class="page"><h1 class="h-title">${PAGES[k][0]}</h1><div style="margin-top:18px">${PAGES[k][1]}</div></div>`;
 V.missing = () => `<div class="empty"><h1 class="h-title">Not found</h1><p>This page moved or never existed.</p><a class="btn" href="#home">Back to the store</a></div>`;
 
 /* ---------- router ---------- */
@@ -1701,11 +1716,15 @@ let lastKey = '';
 // scroll listener keeps its last position here. A new step (a link) starts at the top.
 const SCROLL = {};
 try { history.scrollRestoration = 'manual'; } catch (err) {}
+// Each step also keeps how many steps on the site came before it (`d`), so Back knows whether stepping back stays on
+// the site; it survives a reload, as history.state does.
+let lastDepth = -1;
 function stepKey() {
   const st = history.state;
-  if (st && st.k) return [st.k, true];
-  const k = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  try { history.replaceState({ ...(st || {}), k }, ''); } catch (err) {}
+  if (st && st.k) { lastDepth = st.d || 0; return [st.k, true]; }
+  const k = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), d = lastDepth + 1;
+  lastDepth = d;
+  try { history.replaceState({ ...(st || {}), k, d }, ''); } catch (err) {}
   return [k, false];
 }
 function render(scroll, fade) {
@@ -2022,6 +2041,7 @@ document.addEventListener('click', e => {
     case 'view': setView(+d.i); break;
     case 'size': sizePop(); break;
     case 'dd': ddOpen(a); break;
+    case 'back': if (history.state && history.state.d > 0) history.back(); else location.hash = d.to; break;
     case 'price-reset': priceMin = priceMax = null; syncPrice(true); refreshList(); break;
     case 'dd-pick': {
       if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
