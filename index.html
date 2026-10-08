@@ -155,6 +155,27 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .sr-item span{font-size:12px;color:var(--ink-2)}
 .sr-empty{padding:18px 6px;color:var(--ink-2)}
 .menu a{display:block;font-size:22px;font-weight:500;padding:8px 4px;letter-spacing:-.01em}
+/* Men / Women first, then the sections (owner's reference): in search the switch sits under the field with the
+   sections listed under it; the phone menu goes in two steps, Women / Men / All, then the sections for that choice */
+.stabs{margin:14px 0 2px}
+.crows{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0 28px;margin-top:6px}
+.crow{display:flex;align-items:center;gap:10px;padding:13px 8px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px;font-weight:500;text-align:left;width:100%;transition:background .2s}
+.crow:hover{background:rgba(0,0,0,.035)}
+.crow>span:first-child{flex:1}
+.crow-n{font-size:12px;font-weight:400;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.crow .ico{width:16px;height:16px;color:var(--ink-3);transition:translate .3s var(--ease)}
+.crow:hover .ico{translate:3px 0}
+.menu{overflow-x:hidden}
+.menu .crow{display:flex;font-size:22px;letter-spacing:-.01em;padding:12px 4px}
+.menu .crow .ico{width:20px;height:20px}
+.mclip{overflow:hidden}
+.mtrack{display:flex;align-items:flex-start;width:200%;transition:transform .45s var(--ease)}
+.mstep .menu-sub{border-top:0;margin-top:4px}
+.menu.two .mtrack{transform:translateX(-50%)}
+.mstep{width:50%;min-width:0}
+.mstep + .mstep{padding-left:2px}
+.mback{display:inline-flex;align-items:center;gap:6px;margin:0 0 6px;padding:6px 4px;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-2)}
+.mback .ico{width:14px;height:14px}
 .menu .menu-sub{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,0,0,.07)}
 .menu .menu-sub a{font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;padding:6px 0}
 
@@ -1249,6 +1270,8 @@ const I = {
   chev: '<svg class="ico" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>',
   arrow: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   back: '<svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+  chevR: '<svg class="ico" viewBox="0 0 24 24"><path d="m10 6.5 5.5 5.5-5.5 5.5"/></svg>',
+  chevL: '<svg class="ico" viewBox="0 0 24 24"><path d="M14 6.5 8.5 12l5.5 5.5"/></svg>',
   plus: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   minus: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
   check: '<svg class="ico" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
@@ -1308,13 +1331,19 @@ let genderBy = 'all';
 const genderHTML = () => `<div class="gpill" role="radiogroup" aria-label="Shop for"><i aria-hidden="true"></i>${GENDERS.map(([k, t]) =>
   `<button role="radio" aria-checked="${k === genderBy}" class="${k === genderBy ? 'on' : ''}" data-act="gender" data-g="${k}">${t}</button>`).join('')}</div>`;
 // Men and Women include the unisex pieces, as most stores do; Unisex shows only those
-function placeG(slide) {
-  const g = $('.gpill'), b = g && $('button.on', g);
+function placeSeg(g, slide) {
+  const b = g && $('button.on', g);
   if (!b) return;
   g.classList.toggle('ready', !!slide);
   g.style.setProperty('--gx', b.offsetLeft + 'px');
   g.style.setProperty('--gw', b.offsetWidth + 'px');
 }
+const placeG = slide => placeSeg($('#strip .gpill'), slide);
+// the sections for a choice of Men / Women / All, with how many pieces each has: rows in search and in the phone menu
+const gOK = g => p => g === 'all' || p.gender === g || (g !== 'unisex' && p.gender === 'unisex');
+const SECTIONS = ['new', 'clothing', 'bags', 'shoes', 'accessories', 'sale'];
+const catRows = g => SECTIONS.map(k => [k, P.filter(p => LISTS[k].pick(p) && gOK(g)(p)).length]).filter(([, n]) => n)
+  .map(([k, n]) => `<a class="crow" href="#${k}" data-act="mgo" data-g="${g}"><span>${LISTS[k].title}</span><span class="crow-n">${n}</span>${I.chevR}</a>`).join('');
 // the Telegram pill: at rest its icon and line are shifted right by half the room "Join" takes (plus the difference of
 // the side paddings, 14 - 6), so they sit in the middle of the pill
 function placeTG() {
@@ -1324,7 +1353,7 @@ function placeTG() {
 // the font arriving or the window changing size moves the buttons
 document.fonts && document.fonts.ready.then(() => { placeG(); placeTG(); });
 addEventListener('resize', () => { placeG(); placeTG(); });
-const genderOK = p => genderBy === 'all' || p.gender === genderBy || (genderBy !== 'unisex' && p.gender === 'unisex');
+const genderOK = p => gOK(genderBy)(p);
 const grid = (list, cls = '') => `<div class="grid ${cls}">${list.map(card).join('')}</div>`;
 
 /* ---------- views ---------- */
@@ -1765,7 +1794,7 @@ function switchTab(t) {
 let gT = 0;
 function switchGender(g) {
   genderBy = g;
-  $$('.gpill button').forEach(b => { const on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  $$('#strip .gpill button').forEach(b => { const on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
   placeG(true);
   const v = $('#app .view');
   if (!v || !v.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return render();
@@ -1925,15 +1954,20 @@ function openGuide(k) {
   sizePop(false);
   setTimeout(() => $('.guide [data-act="close"]').focus(), 30);
 }
+// search keeps its own Men / Women choice; it becomes the store's choice when a section is opened from it
+let sg = 'all';
 function openSearch() {
+  sg = genderBy === 'unisex' ? 'all' : genderBy;
   const l = $('#layer');
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <div class="sheet glass" role="dialog" aria-label="Search">
       <form class="search-row" id="search-form" role="search">${I.search}<label class="sr" for="q">Search the store</label><input id="q" placeholder="Search hoodies, Keepall, belts…" autocomplete="off"><button type="button" class="icon-btn" data-act="close" aria-label="Close search">${I.x}</button></form>
+      <div class="gpill stabs" id="sg" role="radiogroup" aria-label="Shop for"><i aria-hidden="true"></i>${GENDERS.slice(0, 3).map(([k, t]) => `<button role="radio" aria-checked="${k === sg}" class="${k === sg ? 'on' : ''}" data-act="sg" data-g="${k}">${t}</button>`).join('')}</div>
       <div id="sr-out"></div>
     </div>`;
   document.body.style.overflow = 'hidden';
   dropToast();
+  placeSeg($('#sg'));
   searchOut('');
   setTimeout(() => $('#q').focus(), 30);
 }
@@ -1972,15 +2006,15 @@ function searchOut(q) {
   q = fold(q.trim());
   const out = $('#sr-out');
   if (!q) {
-    out.innerHTML = `<div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
-      <div class="label sr-h">New in</div><div class="sr-list">${P.filter(p => p.isNew).map(srItem).join('')}</div>`;
+    out.innerHTML = `<div class="crows">${catRows(sg)}</div>
+      <div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>`;
     return;
   }
   // every word of the query has to match the start of a word ("lv" finds LV, not "silver"); pieces that match by name,
   // brand, category or color come before those that match only in the description. A piece found by a color other
   // than its first opens in that color.
   const terms = words(q).map(alts);
-  const hits = P.map(p => {
+  const hits = P.filter(gOK(sg)).map(p => {
     let best = null;
     p.variants.forEach((v, i) => {
       const strong = words([p.brand, p.name, p.cat, ...p.groups, p.was ? 'sale' : '', p.isNew ? 'new' : '', v.color.name].join(' '));
@@ -2002,10 +2036,13 @@ function openMenu() {
   const l = $('#layer');
   if (l.innerHTML) return closeLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
-    <nav class="sheet glass menu" aria-label="Menu">
-      <a href="#home">Home</a>${Object.keys(LISTS).filter(k => k !== 'new' && P.some(LISTS[k].pick)).map(k => `<a href="#${k}">${LISTS[k].title}</a>`).join('')}
-      <div class="menu-sub"><a href="#account">Account</a><a href="#wishlist">Wishlist${S.wish.length ? ' (' + S.wish.length + ')' : ''}</a><a href="#bag">Bag${bagCount() ? ' (' + bagCount() + ')' : ''}</a></div>
-    </nav>`;
+    <nav class="sheet glass menu" aria-label="Menu"><div class="mclip"><div class="mtrack">
+      <div class="mstep">
+        ${[['women', 'Women'], ['men', 'Men'], ['all', 'All']].map(([k, t]) => `<button class="crow" data-act="mstep" data-g="${k}"><span>${t}</span><span class="crow-n">${P.filter(gOK(k)).length}</span>${I.chevR}</button>`).join('')}
+        <div class="menu-sub"><a href="#home">Home</a><a href="#account">Account</a><a href="#wishlist">Wishlist${S.wish.length ? ' (' + S.wish.length + ')' : ''}</a><a href="#bag">Bag${bagCount() ? ' (' + bagCount() + ')' : ''}</a></div>
+      </div>
+      <div class="mstep" id="mstep2" inert></div>
+    </div></div></nav>`;
   document.body.style.overflow = 'hidden';
   dropToast();
   $$('[data-act="menu"]').forEach(b => b.setAttribute('aria-expanded', 'true'));
@@ -2081,6 +2118,23 @@ document.addEventListener('click', e => {
     case 'size': sizePop(); break;
     case 'dd': ddOpen(a); break;
     case 'back': if (history.state && history.state.d > 0) history.back(); else location.hash = d.to; break;
+    case 'sg': if (d.g !== sg) { sg = d.g; $$('#sg button').forEach(b => { const on = b.dataset.g === sg; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); }); placeSeg($('#sg'), true); searchOut($('#q').value); } break;
+    case 'mstep': {
+      const m = $('.menu'), s2 = $('#mstep2'), t = { women: 'Women', men: 'Men', all: 'All' }[d.g];
+      s2.innerHTML = `<button class="mback" data-act="mback">${I.chevL}<span>${t}</span></button>${catRows(d.g)}`;
+      s2.inert = false; $('.mstep', m).inert = true;
+      m.classList.add('two');
+      break;
+    }
+    case 'mback': {
+      const m = $('.menu'), s2 = $('#mstep2');
+      m.classList.remove('two'); s2.inert = true; $('.mstep', m).inert = false;
+      // empty the second step once it has slid away, so the menu shrinks back to the first step's height
+      setTimeout(() => { if (!m.classList.contains('two')) s2.innerHTML = ''; }, 460);
+      break;
+    }
+    // a section opened from search or the menu takes the Men / Women choice made there
+    case 'mgo': genderBy = d.g; if (location.hash === a.getAttribute('href')) setTimeout(() => render(), 0); break;
     case 'price-reset': priceMin = priceMax = null; syncPrice(true); refreshList(); break;
     case 'dd-pick': {
       if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
