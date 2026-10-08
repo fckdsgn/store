@@ -478,6 +478,7 @@ button.sw:hover:not(.on){box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 1.5px 
 .pm::before,.pm::after{content:"";position:absolute;left:0;right:0;top:50%;height:1.3px;margin-top:-.65px;background:currentColor;transition:transform .3s var(--ease)}
 .pm::after{transform:rotate(90deg)}
 details[open] .pm::after{transform:rotate(0)}
+details[open].shut .pm::after{transform:rotate(90deg)}
 .more .body{padding:0 2px 14px;font-size:12.5px;color:var(--ink-2)}
 .more ul{margin:8px 0 0;padding-left:16px}
 .pbar{display:none}
@@ -1304,6 +1305,15 @@ function counts() {
   $$('[data-bag-count]').forEach(e => { e.hidden = !b; e.textContent = b; });
   $$('[data-wish-count]').forEach(e => { e.hidden = !w; e.textContent = w; });
 }
+// a bag line shrinks away, then the bag (or its empty state) is drawn again
+function removeLine(k, el) {
+  rowOut(el, () => {
+    S.bag = S.bag.filter(l => lineKey(l) !== k);
+    if (!S.bag.length) S.promo = null;
+    save();
+    if (S.bag.length) render(); else fadeSwap('#app .view');
+  });
+}
 function toggleWish(id) {
   const i = S.wish.indexOf(id);
   if (i < 0) S.wish.push(id); else S.wish.splice(i, 1);
@@ -1314,7 +1324,10 @@ function toggleWish(id) {
     b.setAttribute('aria-pressed', on);
     const t = $('.t', b); if (t) t.textContent = on ? 'In your wishlist' : 'Add to wishlist';
   });
-  if (route().name === 'wishlist') render();
+  if (route().name === 'wishlist') {
+    const c = $(`.view .card [data-act="wish"][data-id="${id}"]`)?.closest('.card');
+    rowOut(c, () => (S.wish.length ? render() : fadeSwap('#app .view')));
+  }
 }
 
 /* ---------- pieces ---------- */
@@ -1469,11 +1482,12 @@ const dropdown = (key, label, cur, opts, end, head = '') => `<div class="dd${end
   <div class="dd-pop glass${head ? ' wide' : ''}" role="listbox" aria-label="${label}" hidden>${head}${opts.map(([v, t]) => `<button role="option" aria-selected="${v === cur}" class="${v === cur ? 'on' : ''}" data-act="dd-pick" data-dd="${key}" data-v="${esc(v)}"><span>${esc(t)}</span>${I.check}</button>`).join('')}</div>
 </div>`;
 function ddOpen(btn, open) {
-  $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; } });
+  const shut = pop => popOut(pop, () => { pop.hidden = true; });
+  $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); shut(b.nextElementSibling); } });
   if (!btn) return;
   const pop = btn.nextElementSibling;
-  open = open === undefined ? pop.hidden : open;
-  pop.hidden = !open;
+  open = open === undefined ? pop.hidden || !!pop.dataset.out : open;
+  if (open) { popIn(pop); pop.hidden = false; } else if (!pop.hidden) shut(pop);
   btn.setAttribute('aria-expanded', open);
   if (open) { const o = $('button.on', pop) || $('button', pop); o.scrollIntoView({ block: 'nearest' }); o.focus({ preventScroll: true }); }
 }
@@ -1813,19 +1827,11 @@ function switchTab(t) {
       .finished.then(() => { nf.style.overflow = ''; });
   });
 }
-let gT = 0;
 function switchGender(g) {
   genderBy = g;
   $$('#strip .gpill button').forEach(b => { const on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
   placeG(true);
-  const v = $('#app .view');
-  if (!v || !v.animate || matchMedia('(prefers-reduced-motion: reduce)').matches) return render();
-  const n = ++gT;
-  v.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: 'ease-out', fill: 'forwards' }).finished.then(() => {
-    if (n !== gT) return;
-    render();
-    $('#app .view').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 320, easing: 'ease-out' });
-  });
+  fadeSwap('#app .view');
 }
 function paint(r, key, scroll, fade) {
   const app = $('#app');
@@ -1887,8 +1893,9 @@ function mountProduct() {
 function sizePop(open) {
   const pop = $('#size-pop'), btn = $('#size-btn');
   if (!pop) return;
-  open = open === undefined ? pop.hidden : open;
-  pop.hidden = !open;
+  open = open === undefined ? pop.hidden || !!pop.dataset.out : open;
+  if (open) { popIn(pop); pop.hidden = false; }
+  else if (!pop.hidden) popOut(pop, () => { pop.hidden = true; }, matchMedia('(max-width:719px)').matches ? 18 : -4);
   btn.setAttribute('aria-expanded', open);
   if (open) { const f = $('button.on', pop) || $('button:not([disabled])', pop); f && f.focus({ preventScroll: true }); }
 }
@@ -1902,9 +1909,56 @@ function needSize() {
 
 /* ---------- layers: search, menu, toast ---------- */
 function dropToast() { clearTimeout(toastT); const t = $('#toast'); if (t) t.remove(); }
+// ---- smooth changes (owner's request: no jumps anywhere). Every helper falls back to the instant change when the
+// browser has no Web Animations or the visitor asked for reduced motion.
+const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+// a part of the page fades out, the change is drawn, and it fades back in; the newest change wins
+let fT = 0;
+function fadeSwap(sel, after) {
+  const els = $$(sel);
+  if (still() || !els.length || !els[0].animate) { render(); return after && after(); }
+  const n = ++fT;
+  Promise.all(els.map(e => e.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'ease-out', fill: 'forwards' }).finished)).then(() => {
+    if (n !== fT) return;
+    render();
+    $$(sel).forEach(e => e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' }));
+    if (after) after();
+  });
+}
+// a floating list or panel fades out (and drifts a little) before it hides
+function popOut(el, done, dy = -4) {
+  if (still() || !el.animate) return done();
+  el.dataset.out = '1';
+  el.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: `0 ${dy}px` }], { duration: 160, easing: 'ease-in', fill: 'forwards' }).finished.then(() => {
+    if (!el.dataset.out) return;
+    delete el.dataset.out;
+    el.getAnimations().forEach(a => a.cancel());
+    done();
+  });
+}
+const popIn = el => { delete el.dataset.out; el.getAnimations().forEach(a => a.cancel()); };
+// a bag line or a wishlist card shrinks away before the page is redrawn without it
+function rowOut(el, done) {
+  if (still() || !el || !el.animate) return done();
+  const h = el.offsetHeight;
+  el.style.overflow = 'hidden';
+  el.animate([{ opacity: 1, height: h + 'px', transform: 'none' }, { opacity: 0, height: el.classList.contains('card') ? h + 'px' : '0px', transform: 'scale(.97)' }], { duration: 240, easing: 'ease-in', fill: 'forwards' }).finished.then(done);
+}
+// the search, menu, size guide and code sheets fade out over their veil instead of vanishing
+let layerT = 0;
+function clearLayer() { const l = $('#layer'); clearTimeout(layerT); l.innerHTML = ''; delete l.dataset.closing; l.style.pointerEvents = ''; }
 function closeLayer() {
   const l = $('#layer');
-  if (l.innerHTML) { l.innerHTML = ''; document.body.style.overflow = ''; }
+  if (l.innerHTML && !l.dataset.closing) {
+    document.body.style.overflow = '';
+    const kids = [...l.children];
+    if (still() || !kids[0].animate) clearLayer();
+    else {
+      l.dataset.closing = '1'; l.style.pointerEvents = 'none';
+      kids.forEach(k => k.animate(k.classList.contains('veil') ? [{ opacity: 1 }, { opacity: 0 }] : [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 -8px' }], { duration: 200, easing: 'ease-in', fill: 'forwards' }));
+      layerT = setTimeout(clearLayer, 200);
+    }
+  }
   // closing the code sheet cancels the pending order; the bag was never emptied, so checkout is intact
   pendingOrder = null; clearInterval(resendT);
   $$('[data-act="menu"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
@@ -1930,6 +1984,7 @@ function maskPhone(p) {
 }
 function openCode() {
   const l = $('#layer');
+  clearLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <div class="sheet glass code" role="dialog" aria-label="Confirm with a code">
       <div class="code-h">
@@ -1964,6 +2019,7 @@ function startResend() {
 }
 function openGuide(k) {
   const g = GUIDE[k], l = $('#layer');
+  clearLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <div class="sheet glass guide" role="dialog" aria-label="${g.title}">
       <div class="guide-h"><h2>${g.title}</h2><button class="icon-btn" data-act="close" aria-label="Close size guide">${I.x}</button></div>
@@ -1983,6 +2039,7 @@ function openSearch() {
   PR.search.min = PR.search.max = null;
   setBounds(PR.search, P.filter(gOK(sg)));
   const l = $('#layer');
+  clearLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <div class="sheet glass" role="dialog" aria-label="Search">
       <form class="search-row" id="search-form" role="search">${I.search}<label class="sr" for="q">Search the store</label><input id="q" placeholder="Search hoodies, Keepall, belts…" autocomplete="off"><button type="button" class="icon-btn" data-act="close" aria-label="Close search">${I.x}</button></form>
@@ -2063,7 +2120,8 @@ function searchOut(q) {
 const srItem = p => `<a class="sr-item" href="${vHref(p)}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${p.key && p.variants.length > 1 ? esc(p.color.name) + ', ' : ''}${p.from ? 'from ' : ''}${money(p.price)}</span></span></a>`;
 function openMenu() {
   const l = $('#layer');
-  if (l.innerHTML) return closeLayer();
+  if (l.innerHTML && !l.dataset.closing) return closeLayer();
+  clearLayer();
   l.innerHTML = `<div class="veil" data-act="close"></div>
     <nav class="sheet glass menu" aria-label="Menu"><div class="mclip">
       <div class="mstep m1">
@@ -2167,6 +2225,7 @@ document.addEventListener('click', e => {
       setBounds(PR.search, P.filter(gOK(sg)));
       $('#sr-pr').innerHTML = priceBox('search', 'in-sheet');
       searchOut($('#q').value);
+      if (!still()) $('#sr-out').animate([{ opacity: 0, translate: '0 4px' }, { opacity: 1, translate: '0 0' }], { duration: 280, easing: 'ease-out' });
     } break;
     case 'mstep': {
       const t = { women: 'Women', men: 'Men', all: 'All' }[d.g];
@@ -2181,13 +2240,14 @@ document.addEventListener('click', e => {
       // a fresh start in the section, with the price range set in search if there is one
       carry = a.closest('#sr-out') && priced(PR.search) ? { min: PR.search.min, max: PR.search.max } : null;
       brandList = '';
-      if (location.hash === a.getAttribute('href')) setTimeout(() => render(), 0);
+      if (location.hash === a.getAttribute('href')) setTimeout(() => fadeSwap('#app .view'), 0);
       break;
     case 'price-reset': { const pr = a.closest('.pr'), st = PR[pr ? pr.dataset.scope : 'list']; st.min = st.max = null; syncPrice(pr, true); applyPrice(pr); break; }
     case 'dd-pick': {
       if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
-      render();
-      $('#dd-' + d.dd)?.focus({ preventScroll: true });
+      // the list closes as it is, the pieces fade over to the new choice
+      ddOpen(null);
+      fadeSwap('#lgrid, #lcount', () => $('#dd-' + d.dd)?.focus({ preventScroll: true }));
       break;
     }
     case 'pick': {
@@ -2208,17 +2268,16 @@ document.addEventListener('click', e => {
       const p = BY[PV.id], h = d.v === p.variants[0].key ? '' : d.v;
       PV.hk = h;
       try { history.replaceState(history.state, '', '#p-' + p.id + (h ? '--' + h : '')); } catch (err) {}
-      render();
-      $(`.sw[data-v="${d.v}"]`)?.focus({ preventScroll: true });
+      $$('.sw[data-v]').forEach(b => b.classList.toggle('on', b === a));
+      // photos, price and color name fade over to the new color; the rest of the page stays
+      fadeSwap('.main-p, .thumbs, .info .price, .sw-name, .more', () => $(`.sw[data-v="${d.v}"]`)?.focus({ preventScroll: true }));
       break;
     }
-    case 'rm': S.bag = S.bag.filter(l => lineKey(l) !== d.k); if (!S.bag.length) S.promo = null; save(); render(); break;
+    case 'rm': removeLine(d.k, a.closest('.item')); break;
     case 'qty': {
       const l = S.bag.find(x => lineKey(x) === d.k);
-      l.qty += +d.d;
-      if (l.qty < 1) S.bag = S.bag.filter(x => x !== l);
-      l.qty = Math.min(l.qty, 9);
-      if (!S.bag.length) S.promo = null;
+      if (l.qty + +d.d < 1) { removeLine(d.k, a.closest('.item')); break; }
+      l.qty = Math.min(l.qty + +d.d, 9);
       save(); render(); break;
     }
     case 'search': openSearch(); break;
@@ -2229,7 +2288,7 @@ document.addEventListener('click', e => {
     case 'close': closeLayer(); break;
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
     case 'tab': if (d.t !== accTab) switchTab(d.t); break;
-    case 'signout': S.user = null; save(); render(); break;
+    case 'signout': S.user = null; save(); fadeSwap('#app .view'); break;
     case 'copy': {
       const el = document.getElementById(d.t);
       const done = () => { a.textContent = 'Copied'; setTimeout(() => (a.textContent = 'Copy'), 1600); };
@@ -2270,6 +2329,25 @@ for (const [type, on] of [['pointerover', true], ['pointerout', false]])
     const a = e.target.closest && e.target.closest('.hot a');
     if (a) $$(`.reel .tag[href="${a.getAttribute('href')}"]`).forEach(t => t.classList.toggle('lit', on));
   });
+// Details, Shipping and returns, and the FAQ open and close with their height easing instead of jumping
+document.addEventListener('click', e => {
+  const sm = e.target.closest && e.target.closest('.more summary, .faq summary');
+  if (!sm || still()) return;
+  const det = sm.parentElement, body = $('.body', det);
+  if (!body || !body.animate || det.dataset.anim) return;
+  e.preventDefault();
+  det.dataset.anim = '1';
+  body.style.overflow = 'hidden';
+  const end = () => { body.style.overflow = ''; delete det.dataset.anim; };
+  if (det.open) {
+    det.classList.add('shut');
+    body.animate([{ height: body.offsetHeight + 'px', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 260, easing: 'cubic-bezier(.4,0,.2,1)' })
+      .finished.then(() => { det.open = false; det.classList.remove('shut'); end(); });
+  } else {
+    det.open = true;
+    body.animate([{ height: '0px', opacity: 0 }, { height: body.offsetHeight + 'px', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.22,.8,.24,1)' }).finished.then(end);
+  }
+});
 document.addEventListener('click', e => {
   // links inside sheets close them even when the hash does not change
   if (e.target.closest('.sheet a')) setTimeout(closeLayer, 0);
@@ -2330,7 +2408,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('keydown', e => {
   const dd = e.target.closest && e.target.closest('.dd');
-  if (e.key === 'Escape' && dd && !$('.dd-pop', dd).hidden) { ddOpen(null); $('.dd-btn', dd).focus(); return; }
+  if (e.key === 'Escape' && dd && !$('.dd-pop', dd).hidden && !$('.dd-pop', dd).dataset.out) { ddOpen(null); $('.dd-btn', dd).focus(); return; }
   if (e.key === 'Escape') { closeLayer(); sizePop(false); }
   if (e.key === 'Backspace' && e.target.classList && e.target.classList.contains('code-box') && !e.target.value) {
     const boxes = $$('.code-box'), i = boxes.indexOf(e.target);
@@ -2353,12 +2431,12 @@ document.addEventListener('submit', e => {
   if (f.id === 'search-form') { const a = $('#sr-out .sr-item'); if (a) location.hash = a.getAttribute('href'); }
   if (f.id === 'promo-form') {
     const msg = $('#promo-msg');
-    if (S.promo) { S.promo = null; save(); render(); return; }
+    if (S.promo) { S.promo = null; save(); fadeSwap('.two > section:last-child'); return; }
     const c = $('#promo').value.trim().toUpperCase();
     if (!c) { msg.className = 'promo-msg err'; msg.textContent = 'Enter a code first'; return; }
     if (!PROMOS[c]) { msg.className = 'promo-msg err'; msg.textContent = 'This code is not valid'; return; }
-    S.promo = c; save(); render();
-    const m = $('#promo-msg'); m.className = 'promo-msg ok'; m.textContent = `${c} applied: ${PROMOS[c] * 100}% off`;
+    S.promo = c; save();
+    fadeSwap('.two > section:last-child', () => { const m = $('#promo-msg'); m.className = 'promo-msg ok'; m.textContent = `${c} applied: ${PROMOS[c] * 100}% off`; });
   }
   if (f.id === 'co-form') {
     let bad = null, msg = '';
@@ -2393,7 +2471,7 @@ document.addEventListener('submit', e => {
     if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = 'Enter a valid email, like name@mail.com'; return; }
     if (pass.length < 8) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Password needs at least 8 characters'; return; }
     const nm = name ? name.value.trim() : email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    S.user = { name: nm, email }; save(); render();
+    S.user = { name: nm, email }; save(); fadeSwap('#app .view');
   }
 });
 let lastY = -1;
