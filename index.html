@@ -339,6 +339,31 @@ main{flex:1;padding:0 var(--x);outline:none}
 .dd-pop button .ico{width:14px;height:14px;flex:none;visibility:hidden}
 .dd-pop button.on{font-weight:500}
 .dd-pop button.on .ico{visibility:visible}
+/* price range at the top of the sort list (owner's request): two fields, from and to, and a slider with two handles
+   under them; the pieces update as you type or drag, the list stays open */
+.dd-pop.wide{width:272px}
+.pr{padding:8px 8px 12px;margin-bottom:4px;border-bottom:1px solid rgba(0,0,0,.06)}
+.pr-h{display:flex;align-items:center;justify-content:space-between;min-height:22px;margin:0 2px 8px}
+.pr-h .label{color:var(--ink-2)}
+.dd-pop .pr-reset{min-height:0;padding:0;font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;background:none}
+.dd-pop .pr-reset:hover{background:none;color:var(--ink)}
+.pr-f{display:flex;align-items:center;gap:8px}
+.pr-f>i{width:8px;height:1px;background:var(--ink-3);flex:none}
+.pr-in{flex:1;display:flex;align-items:center;gap:2px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;transition:border-color .2s,box-shadow .2s}
+.pr-in:focus-within{border-color:#AFAFAF;box-shadow:0 0 0 3px rgba(0,0,0,.04)}
+.pr-in span{color:var(--ink-3)}
+.pr-in input{width:100%;min-width:0;border:0;outline:none;background:none;font-size:12.5px;font-variant-numeric:tabular-nums}
+.pr-in input::placeholder{color:var(--ink-3)}
+.pr-s{position:relative;height:22px;margin:14px 0 0}
+.pr-track{position:absolute;left:9px;right:9px;top:50%;height:3px;margin-top:-1.5px;border-radius:3px;background:#DEDEDE}
+.pr-track b{position:absolute;top:0;bottom:0;left:var(--a,0%);right:calc(100% - var(--b,100%));border-radius:3px;background:var(--ink)}
+.pr-s input{position:absolute;inset:0;width:100%;height:22px;margin:0;background:none;-webkit-appearance:none;appearance:none;pointer-events:none;outline:none}
+.pr-s input::-webkit-slider-runnable-track{background:none;border:0}
+.pr-s input::-moz-range-track{background:none;border:0}
+.pr-s input::-webkit-slider-thumb{-webkit-appearance:none;pointer-events:auto;width:18px;height:18px;border-radius:50%;background:#fff;border:1px solid #CFCFCF;box-shadow:0 1px 3px rgba(0,0,0,.14);cursor:grab;transition:transform .2s var(--ease)}
+.pr-s input::-moz-range-thumb{pointer-events:auto;width:16px;height:16px;border-radius:50%;background:#fff;border:1px solid #CFCFCF;box-shadow:0 1px 3px rgba(0,0,0,.14);cursor:grab}
+.pr-s input:active::-webkit-slider-thumb{transform:scale(1.12);cursor:grabbing}
+.pr-s input:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(0,0,0,.12)}
 .empty{display:grid;justify-items:center;text-align:center;gap:14px;padding:90px 0 40px}
 .empty p{margin:0;color:var(--ink-2);max-width:36ch}
 
@@ -1359,11 +1384,28 @@ function dealsHTML(all) {
   </section>`;
 }
 let sortBy = 'featured', brandBy = 'all', typeBy = 'all', brandList = '';
+// Price range of a section (null = no limit), and the section's own lowest and highest price for the slider. The slider
+// runs on a log scale: prices go from $129 to $30,094 and most pieces cost under $4,000, so the low end gets fine steps.
+let priceMin = null, priceMax = null, priceLo = 0, priceHi = 0;
+const SLIDE = 1000;
+const nice = n => n < 1000 ? Math.round(n / 10) * 10 : n < 10000 ? Math.round(n / 50) * 50 : Math.round(n / 100) * 100;
+const priceAt = t => t <= 0 ? priceLo : t >= SLIDE ? priceHi : Math.min(priceHi, Math.max(priceLo, nice(priceLo * Math.pow(priceHi / priceLo, t / SLIDE))));
+const slideAt = n => n == null ? null : priceHi <= priceLo ? 0 : Math.round(Math.min(SLIDE, Math.max(0, SLIDE * Math.log(n / priceLo) / Math.log(priceHi / priceLo))));
+const priceOK = p => (priceMin == null || p.price >= priceMin) && (priceMax == null || p.price <= priceMax);
+const priceText = () => priceMin != null && priceMax != null ? `${money(priceMin)} – ${money(priceMax)}` : priceMin != null ? `from ${money(priceMin)}` : `up to ${money(priceMax)}`;
+const priceBox = () => {
+  const t0 = slideAt(priceMin) ?? 0, t1 = slideAt(priceMax) ?? SLIDE;
+  return `<div class="pr" style="--a:${t0 / 10}%;--b:${t1 / 10}%">
+    <div class="pr-h"><span class="label">Price</span><button type="button" class="pr-reset" data-act="price-reset"${priceMin == null && priceMax == null ? ' hidden' : ''}>Reset</button></div>
+    <div class="pr-f"><label class="pr-in"><span>$</span><input id="pr-lo" inputmode="numeric" autocomplete="off" placeholder="${priceLo.toLocaleString('en-US')}" value="${priceMin ?? ''}" aria-label="Lowest price"></label><i></i><label class="pr-in"><span>$</span><input id="pr-hi" inputmode="numeric" autocomplete="off" placeholder="${priceHi.toLocaleString('en-US')}" value="${priceMax ?? ''}" aria-label="Highest price"></label></div>
+    <div class="pr-s"><span class="pr-track"><b></b></span><input type="range" id="pr-r0" min="0" max="${SLIDE}" value="${t0}" aria-label="Lowest price"><input type="range" id="pr-r1" min="0" max="${SLIDE}" value="${t1}" aria-label="Highest price"></div>
+  </div>`;
+};
 const SORTS = { featured: 'Featured', low: 'Price: low to high', high: 'Price: high to low' };
 // a pill that opens a frosted list, in place of the browser's own select menu
-const dropdown = (key, label, cur, opts, end) => `<div class="dd${end ? ' end' : ''}">
+const dropdown = (key, label, cur, opts, end, head = '') => `<div class="dd${end ? ' end' : ''}">
   <button class="dd-btn" id="dd-${key}" data-act="dd" aria-haspopup="listbox" aria-expanded="false" aria-label="${label}: ${esc(opts.find(o => o[0] === cur)[1])}"><span>${esc(opts.find(o => o[0] === cur)[1])}</span>${I.chev}</button>
-  <div class="dd-pop glass" role="listbox" aria-label="${label}" hidden>${opts.map(([v, t]) => `<button role="option" aria-selected="${v === cur}" class="${v === cur ? 'on' : ''}" data-act="dd-pick" data-dd="${key}" data-v="${esc(v)}"><span>${esc(t)}</span>${I.check}</button>`).join('')}</div>
+  <div class="dd-pop glass${head ? ' wide' : ''}" role="listbox" aria-label="${label}" hidden>${head}${opts.map(([v, t]) => `<button role="option" aria-selected="${v === cur}" class="${v === cur ? 'on' : ''}" data-act="dd-pick" data-dd="${key}" data-v="${esc(v)}"><span>${esc(t)}</span>${I.check}</button>`).join('')}</div>
 </div>`;
 function ddOpen(btn, open) {
   $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); b.nextElementSibling.hidden = true; } });
@@ -1374,6 +1416,33 @@ function ddOpen(btn, open) {
   btn.setAttribute('aria-expanded', open);
   if (open) { const o = $('button.on', pop) || $('button', pop); o.scrollIntoView({ block: 'nearest' }); o.focus({ preventScroll: true }); }
 }
+// the price range redraws only the count and the pieces, so the open list with the fields and the slider stays as it is
+// (typed prices wait until the typing pauses, so "1200" does not empty the list at "1")
+let prT = 0, prW = 0;
+function refreshList(wait) {
+  cancelAnimationFrame(prT); clearTimeout(prW);
+  if (wait) { prW = setTimeout(refreshList, wait); return; }
+  prT = requestAnimationFrame(() => {
+    const r = route();
+    if (r.name !== 'list') return;
+    const t = document.createElement('div');
+    t.innerHTML = V.list(r.arg);
+    $('#lcount').innerHTML = $('#lcount', t).innerHTML;
+    $('#lgrid').replaceWith($('#lgrid', t));
+    $$('#lgrid img').forEach(i => { if (i.complete && i.naturalWidth) i.classList.add('ld0'); });
+    const reset = $('.pr-reset'); if (reset) reset.hidden = priceMin == null && priceMax == null;
+  });
+}
+// move the slider handles and the filled part to the current range; `fields` also writes the numbers into the fields
+function syncPrice(fields) {
+  const t0 = slideAt(priceMin) ?? 0, t1 = slideAt(priceMax) ?? SLIDE, pr = $('.pr');
+  if (!pr) return;
+  $('#pr-r0').value = t0; $('#pr-r1').value = t1;
+  pr.style.setProperty('--a', t0 / 10 + '%'); pr.style.setProperty('--b', t1 / 10 + '%');
+  // two handles at the top end: the lower one goes on top so it can still be dragged down
+  $('#pr-r0').style.zIndex = t0 > SLIDE / 2 && t1 - t0 < 20 ? 2 : '';
+  if (fields) { $('#pr-lo').value = priceMin ?? ''; $('#pr-hi').value = priceMax ?? ''; }
+}
 V.list = key => {
   const L = LISTS[key];
   const all = P.filter(p => L.pick(p) && genderOK(p));
@@ -1382,7 +1451,7 @@ V.list = key => {
   const mixed = !['clothing', 'bags', 'shoes', 'accessories'].includes(key);
   const typeOf = p => mixed ? p.groups[0] : p.cat;
   const typeName = t => mixed ? LISTS[t].title : t;
-  if (brandList !== key) { brandBy = 'all'; typeBy = 'all'; }
+  if (brandList !== key) { brandBy = 'all'; typeBy = 'all'; priceMin = priceMax = null; }
   brandList = key;
   const tally = {};
   all.forEach(p => { tally[typeOf(p)] = (tally[typeOf(p)] || 0) + 1; });
@@ -1396,18 +1465,20 @@ V.list = key => {
   if (!brands.includes(brandBy)) brandBy = 'all';
   const byBrand = brandBy === 'all' ? all : all.filter(p => p.brand === brandBy);
   const typesHere = types.filter(t => byBrand.some(p => typeOf(p) === t));
-  let list = byType.filter(p => brandBy === 'all' || p.brand === brandBy);
+  priceLo = Math.min(...all.map(p => p.price)); priceHi = Math.max(...all.map(p => p.price));
+  const priced = priceMin != null || priceMax != null;
+  let list = byType.filter(p => (brandBy === 'all' || p.brand === brandBy) && priceOK(p));
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   return `${key === 'sale' ? dealsHTML(all) : ''}<div class="cat-top">
-      <div><h1 class="h-title">${L.title}</h1><div class="muted">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${L.note && typeBy === 'all' && brandBy === 'all' ? ', ' + L.note.toLowerCase() : ''}</div></div>
+      <div><h1 class="h-title">${L.title}</h1><div class="muted" id="lcount">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${priced ? ', ' + priceText() : L.note && typeBy === 'all' && brandBy === 'all' ? ', ' + L.note.toLowerCase() : ''}</div></div>
       <div class="tools">
         ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
-        ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true)}
+        ${dropdown('sort', 'Sort', sortBy, Object.entries(SORTS), true, all.length > 1 ? priceBox() : '')}
       </div>
     </div>
-    ${list.length ? grid(list) : `<div class="empty" style="padding-top:40px"><p>Nothing here for ${GENDERS.find(g => g[0] === genderBy)[1].toLowerCase()} yet.</p><button class="btn" data-act="gender" data-g="all">Show all</button></div>`}`;
+    <div id="lgrid">${list.length ? grid(list) : priced ? `<div class="empty" style="padding-top:40px"><p>Nothing in this price range.</p><button class="btn" data-act="price-reset">Reset price</button></div>` : `<div class="empty" style="padding-top:40px"><p>Nothing here for ${GENDERS.find(g => g[0] === genderBy)[1].toLowerCase()} yet.</p><button class="btn" data-act="gender" data-g="all">Show all</button></div>`}</div>`;
 };
 
 let PV = { id: null, view: 0, size: null, v: '', hk: null };
@@ -1951,6 +2022,7 @@ document.addEventListener('click', e => {
     case 'view': setView(+d.i); break;
     case 'size': sizePop(); break;
     case 'dd': ddOpen(a); break;
+    case 'price-reset': priceMin = priceMax = null; syncPrice(true); refreshList(); break;
     case 'dd-pick': {
       if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
       render();
@@ -2037,6 +2109,21 @@ document.addEventListener('input', e => {
   }
   if (e.target.id === 'cc-exp') { const n = digits(e.target.value).slice(0, 4); reformat(e.target, n.length > 2 ? n.slice(0, 2) + '/' + n.slice(2) : n); }
   if (e.target.id === 'cc-cvc') reformat(e.target, digits(e.target.value).slice(0, CARDS[payBy].cvc));
+  if (e.target.id === 'pr-r0' || e.target.id === 'pr-r1') {
+    let t0 = +$('#pr-r0').value, t1 = +$('#pr-r1').value;
+    if (t0 > t1) { if (e.target.id === 'pr-r0') t0 = t1; else t1 = t0; }
+    priceMin = t0 > 0 ? priceAt(t0) : null;
+    priceMax = t1 < SLIDE ? priceAt(t1) : null;
+    syncPrice(true);
+    refreshList();
+  }
+  if (e.target.id === 'pr-lo' || e.target.id === 'pr-hi') {
+    const v = digits(e.target.value).slice(0, 6);
+    e.target.value = v;
+    if (e.target.id === 'pr-lo') priceMin = v ? +v : null; else priceMax = v ? +v : null;
+    syncPrice(false);
+    refreshList(350);
+  }
   if (e.target.classList.contains('code-box')) {
     const boxes = $$('.code-box'), i = boxes.indexOf(e.target), v = digits(e.target.value);
     $('.code-boxes').classList.remove('bad'); $('#code-err').textContent = '';
@@ -2069,7 +2156,7 @@ document.addEventListener('keydown', e => {
     if (i > 0) { boxes[i - 1].value = ''; boxes[i - 1].focus(); e.preventDefault(); }
   }
   // arrows walk the open list
-  if (dd && /^Arrow(Up|Down)$/.test(e.key)) {
+  if (dd && /^Arrow(Up|Down)$/.test(e.key) && e.target.tagName !== 'INPUT') {
     e.preventDefault();
     const btn = $('.dd-btn', dd), pop = $('.dd-pop', dd);
     if (pop.hidden) return ddOpen(btn, true);
