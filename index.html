@@ -356,6 +356,8 @@ main{flex:1;padding:0 var(--x);outline:none}
 .deal:not(.main) .deal-card h2{font-size:clamp(18px,1.6vw,22px)}
 .cat-top .h-title{font-size:clamp(24px,2.6vw,34px)}
 .cat-top .muted{font-size:12.5px;margin-top:8px}
+/* no piece counts under the section titles (owner's request); the line shows the price range or the section's note */
+.cat-top .muted:empty{display:none}
 .tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .dd{position:relative}
 .dd-btn{display:inline-flex;align-items:center;gap:10px;height:36px;padding:0 12px 0 16px;border-radius:999px;background:var(--pill);font-size:12px;white-space:nowrap;transition:background .2s}
@@ -1427,8 +1429,7 @@ V.home = () => {
     <div class="sec-h"><h2 class="h-title">Shop by category</h2></div>
     <div class="cats">
       ${[['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55'], ['shoes', 'timberland-cross-boot'], ['accessories', 'gucci-gg-belt']].map(([k, id]) => {
-        const n = P.filter(LISTS[k].pick).length;
-        return `<a class="cat" href="#${k}">${pic(BY[id])}<span class="cat-plate glass"><span><b>${LISTS[k].title}</b><span>${n} pieces</span></span><span class="arrow">${I.arrow}</span></span></a>`;
+        return `<a class="cat" href="#${k}">${pic(BY[id])}<span class="cat-plate glass"><span><b>${LISTS[k].title}</b></span><span class="arrow">${I.arrow}</span></span></a>`;
       }).join('')}
     </div>
   </section>`;
@@ -1465,6 +1466,7 @@ const priceAt = (st, t) => t <= 0 ? st.lo : t >= SLIDE ? st.hi : Math.min(st.hi,
 const slideAt = (st, n) => n == null ? null : st.hi <= st.lo ? 0 : Math.round(Math.min(SLIDE, Math.max(0, SLIDE * Math.log(n / st.lo) / Math.log(st.hi / st.lo))));
 const priceOK = st => p => (st.min == null || p.price >= st.min) && (st.max == null || p.price <= st.max);
 const priced = st => st.min != null || st.max != null;
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 const priceText = st => st.min != null && st.max != null ? `${money(st.min)} – ${money(st.max)}` : st.min != null ? `from ${money(st.min)}` : `up to ${money(st.max)}`;
 const setBounds = (st, list) => { st.lo = Math.min(...list.map(p => p.price)); st.hi = Math.max(...list.map(p => p.price)); };
 const priceBox = (scope, cls = '') => {
@@ -1554,7 +1556,7 @@ V.list = key => {
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   return `${key === 'sale' ? dealsHTML(all) : ''}<div class="cat-top">
-      <div><h1 class="h-title">${L.title}</h1><div class="muted" id="lcount">${list.length} ${list.length === 1 ? 'piece' : 'pieces'}${hasPrice ? ', ' + priceText(PR.list) : L.note && typeBy === 'all' && brandBy === 'all' ? ', ' + L.note.toLowerCase() : ''}</div></div>
+      <div><h1 class="h-title">${L.title}</h1><div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && typeBy === 'all' && brandBy === 'all' ? L.note : ''}</div></div>
       <div class="tools">
         ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
