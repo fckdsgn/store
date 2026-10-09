@@ -322,7 +322,7 @@ main{flex:1;padding:0 var(--x);outline:none}
 .cat-plate{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 14px 18px;border-radius:16px}
 .cat-plate b{display:block;color:var(--ink);font-weight:500;font-size:15px;text-transform:uppercase;letter-spacing:.01em}
 .cat-plate span{font-size:12px;color:var(--ink-2)}
-.cat-t,.cat-bars,.cats-go{display:none}
+.cat-t,.cat-bars,.cats-go,.cat.clone{display:none}
 .arrow{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.06);flex:none;transition:transform .35s var(--ease)}
 
 /* ---------- product card ---------- */
@@ -675,7 +675,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   .cats-wrap{position:relative;border-radius:var(--r-tile);overflow:hidden;background:var(--tile)}
   .cats{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
   .cats::-webkit-scrollbar{display:none}
-  .cat{flex:0 0 100%;aspect-ratio:3/4;scroll-snap-align:start;scroll-snap-stop:always;border-radius:0}
+  .cat,.cat.clone{display:block;flex:0 0 100%;aspect-ratio:3/4;scroll-snap-align:start;scroll-snap-stop:always;border-radius:0}
   .cat img{object-position:50% 40%}
   .cat::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to top,rgba(0,0,0,.34),rgba(0,0,0,.12) 55%,rgba(0,0,0,0));pointer-events:none}
   .cat-t{display:block;position:absolute;z-index:1;left:20px;right:20px;bottom:86px;color:#fff;font-size:24px;font-weight:500;line-height:1.1;text-transform:uppercase;letter-spacing:.01em;text-shadow:0 1px 12px rgba(0,0,0,.18)}
@@ -2212,13 +2212,23 @@ const CATS = [['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55
 // top of the text show which card is up, the current one fills over 5 s and the next card slides in; a swipe or a tap
 // on the left or right third of the photo turns the cards too, the middle opens the section. The bars wait while a
 // finger is on the cards, while they are off screen, in a hidden tab and with reduced motion.
-let catsIO = null;
+let catsIO = null, catsJump = () => {};
+matchMedia('(max-width:719px)').addEventListener('change', () => catsJump());
 function mountCats() {
   const wrap = $('.cats-wrap'), row = wrap && $('.cats', wrap);
   if (catsIO) { catsIO.disconnect(); catsIO = null; }
   if (!row) return;
   const bars = $$('.cat-bars i', wrap), n = bars.length;
   let at = 0;
+  // an endless ribbon (owner: after the last card it goes on to the right, from the start): a copy of the last card
+  // stands before the first and a copy of the first after the last; on landing on a copy the ribbon jumps unseen to
+  // the card it copies
+  const cards = $$('.cat', row), lead = cards[n - 1].cloneNode(true), tail = cards[0].cloneNode(true);
+  [lead, tail].forEach(c => { c.classList.add('clone'); c.setAttribute('aria-hidden', 'true'); c.tabIndex = -1; });
+  row.prepend(lead); row.append(tail);
+  const jump = pos => { row.style.scrollSnapType = 'none'; row.scrollLeft = pos * row.clientWidth; void row.offsetWidth; row.style.scrollSnapType = ''; };
+  catsJump = () => { if (phone()) jump(at + 1); };
+  catsJump();
   // one plate stays put under the cards; its words roll over to the card that comes up (up going forward, down going
   // back), and it leads to that card's section
   const plate = $('.cats-go', wrap), words = $('.cg-t', plate);
@@ -2241,12 +2251,17 @@ function mountCats() {
     void wrap.offsetWidth; // the fill starts over on the current bar
     bars[i].classList.add('on');
   };
-  const go = i => { i = (i + n) % n; row.scrollTo({ left: i * row.clientWidth, behavior: still() ? 'auto' : 'smooth' }); show(i); };
+  // i may be -1 or n: the copy on that side is scrolled to, and the scroll handler jumps on from it
+  const go = i => { row.scrollTo({ left: (i + 1) * row.clientWidth, behavior: still() ? 'auto' : 'smooth' }); show((i + n) % n); };
   show(0);
   if (still()) wrap.classList.add('hold', 'still');
   bars.forEach((b, i) => b.addEventListener('animationend', () => { if (i === at && phone() && !still()) go(at + 1); }));
   let st = 0;
-  row.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => { const i = Math.round(row.scrollLeft / row.clientWidth); if (i !== at) show(i); }, 80); }, { passive: true });
+  row.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => {
+    let pos = Math.round(row.scrollLeft / row.clientWidth);
+    if (pos === n + 1) { pos = 1; jump(1); } else if (pos === 0) { pos = n; jump(n); }
+    if (pos - 1 !== at) show(pos - 1);
+  }, 80); }, { passive: true });
   const hold = on => wrap.classList.toggle('hold', on || still());
   row.addEventListener('touchstart', () => hold(true), { passive: true });
   row.addEventListener('touchend', () => hold(false), { passive: true });
