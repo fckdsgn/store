@@ -106,7 +106,6 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .logo .lw{display:inline-block;white-space:pre;position:relative}
 .logo .fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .logo .fx svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
-.logo .fx .ns{vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center}
 .logo .ll{display:inline-block}
 .logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards}
 @keyframes logo-in{from{opacity:0;transform:translateY(.4em);filter:blur(4px)}}
@@ -2024,8 +2023,8 @@ const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // The store name acts out the shop for a moment, one scene after the other with a rest between (owner's request,
 // after a reference where the letters of GOAL play a goal). Each letter is redrawn in lines over its glyph, at the
 // glyph's size and stroke, and those lines turn into the thing (owner: the first try looked too big and came out of
-// thin air): the U of ECRUO flips over as the handle while the O flows from an oval into the body of a shopping bag,
-// and the bag swings; the O of STORE squeezes into the shoulders and bar of a hanger, its curled hook grows out of
+// thin air): the O of ECRUO flows from an oval into the body of a shopping bag while the U turns over into its
+// handle, the bag as big as the hanger and drawn in its style, and the bag swings; the O of STORE squeezes into the shoulders and bar of a hanger, its curled hook grows out of
 // the top, and the hanger swings. Then everything flows back into the letters. A scene whose letters a new name lacks
 // is skipped.
 function logoScenes(a) {
@@ -2056,32 +2055,46 @@ function logoScenes(a) {
   // the hanger comes out of an O the bag does not use (the O of STORE)
   const hO = L.find((el, i) => ch(el) === 'O' && i !== ui + 1);
 
+  // points spread evenly along a path (for one outline to flow into another point by point)
+  const along = (g, d, n) => { const pth = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    pth.setAttribute('d', d); pth.style.visibility = 'hidden'; g.append(pth);
+    const len = pth.getTotalLength(), pts = Array.from({ length: n }, (_, i) => { const q = pth.getPointAtLength(len * i / (n - 1)); return [q.x, q.y]; });
+    pth.remove(); return pts; };
+  const poly = (pts, close) => 'M' + pts.map(q => q[0] + ' ' + q[1]).join('L') + (close ? 'Z' : '');
+  // the hanger's size, for the bag to match it: its width and its height from the baseline to the top of the hook
+  const hangerSize = o => { const W = o.w * 1.28, R = Math.max(W * .16, o.sw * 1.05); return { W, H: W * .52 + 2 * R }; };
+
   async function bag() {
     const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
-    // the letters in lines: the U as two stems and a bowl, the O as an oval (a rect whose corners are half its size)
+    // the bag (owner: as big as the hanger and in its style): a body narrowing a little to the top like the hanger's
+    // shoulders, its bottom corners rounded, a round handle standing on its top edge; as wide and as tall as the
+    // hanger, centred where the U and the O stood
+    const { W, H } = hangerSize(o), cx = (u.x + o.x + o.w) / 2, b = o.y + o.h - sw / 2;
+    const bw = W - sw, tw = bw * .82, hr = tw * .28, legs = hr * .75, top = b - (H - hr - legs), rb = sw, rt = sw * .35;
+    const xl = cx - bw / 2, xr = cx + bw / 2, tl = cx - tw / 2, tr = cx + tw / 2, k1 = rt / (b - top), k2 = rb / (b - top);
+    const bodyD = `M${cx} ${top}H${tr - rt}Q${tr} ${top} ${mix(tr, xr, k1)} ${top + rt}L${mix(xr, tr, k2)} ${b - rb}Q${xr} ${b} ${xr - rb} ${b}H${xl + rb}Q${xl} ${b} ${mix(xl, tl, k2)} ${b - rb}L${mix(tl, xl, k1)} ${top + rt}Q${tl} ${top} ${tl + rt} ${top}Z`;
+    // the U and the O in lines over their glyphs: the U as two stems and a bowl, the O as an oval from its top
     const ul = u.x + sw * .52, ur = u.x + u.w - sw * .52, rx = (ur - ul) / 2, ry = rx * .92, uy = u.y + sw / 2, ub = u.y + u.h - sw / 2 - ry;
-    g.innerHTML = `<path/><path class="ns" d="M${ul} ${uy}V${ub}A${rx} ${ry} 0 0 0 ${ur} ${ub}V${uy}"/>`;
+    const oa = (o.w - sw) / 2, ob = (o.h - sw) / 2, ocx = o.x + o.w / 2, ocy = o.y + o.h / 2;
+    const N = 120, oval = along(g, `M${ocx} ${o.y + sw / 2}A${oa} ${ob} 0 1 1 ${ocx} ${o.y + o.h - sw / 2}A${oa} ${ob} 0 1 1 ${ocx} ${o.y + sw / 2}`, N), body = along(g, bodyD, N);
+    // the U turns over into the handle: it spins half a turn about its middle while its shape flows into the handle's
+    // (the handle written in the U's unturned frame), so its legs shorten and its bowl rounds into the arch
+    const M = 80, c = [u.x + u.w / 2, u.y + u.h / 2], hc = [cx, top - (hr + legs) / 2], d = [hc[0] - c[0], hc[1] - c[1]];
+    const uPts = along(g, `M${ul} ${uy}V${ub}A${rx} ${ry} 0 0 0 ${ur} ${ub}V${uy}`, M);
+    const hPts = along(g, `M${cx + hr} ${top}V${top - legs}A${hr} ${hr} 0 0 0 ${cx - hr} ${top - legs}V${top}`, M).map(q => [2 * c[0] + d[0] - q[0], 2 * c[1] + d[1] - q[1]]);
+    g.innerHTML = '<path/><path/>';
     const [bp, hp] = g.children;
-    const oval = { x: o.x + sw / 2, y: o.y + sw / 2, w: o.w - sw, h: o.h - sw };
-    // the bag, centred where the U and the O stood, drawn like the bag icon in the header: square top corners,
-    // rounded bottom ones, the handle (the U turned over) half as wide and low, its feet well inside the body
-    const bw = o.w * 1.04, bh = o.h * .78, bx = (u.x + o.x + o.w) / 2 - bw / 2, by = o.y + o.h - bh;
-    const body = { x: bx + sw / 2, y: by + sw / 2, w: bw - sw, h: bh - sw };
-    // the body's outline with its own radius at each corner: an oval at first (every corner half the size), then the
-    // bag (top corners nearly square, bottom ones rounded like the glyphs)
     const set = k => {
-      const v = n => mix(oval[n], body[n], k), x = v('x'), y = v('y'), w = v('w'), h = v('h');
-      const tr = [mix(w / 2, sw * .25, k), mix(h / 2, sw * .25, k)], br = [mix(w / 2, sw * 1.3, k), mix(h / 2, sw * 1.3, k)];
-      bp.setAttribute('d', `M${x + tr[0]} ${y}H${x + w - tr[0]}A${tr[0]} ${tr[1]} 0 0 1 ${x + w} ${y + tr[1]}V${y + h - br[1]}A${br[0]} ${br[1]} 0 0 1 ${x + w - br[0]} ${y + h}H${x + br[0]}A${br[0]} ${br[1]} 0 0 1 ${x} ${y + h - br[1]}V${y + tr[1]}A${tr[0]} ${tr[1]} 0 0 1 ${x + tr[0]} ${y}Z`);
+      bp.setAttribute('d', poly(oval.map((q, i) => [mix(q[0], body[i][0], k), mix(q[1], body[i][1], k)]), true));
+      const a = Math.PI * k, cs = Math.cos(a), sn = Math.sin(a);
+      hp.setAttribute('d', poly(uPts.map((q, i) => { const x = mix(q[0], hPts[i][0], k) - c[0], y = mix(q[1], hPts[i][1], k) - c[1];
+        return [c[0] + x * cs - y * sn + d[0] * k, c[1] + x * sn + y * cs + d[1] * k]; })));
     };
     set(0);
-    const hw = bw * .5, hh = bh * .52, sx = hw / (ur - ul), sy = hh / (u.h - sw);
-    const hcx = bx + bw / 2, hcy = by - hh / 2 + hh * .4;
-    const pose = `translate(${hcx - (ul + ur) / 2}px,${hcy - (u.y + u.h / 2)}px) rotate(180deg) scale(${sx},${sy})`;
     await Promise.all([fade([svg], 1), fade([U, O], 0)]);
-    await Promise.all([hp.animate([{ transform: 'none' }, { transform: pose }], { duration: 760, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }).finished, tween(700, set, 120)]);
-    await swing(g, hcx, hcy - hh / 2, 6);
-    await Promise.all([hp.animate([{ transform: pose }, { transform: 'none' }], { duration: 720, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }).finished, tween(640, k => set(1 - k))]);
+    await tween(820, set);
+    await swing(g, cx, top - hr - legs - sw / 2, 6);
+    await tween(820, k => set(1 - k));
     await Promise.all([fade([U, O], 1), fade([svg], 0)]);
     done([U, O], f);
   }
@@ -2093,7 +2106,7 @@ function logoScenes(a) {
     // round hook open to the side, about 1.15 times as tall as the letters with its hook. It is wider than the O, so the
     // letters after it step aside (the ones before keep their place).
     // (room: the extra width plus a little air on each side, so it does not touch the T and the R)
-    const W = o.w * 1.28, room = W - o.w + sw * .9, after = L.slice(L.indexOf(O) + 1);
+    const { W } = hangerSize(o), room = W - o.w + sw * .9, after = L.slice(L.indexOf(O) + 1);
     const cx = o.x + o.w / 2 + room / 2, base = o.y + o.h - sw / 2, x0 = cx - W / 2 + sw / 2, x1 = cx + W / 2 - sw / 2;
     const apex = base - W * .36, R = Math.max(W * .16, sw * 1.05), hy = apex - W * .16 - R;
     // the shoulders bow upward a little: each a curve from the neck to an end of the bar
