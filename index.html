@@ -1790,14 +1790,16 @@ V.account = () => {
     </div>`;
   }
   const up = accTab === 'up';
+  // the password fields ask the phone for the same keyboard as the email field (owner's request: there it opens in
+  // English), with no suggestions or corrections; they stay real password fields for the phone's saved passwords
   return `${backBtn('home')}<div class="narrow">
     <h1 class="h-title" style="text-align:center">Account</h1>
     <div class="seg${up ? ' r' : ''}" role="tablist"><i></i><button role="tab" aria-selected="${!up}" class="${up ? '' : 'on'}" data-act="tab" data-t="in">Sign in</button><button role="tab" aria-selected="${up}" class="${up ? 'on' : ''}" data-act="tab" data-t="up">Create account</button></div>
     <form class="stack" id="acc-form" novalidate>
       ${up ? `<div class="field"><input id="a-name" placeholder=" " autocomplete="name" required><label for="a-name">Full name</label></div>` : ''}
       <div class="field"><input id="a-email" type="email" placeholder=" " autocomplete="email" required><label for="a-email">Email</label></div>
-      <div class="field pw"><input id="a-pass" type="password" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="8"><label for="a-pass">Password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>
-      ${up ? `<div class="field pw" id="a-pass2-f" hidden><input id="a-pass2" type="password" placeholder=" " autocomplete="new-password" required><label for="a-pass2">Confirm password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>` : ''}
+      <div class="field pw"><input id="a-pass" type="password" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required minlength="8"><label for="a-pass">Password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>
+      ${up ? `<div class="field pw" id="a-pass2-f" hidden><input id="a-pass2" type="password" placeholder=" " autocomplete="new-password" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required><label for="a-pass2">Confirm password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>` : ''}
       <p class="form-err" id="acc-err" aria-live="polite" style="margin:2px 2px 0"></p>
       <button class="btn wide" type="submit" style="margin-top:6px">${up ? 'Create account' : 'Sign in'}</button>
     </form>
