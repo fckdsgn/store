@@ -7,6 +7,8 @@
 <meta name="description" content="Pale Store: clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler and more.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="data:,">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
@@ -275,6 +277,10 @@ main{flex:1;padding:0 var(--x);outline:none}
   .hero-card .btn:active{transform:translateY(0) scale(.98)}
 }
 .hero-card .row{display:flex;gap:8px;flex-wrap:wrap}
+@media (max-width:900px),(max-height:520px) and (orientation:landscape){
+  .hero-card{position:static;width:auto;margin-top:46px}
+  .hero-card .btn{flex:1}
+}
 .sec{padding-top:clamp(56px,7vw,96px)}
 .sec-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px 18px}
@@ -608,7 +614,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   .co-peek[open].shut summary .ico{transform:none}
   .co-peek .body{padding:2px 0 14px}
   .co-peek .sum-items{margin-bottom:16px}
-  .pdp{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"main info" "thumbs info";align-items:start;gap:16px 28px}
+  .pdp{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"main info" "thumbs info";align-items:start;gap:16px 28px}
   .thumbs{grid-area:thumbs;flex-direction:row;justify-self:start}
   .main-p{grid-area:main;min-width:0}
   .info{grid-area:info;align-self:center}
@@ -1760,7 +1766,7 @@ V.order = n => {
 V.wishlist = () => {
   const list = S.wish.map(id => BY[id]).filter(Boolean);
   if (!list.length) return `${backBtn('home')}<div class="empty"><h1 class="h-title">Wishlist</h1><p>Tap the heart on any piece to save it here.</p><a class="btn" href="#new">Shop new in</a></div>`;
-  return `${backBtn('home')}<div class="cat-top"><div><h1 class="h-title">Wishlist</h1><div class="muted">${list.length} saved</div></div></div>${grid(list)}`;
+  return `${backBtn('home')}<div class="cat-top"><div><h1 class="h-title">Wishlist</h1></div></div>${grid(list)}`;
 };
 
 let accTab = 'in';
