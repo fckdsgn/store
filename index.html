@@ -1710,7 +1710,8 @@ function dealsHTML(all) {
     ${DEALS.small.map(b => `<div class="deal">${pics(val(b.ids, all))}${card(b, 'h2', all)}</div>`).join('')}
   </section>`;
 }
-let sortBy = 'featured', brandBy = 'all', typeBy = 'all', brandList = '';
+// brandBy: the brands picked in the section (several at once, owner's request); none picked = all brands
+let sortBy = 'featured', brandBy = [], typeBy = 'all', brandList = '';
 // Price ranges (null = no limit) with the lowest and highest price for their slider: one for the catalog section (in
 // its sort list), one for search. The slider runs on a log scale: prices go from $129 to $30,094 and most pieces cost
 // under $4,000, so the low end gets fine steps.
@@ -1734,11 +1735,18 @@ const priceBox = (scope, cls = '') => {
   </div>`;
 };
 const SORTS = { featured: 'Featured', low: 'Price: low to high', high: 'Price: high to low' };
-// a pill that opens a frosted list, in place of the browser's own select menu
-const dropdown = (key, label, cur, opts, end, head = '') => `<div class="dd${end ? ' end' : ''}">
-  <button class="dd-btn" id="dd-${key}" data-act="dd" aria-haspopup="listbox" aria-expanded="false" aria-label="${label}: ${esc(opts.find(o => o[0] === cur)[1])}"><span>${esc(opts.find(o => o[0] === cur)[1])}</span>${I.chev}</button>
-  <div class="dd-pop glass${head ? ' wide' : ''}" role="listbox" aria-label="${label}" hidden>${head}${opts.map(([v, t]) => `<button role="option" aria-selected="${v === cur}" class="${v === cur ? 'on' : ''}" data-act="dd-pick" data-dd="${key}" data-v="${esc(v)}"><span>${esc(t)}</span>${I.check}</button>`).join('')}</div>
+// a pill that opens a frosted list, in place of the browser's own select menu. With a list of picks for `cur` it takes
+// several at once (the brands): each option ticks on and off, the first option ("All …") clears them, and the pill
+// names the one pick or counts them
+const ddText = (label, cur, opts) => !Array.isArray(cur) ? opts.find(o => o[0] === cur)[1]
+  : !cur.length ? opts[0][1] : cur.length === 1 ? opts.find(o => o[0] === cur[0])[1] : `${cur.length} ${label.toLowerCase()}s`;
+const dropdown = (key, label, cur, opts, end, head = '') => {
+  const many = Array.isArray(cur), on = v => many ? (v === opts[0][0] ? !cur.length : cur.includes(v)) : v === cur, text = esc(ddText(label, cur, opts));
+  return `<div class="dd${end ? ' end' : ''}">
+  <button class="dd-btn" id="dd-${key}" data-act="dd" aria-haspopup="listbox" aria-expanded="false" aria-label="${label}: ${text}"><span>${text}</span>${I.chev}</button>
+  <div class="dd-pop glass${head ? ' wide' : ''}" role="listbox" aria-label="${label}"${many ? ' aria-multiselectable="true"' : ''} hidden>${head}${opts.map(([v, t]) => `<button role="option" aria-selected="${on(v)}" class="${on(v) ? 'on' : ''}" data-act="dd-pick" data-dd="${key}" data-v="${esc(v)}"><span>${esc(t)}</span>${I.check}</button>`).join('')}</div>
 </div>`;
+};
 function ddOpen(btn, open) {
   const shut = pop => popOut(pop, () => { pop.hidden = true; });
   $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); shut(b.nextElementSibling); } });
@@ -1764,6 +1772,34 @@ function refreshList(wait) {
     $('#lgrid').replaceWith($('#lgrid', t));
     markSeen($('#lgrid'));
   });
+}
+// a brand ticked on or off: the list stays open and the pieces fade over to the new choice; the pill, the ticks and the
+// type list (it offers only the kinds the picked brands have) are brought up to date in place
+let bfN = 0;
+function brandsChanged() {
+  const n = ++bfN, els = $$('#lgrid, #lcount');
+  const swap = () => {
+    if (n !== bfN) return;
+    const r = route();
+    if (r.name !== 'list') return;
+    const t = document.createElement('div');
+    t.innerHTML = V.list(r.arg);
+    $('#lcount').innerHTML = $('#lcount', t).innerHTML;
+    $('#lgrid').replaceWith($('#lgrid', t));
+    markSeen($('#lgrid'));
+    const tb = $('#dd-type'), nb = $('#dd-type', t);
+    if (tb && nb) tb.parentNode.replaceWith(nb.parentNode);
+    const bb = $('#dd-brand'), nbb = $('#dd-brand', t);
+    if (bb && nbb) {
+      bb.firstElementChild.textContent = nbb.firstElementChild.textContent;
+      bb.setAttribute('aria-label', nbb.getAttribute('aria-label'));
+      const now = $$('[data-act="dd-pick"]', nbb.nextElementSibling);
+      $$('[data-act="dd-pick"]', bb.nextElementSibling).forEach((o, i) => { const on = now[i] && now[i].classList.contains('on'); o.classList.toggle('on', on); o.setAttribute('aria-selected', on); });
+    }
+    if (!still()) $$('#lgrid, #lcount').forEach(e => e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' }));
+  };
+  if (still() || !els.length || !els[0].animate) return swap();
+  Promise.all(els.map(e => e.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, easing: 'ease-out', fill: 'forwards' }).finished)).then(swap);
 }
 // a range changed: the catalog redraws its pieces, search its results; typed prices wait until the typing pauses
 let srW = 0;
@@ -1792,7 +1828,7 @@ V.list = key => {
   const mixed = !['clothing', 'bags', 'shoes', 'accessories'].includes(key);
   const typeOf = p => mixed ? p.groups[0] : p.cat;
   const typeName = t => mixed ? LISTS[t].title : t;
-  if (brandList !== key) { brandBy = 'all'; typeBy = 'all'; PR.list.min = carry ? carry.min : null; PR.list.max = carry ? carry.max : null; carry = null; }
+  if (brandList !== key) { brandBy = []; typeBy = 'all'; PR.list.min = carry ? carry.min : null; PR.list.max = carry ? carry.max : null; carry = null; }
   brandList = key;
   const tally = {};
   all.forEach(p => { tally[typeOf(p)] = (tally[typeOf(p)] || 0) + 1; });
@@ -1803,17 +1839,17 @@ V.list = key => {
   // each list offers only what goes with the other choice, so no pick leaves the section empty
   const byType = typeBy === 'all' ? all : all.filter(p => typeOf(p) === typeBy);
   const brands = [...new Set(byType.map(p => p.brand))].sort((a, b) => a.localeCompare(b));
-  if (!brands.includes(brandBy)) brandBy = 'all';
-  const byBrand = brandBy === 'all' ? all : all.filter(p => p.brand === brandBy);
+  brandBy = brandBy.filter(b => brands.includes(b));
+  const byBrand = !brandBy.length ? all : all.filter(p => brandBy.includes(p.brand));
   const typesHere = types.filter(t => byBrand.some(p => typeOf(p) === t));
   setBounds(PR.list, all);
   const hasPrice = priced(PR.list);
-  let list = byType.filter(p => (brandBy === 'all' || p.brand === brandBy) && priceOK(PR.list)(p));
+  let list = byType.filter(p => (!brandBy.length || brandBy.includes(p.brand)) && priceOK(PR.list)(p));
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   // in Sale the title goes above the banners, and the filters stay with the pieces under them
   return `${key === 'sale' ? `<h1 class="h-title sale-h">${L.title}</h1>${dealsHTML(all)}` : ''}<div class="cat-top">
-      <div>${key === 'sale' ? '' : `<h1 class="h-title">${L.title}</h1>`}<div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && typeBy === 'all' && brandBy === 'all' ? L.note : ''}</div></div>
+      <div>${key === 'sale' ? '' : `<h1 class="h-title">${L.title}</h1>`}<div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && typeBy === 'all' && !brandBy.length ? L.note : ''}</div></div>
       <div class="tools">
         ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
@@ -2956,7 +2992,13 @@ document.addEventListener('click', e => {
       break;
     case 'price-reset': { const pr = a.closest('.pr'), st = PR[pr ? pr.dataset.scope : 'list']; st.min = st.max = null; syncPrice(pr, true); applyPrice(pr); break; }
     case 'dd-pick': {
-      if (d.dd === 'brand') brandBy = d.v; else if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
+      // brands: several at once, so the list stays open; "All brands" clears the picks
+      if (d.dd === 'brand') {
+        brandBy = d.v === 'all' ? [] : brandBy.includes(d.v) ? brandBy.filter(b => b !== d.v) : [...brandBy, d.v];
+        brandsChanged();
+        break;
+      }
+      if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
       // the list closes as it is, the pieces fade over to the new choice
       ddOpen(null);
       fadeSwap('#lgrid, #lcount', () => $('#dd-' + d.dd)?.focus({ preventScroll: true }));
