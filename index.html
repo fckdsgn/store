@@ -106,10 +106,11 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .logo .lw{display:inline-block;white-space:pre;position:relative}
 /* the letters and the scene's lines sit on layers of their own from the start (owner: the scenes looked torn, above all
    on the way back): otherwise the browser builds layers mid-scene, when a letter starts to fade, and repaints the
-   glass header around them, and a frame is lost */
-.logo .fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;will-change:transform,opacity}
+   glass header around them, and a frame is lost. Only for opacity: a layer for transform is set on whole pixels in
+   Chrome, and the letters then stood up to half a pixel off the lines that take their place */
+.logo .fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible;will-change:opacity}
 .logo .fx svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
-.logo .ll{display:inline-block;will-change:transform,opacity}
+.logo .ll{display:inline-block;will-change:opacity}
 .logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards}
 @keyframes logo-in{from{opacity:0;transform:translateY(.4em);filter:blur(4px)}}
 @media (prefers-reduced-motion:reduce){.logo .ll{animation:none!important}}
@@ -2032,14 +2033,54 @@ const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // is skipped.
 function logoScenes(a) {
   const lw = $('.lw', a), L = $$('.ll', lw), ch = el => el.textContent.toUpperCase();
-  const ctx = document.createElement('canvas').getContext('2d');
-  // where a letter's ink sits inside the name, in px (measured on a canvas, so it holds at any font size)
-  const ink = el => {
-    const cs = getComputedStyle(el), fs = parseFloat(cs.fontSize);
-    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    const m = ctx.measureText(ch(el)), base = (fs - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
-    const x = el.offsetLeft - m.actualBoundingBoxLeft, y = el.offsetTop + base - m.actualBoundingBoxAscent;
-    return { x, y, w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight, h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, fs, sw: fs * .125 };
+  const cv = document.createElement('canvas'), ctx = cv.getContext('2d', { willReadFrequently: true });
+  // a letter drawn eight times bigger on a canvas and read pixel by pixel: where its ink sits inside the name and the
+  // middle line of its strokes, so the lines put over it lie exactly on it and can take its place in one frame (the
+  // ink box the canvas reports is not the same in Safari, and there the lines stood a pixel or two off the letter, so
+  // the hand-over showed as a double letter fading)
+  const Z = 8, lineOf = el => {
+    const cs = getComputedStyle(el), fs = parseFloat(cs.fontSize), F = fs * Z, pad = Math.ceil(F * .25);
+    const w = cv.width = Math.ceil(F * 1.1) + 2 * pad, h = cv.height = Math.ceil(F * 1.1) + 2 * pad, by = pad + Math.round(F * .85);
+    // (at the letter's own size, enlarged by a scale: Inter changes its shapes with the size it is set at)
+    ctx.setTransform(Z, 0, 0, Z, 0, 0); ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = '#000';
+    ctx.fillText(ch(el), pad / Z, by / Z); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const px = ctx.getImageData(0, 0, w, h).data, at = (x, y) => { x = Math.floor(x); y = Math.floor(y);
+      return x < 0 || y < 0 || x >= w || y >= h ? 0 : px[(y * w + x) * 4 + 3] / 255; };
+    let x0 = w, x1 = 0, y0 = h, y1 = 0;
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (at(x, y) > .5) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+    // along a ray from (x, y): where it goes into the ink and out again (to a fraction of a pixel); its middle and width
+    const cross = (x, y, dx, dy) => { let r = 0, inn = -1, prev = at(x, y);
+      for (r = .5; r < w; r += .5) { const v = at(x + dx * r, y + dy * r);
+        if (inn < 0 && prev <= .5 && v > .5) inn = r - .5 * (v - .5) / (v - prev);
+        else if (inn >= 0 && v <= .5) { const out = r - .5 * (.5 - v) / (prev - v); return [x + dx * (inn + out) / 2, y + dy * (inn + out) / 2, out - inn]; }
+        prev = v; }
+      return null; };
+    // the baseline in the page: a dot of no size at the end of the letter sits on it
+    const dot = document.createElement('i'); dot.style.cssText = 'display:inline-block;width:0;height:0'; el.append(dot);
+    // (from the boxes as drawn, to a fraction of a pixel: offsetLeft is rounded, and half a pixel off showed)
+    const box = lw.getBoundingClientRect(), left = el.getBoundingClientRect().left - box.left, base = dot.getBoundingClientRect().top - box.top; dot.remove();
+    const X = v => left + (v - pad) / Z, Y = v => base + (v - by) / Z;
+    const pts = [], wid = [], add = q => { if (q) { pts.push([X(q[0]), Y(q[1])]); wid.push(q[2] / Z); } };
+    if (ch(el) === 'O') {
+      // the O: rays from its middle all the way round, from the top clockwise
+      const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+      for (let i = 0; i < 144; i++) { const t = i / 144 * Math.PI * 2; add(cross(cx, cy, Math.sin(t), -Math.cos(t))); }
+    } else {
+      // the U: down the left stem row by row, round the bowl by rays from its middle, up the right stem; the stems
+      // start right at the top of the letter (drawn with flat ends there, as the letter has)
+      const row = y => { const r = []; let run = -1;
+        for (let x = x0 - 1; x <= x1 + 1; x++) { const v = at(x, y); if (run < 0 && v > .5) run = x; else if (run >= 0 && v <= .5) { r.push([run, x]); run = -1; } }
+        return r; };
+      const r0 = row(y0 + (y1 - y0) * .3), m1 = (r0[0][0] + r0[0][1]) / 2, m2 = (r0.at(-1)[0] + r0.at(-1)[1]) / 2;
+      const yc = y1 - (m2 - m1) / 2 - (r0[0][1] - r0[0][0]) / 2, cx = (m1 + m2) / 2, rows = [];
+      for (let y = y0; y < yc; y += 2) rows.push(y);
+      rows.forEach(y => { const r = row(Math.max(y, y0 + 2)); r.length && add([(r[0][0] + r[0][1]) / 2, y, r[0][1] - r[0][0]]); });
+      for (let i = 0; i <= 72; i++) { const a = i / 72 * Math.PI; add(cross(cx, yc, -Math.cos(a), Math.sin(a))); }
+      rows.reverse().forEach(y => { const r = row(Math.max(y, y0 + 2)); r.length && add([(r.at(-1)[0] + r.at(-1)[1]) / 2, y, r.at(-1)[1] - r.at(-1)[0]]); });
+    }
+    wid.sort((p, q) => p - q);
+    return { x: X(x0), y: Y(y0), w: (x1 - x0 + 1) / Z, h: (y1 - y0 + 1) / Z, fs, sw: wid[wid.length >> 1],
+      d: 'M' + pts.map(q => q[0].toFixed(2) + ' ' + q[1].toFixed(2)).join('L') + (ch(el) === 'O' ? 'Z' : '') };
   };
   // sine in-out: a gentle start and stop without the rush in the middle that a cubic curve has
   const inOut = k => (1 - Math.cos(Math.PI * k)) / 2, mix = (p, q, k) => p + (q - p) * k;
@@ -2049,20 +2090,20 @@ function logoScenes(a) {
     const step = now => { const k = Math.min(1, (now - t0) / ms); fn(linear ? k : inOut(k)); k < 1 ? requestAnimationFrame(step) : res(); };
     requestAnimationFrame(step);
   }, delay));
-  const fade = (els, to, ms = 160) => Promise.all(els.map(el => el.animate([{ opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0 }], { duration: ms, fill: 'forwards' }).finished));
-  const layer = sw => { const f = document.createElement('span'); f.className = 'fx';
-    f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px;opacity:0"><g></g></svg>`; lw.append(f); return f; };
+  const layer = sw => { const f = document.createElement('span'), r = lw.getBoundingClientRect(); f.className = 'fx';
+    f.innerHTML = `<svg viewBox="0 0 ${r.width} ${r.height}" style="stroke-width:${sw}px;opacity:0"><g></g></svg>`; lw.append(f); return f; };
   // the swing like a pendulum settling, frame by frame on the group's own transform (no new layer mid-scene, so no
   // stall where the morph hands over to the swing)
   const swing = (el, ox, oy, deg) => { const ks = [0, 1, -.72, .42, -.18, 0];
     return tween(1800, k => { const t = k * (ks.length - 1), i = Math.min(ks.length - 2, Math.floor(t)), e = (1 - Math.cos(Math.PI * (t - i))) / 2;
       el.setAttribute('transform', `rotate(${(mix(ks[i], ks[i + 1], e) * deg).toFixed(3)} ${ox} ${oy})`); }, 0, true); };
   const done = (els, f) => { els.forEach(el => { el.getAnimations().forEach(x => x.cancel()); el.style.opacity = ''; }); f.remove(); };
-  // the hand-over between the glyphs and the lines over them: the lines fade in on top of the glyphs (which then go
-  // at once), and on the way back the glyphs come back at once under the lines, which fade out; never both half
-  // transparent, which looked pale for a moment
-  const toLines = async (svg, els) => { await fade([svg], 1); els.forEach(el => { el.style.opacity = 0; }); };
-  const toGlyphs = (svg, els) => { els.forEach(el => { el.style.opacity = ''; }); return fade([svg], 0); };
+  // the hand-over between the glyphs and the lines lying exactly on them, in one frame both ways (owner: a fade
+  // between them showed as an overlay, not as the letter itself changing); the lines are drawn a frame ahead, so the
+  // swap never waits on them
+  const frame = () => new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+  const toLines = async (svg, els) => { await frame(); svg.style.opacity = 1; els.forEach(el => { el.style.opacity = 0; }); };
+  const toGlyphs = (svg, els) => { els.forEach(el => { el.style.opacity = ''; }); svg.style.opacity = 0; };
   const ui = L.findIndex((el, i) => ch(el) === 'U' && L[i + 1] && ch(L[i + 1]) === 'O');
   // the hanger comes out of an O the bag does not use (the O of STORE)
   const hO = L.find((el, i) => ch(el) === 'O' && i !== ui + 1);
@@ -2086,7 +2127,7 @@ function logoScenes(a) {
   const hangerSize = o => { const W = o.w * 1.28, R = Math.max(W * .16, o.sw * 1.05); return { W, H: W * .52 + 2 * R }; };
 
   async function bag() {
-    const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
+    const U = L[ui], O = L[ui + 1], u = lineOf(U), o = lineOf(O), sw = (u.sw + o.sw) / 2, f = layer(sw), svg = $('svg', f), g = $('g', f);
     // the bag (owner: as tall as the hanger and in its style, then taller in shape after a reference icon): a body
     // narrowing to its straight top edge, the bottom corners rounded, a tall narrow round handle standing on the top
     // edge; as tall as the hanger and narrower than it, centred where the U and the O stood. The handle is kept at
@@ -2095,16 +2136,15 @@ function logoScenes(a) {
     const bw = H * .8, tw = bw * .74, hr = Math.max(tw * .29, sw * .95), legs = hr * 1.05, top = b - (H - hr - legs), rb = sw * 1.1, rt = sw * .45;
     const xl = cx - bw / 2, xr = cx + bw / 2, tl = cx - tw / 2, tr = cx + tw / 2, k1 = rt / (b - top), k2 = rb / (b - top);
     const bodyD = `M${cx} ${top}H${tr - rt}Q${tr} ${top} ${mix(tr, xr, k1)} ${top + rt}L${mix(xr, tr, k2)} ${b - rb}Q${xr} ${b} ${xr - rb} ${b}H${xl + rb}Q${xl} ${b} ${mix(xl, tl, k2)} ${b - rb}L${mix(tl, xl, k1)} ${top + rt}Q${tl} ${top} ${tl + rt} ${top}Z`;
-    // the U and the O in lines over their glyphs: the U as two stems and a bowl, the O as an oval from its top
-    const ul = u.x + sw * .52, ur = u.x + u.w - sw * .52, rx = (ur - ul) / 2, ry = rx * .92, uy = u.y + sw / 2, ub = u.y + u.h - sw / 2 - ry;
-    const oa = (o.w - sw) / 2, ob = (o.h - sw) / 2, ocx = o.x + o.w / 2, ocy = o.y + o.h / 2;
-    const N = 96, oval = along(g, `M${ocx} ${o.y + sw / 2}A${oa} ${ob} 0 1 1 ${ocx} ${o.y + o.h - sw / 2}A${oa} ${ob} 0 1 1 ${ocx} ${o.y + sw / 2}`, N), body = along(g, bodyD, N);
+    // the U and the O as lines along the middle of their strokes (the O from its top, clockwise)
+    const N = 96, oval = along(g, o.d, N), body = along(g, bodyD, N);
     // the U turns over into the handle: it spins half a turn about its middle while its shape flows into the handle's
     // (the handle written in the U's unturned frame), so its legs shorten and its bowl rounds into the arch
     const M = 56, c = [u.x + u.w / 2, u.y + u.h / 2], hc = [cx, top - (hr + legs) / 2], d = [hc[0] - c[0], hc[1] - c[1]];
-    const uPts = along(g, `M${ul} ${uy}V${ub}A${rx} ${ry} 0 0 0 ${ur} ${ub}V${uy}`, M);
+    const uPts = along(g, u.d, M);
     const hPts = along(g, `M${cx + hr} ${top}V${top - legs}A${hr} ${hr} 0 0 0 ${cx - hr} ${top - legs}V${top}`, M).map(q => [2 * c[0] + d[0] - q[0], 2 * c[1] + d[1] - q[1]]);
-    g.innerHTML = '<path/><path/>';
+    // the handle keeps the U's flat ends (they end inside the bag's top edge)
+    g.innerHTML = '<path/><path stroke-linecap="butt"/>';
     const [bp, hp] = g.children;
     const set = k => { bp.setAttribute('d', blend(oval, body, k, true)); hp.setAttribute('d', blend(uPts, hPts, k, false, Math.PI * k, c, d)); };
     set(0);
@@ -2112,12 +2152,12 @@ function logoScenes(a) {
     await tween(800, set);
     await swing(g, cx, top - hr - legs - sw / 2, 6);
     await tween(800, k => set(1 - k));
-    await toGlyphs(svg, [U, O]);
+    toGlyphs(svg, [U, O]);
     done([U, O], f);
   }
 
   async function hanger() {
-    const O = hO, o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
+    const O = hO, o = lineOf(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
     // a hanger drawn like the classic icon (owner: both earlier shapes looked wrong, then this one at 1.3 times the
     // letters was too big): gently rounded shoulders like a wooden hanger, a straight bar on the baseline, a neck and a
     // round hook open to the side, about 1.15 times as tall as the letters with its hook. It is wider than the O, so the
@@ -2131,8 +2171,7 @@ function logoScenes(a) {
       return [m * m * cx + 2 * m * k * px + k * k * ex, m * m * apex + 2 * m * k * py + k * k * base]; };
     // the O and the hanger's outline as the same number of points, both from the top going round clockwise (down the
     // right shoulder, back along the bar, up the left shoulder), so the oval flows into the hanger point by point
-    const N = 96, M = N / 3, oa = (o.w - sw) / 2, ob = (o.h - sw) / 2, ocx = o.x + o.w / 2, ocy = o.y + o.h / 2;
-    const oval = Array.from({ length: N }, (_, i) => { const t = i / N * Math.PI * 2; return [ocx + oa * Math.sin(t), ocy - ob * Math.cos(t)]; });
+    const N = 96, M = N / 3, oval = along(g, o.d, N + 1).slice(0, N);
     const tri = Array.from({ length: N }, (_, i) => i < M ? q(i / M, 1) : i < 2 * M ? [mix(x1, x0, (i - M) / M), base] : q(1 - (i - 2 * M) / M, -1));
     g.innerHTML = `<path/><path pathLength="1" d="M${cx} ${apex}V${hy + R}A${R} ${R} 0 1 0 ${cx - R} ${hy}"/>`;
     const [body, hook] = g.children;
@@ -2153,7 +2192,7 @@ function logoScenes(a) {
     const hb = hook.getBBox();
     await swing(g, hb.x + hb.width / 2, hb.y, 7);
     await Promise.all([draw(false, 480), tween(780, k => set(1 - k), 220)]);
-    await toGlyphs(svg, [O]);
+    toGlyphs(svg, [O]);
     set(0);
     done([O], f);
   }
