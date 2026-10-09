@@ -105,8 +105,8 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .logo.pre{opacity:0}
 .logo .lw{display:inline-block;white-space:pre;position:relative}
 .logo .fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
-.logo .fx .body{position:absolute;box-sizing:border-box;border:solid currentColor}
 .logo .fx svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.logo .fx .ns{vector-effect:non-scaling-stroke;transform-box:fill-box;transform-origin:center}
 .logo .ll{display:inline-block}
 .logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards}
 @keyframes logo-in{from{opacity:0;transform:translateY(.4em);filter:blur(4px)}}
@@ -2022,89 +2022,106 @@ function dropToast() { clearTimeout(toastT); const t = $('#toast'); if (t) t.rem
 // browser has no Web Animations or the visitor asked for reduced motion.
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // The store name acts out the shop for a moment, one scene after the other with a rest between (owner's request,
-// after a reference where the letters of GOAL play a goal): the U of ECRUO flips over the O as its handle and the O
-// squares into a shopping bag that swings; the T of STORE turns into a clothes hanger, drawn in one line, that swings
-// on its hook. Then the letters come back as they were. A scene whose letters a new name lacks is skipped. Shapes are
-// placed by the ink of the letters (measured on a canvas), so they meet the letters at any font size.
+// after a reference where the letters of GOAL play a goal). Each letter is redrawn in lines over its glyph, at the
+// glyph's size and stroke, and those lines turn into the thing (owner: the first try looked too big and came out of
+// thin air): the U of ECRUO flips over as the handle while the O flows from an oval into the body of a shopping bag,
+// and the bag swings; the T of STORE drops its crossbar to the baseline as the bar of a hanger, its stem rises into
+// the neck, the shoulders open out of it and the hook curls on top, inside the T's own width, and the hanger swings.
+// Then everything flows back into the letters. A scene whose letters a new name lacks is skipped.
 function logoScenes(a) {
   const lw = $('.lw', a), L = $$('.ll', lw), ch = el => el.textContent.toUpperCase();
   const ctx = document.createElement('canvas').getContext('2d');
-  // where a letter's ink sits inside the name, in px
+  // where a letter's ink sits inside the name, in px (measured on a canvas, so it holds at any font size)
   const ink = el => {
     const cs = getComputedStyle(el), fs = parseFloat(cs.fontSize);
     ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
     const m = ctx.measureText(ch(el)), base = (fs - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
     const x = el.offsetLeft - m.actualBoundingBoxLeft, y = el.offsetTop + base - m.actualBoundingBoxAscent;
-    return { x, y, w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight, h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, fs };
+    return { x, y, w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight, h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, fs, sw: fs * .125 };
   };
-  const E = 'cubic-bezier(.22,.8,.24,1)', go = (el, k, o) => el.animate(k, { fill: 'forwards', easing: E, ...o }).finished;
-  const fx = () => { const f = document.createElement('span'); f.className = 'fx'; lw.append(f); return f; };
+  const inOut = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2, mix = (p, q, k) => p + (q - p) * k;
+  // a frame-by-frame tween for what the browser cannot animate itself (path shapes, rect corners)
+  const tween = (ms, fn, delay = 0) => new Promise(res => setTimeout(() => {
+    const t0 = performance.now();
+    const step = now => { const k = Math.min(1, (now - t0) / ms); fn(inOut(k)); k < 1 ? requestAnimationFrame(step) : res(); };
+    requestAnimationFrame(step);
+  }, delay));
+  const fade = (els, to, ms = 140) => Promise.all(els.map(el => el.animate([{ opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0 }], { duration: ms, fill: 'forwards' }).finished));
+  const layer = sw => { const f = document.createElement('span'); f.className = 'fx';
+    f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px;opacity:0"><g></g></svg>`; lw.append(f); return f; };
   const swing = (el, ox, oy, deg) => { el.style.transformOrigin = `${ox}px ${oy}px`;
-    return el.animate([0, 1, -.75, .45, -.2, 0].map(k => ({ transform: `rotate(${k * deg}deg)` })), { duration: 1700, easing: 'ease-in-out' }).finished; };
+    return el.animate([0, 1, -.72, .42, -.18, 0].map(k => ({ transform: `rotate(${k * deg}deg)` })), { duration: 1800, easing: 'ease-in-out' }).finished; };
+  const done = (els, f) => { els.forEach(el => el.getAnimations().forEach(x => x.cancel())); f.remove(); };
   const ui = L.findIndex((el, i) => ch(el) === 'U' && L[i + 1] && ch(L[i + 1]) === 'O'), T = L.find(el => ch(el) === 'T');
 
   async function bag() {
-    const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.fs * .13;
-    // the bag drawn like the bag icon in the header (a 24-unit box: body from 8.25 to 21, handle legs inside it), as
-    // tall as the letters with its handle, centred where the U and the O stood
-    const k = o.h * 1.18 / 17, bw = 14 * k, bh = 12.75 * k, cx = (u.x + o.x + o.w) / 2, bx = cx - bw / 2, by = o.y + o.h - bh;
-    const X = v => bx + (v - 5) * k, Y = v => by + (v - 8.25) * k, r = 2.25 * k + sw / 2, c = sw * .3;
-    const f = fx(), body = document.createElement('i');
-    body.className = 'body';
-    f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px;opacity:0"><path d="M${X(9)} ${Y(11.25)}V${Y(7)}A${3 * k} ${3 * k} 0 0 1 ${X(15)} ${Y(7)}V${Y(11.25)}"/></svg>`;
-    f.prepend(body);
-    const svg = $('svg', f);
-    const ring = { left: o.x + 'px', top: o.y + 'px', width: o.w + 'px', height: o.h + 'px', borderRadius: '50%', borderWidth: sw + 'px' };
-    const box = { left: bx + 'px', top: by + 'px', width: bw + 'px', height: bh + 'px', borderRadius: `${c}px ${c}px ${r}px ${r}px`, borderWidth: sw + 'px' };
-    Object.assign(body.style, ring, { opacity: 0 });
-    // the U upside down is the handle: it flies over the bag, turning and shrinking to the handle's size
-    const hx0 = X(9) - sw / 2, hx1 = X(15) + sw / 2, hy0 = Y(4) - sw / 2, hy1 = Y(11.25);
-    const dx = (hx0 + hx1) / 2 - (u.x + u.w / 2), dy = (hy0 + hy1) / 2 - (u.y + u.h / 2);
-    const pose = `translate(${dx}px,${dy}px) rotate(180deg) scale(${(hx1 - hx0) / u.w},${(hy1 - hy0) / u.h})`;
-    U.style.transformOrigin = `${u.x - U.offsetLeft + u.w / 2}px ${u.y - U.offsetTop + u.h / 2}px`;
-    const fade = (a, b, d = 180) => Promise.all([go(a, [{ opacity: 1 }, { opacity: 0 }], { duration: d }), go(b, [{ opacity: 0 }, { opacity: 1 }], { duration: d })]);
-    await fade(O, body, 160);
-    await Promise.all([go(U, [{ transform: 'none' }, { transform: pose }], { duration: 700 }), go(body, [ring, box], { duration: 620, delay: 100 })]);
-    await fade(U, svg);
-    await swing(f, cx, hy0, 7);
-    await fade(svg, U);
-    await Promise.all([go(U, [{ transform: pose }, { transform: 'none' }], { duration: 650 }), go(body, [box, ring], { duration: 560 })]);
-    await fade(body, O, 160);
-    [U, O].forEach(el => { el.getAnimations().forEach(x => x.cancel()); el.style.transformOrigin = ''; });
-    f.remove();
+    const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
+    // the letters in lines: the U as two stems and a bowl, the O as an oval (a rect whose corners are half its size)
+    const ul = u.x + sw * .52, ur = u.x + u.w - sw * .52, rx = (ur - ul) / 2, ry = rx * .92, uy = u.y + sw / 2, ub = u.y + u.h - sw / 2 - ry;
+    g.innerHTML = `<path/><path class="ns" d="M${ul} ${uy}V${ub}A${rx} ${ry} 0 0 0 ${ur} ${ub}V${uy}"/>`;
+    const [bp, hp] = g.children;
+    const oval = { x: o.x + sw / 2, y: o.y + sw / 2, w: o.w - sw, h: o.h - sw };
+    // the bag, centred where the U and the O stood, drawn like the bag icon in the header: square top corners,
+    // rounded bottom ones, the handle (the U turned over) half as wide and low, its feet well inside the body
+    const bw = o.w * 1.04, bh = o.h * .78, bx = (u.x + o.x + o.w) / 2 - bw / 2, by = o.y + o.h - bh;
+    const body = { x: bx + sw / 2, y: by + sw / 2, w: bw - sw, h: bh - sw };
+    // the body's outline with its own radius at each corner: an oval at first (every corner half the size), then the
+    // bag (top corners nearly square, bottom ones rounded like the glyphs)
+    const set = k => {
+      const v = n => mix(oval[n], body[n], k), x = v('x'), y = v('y'), w = v('w'), h = v('h');
+      const tr = [mix(w / 2, sw * .25, k), mix(h / 2, sw * .25, k)], br = [mix(w / 2, sw * 1.3, k), mix(h / 2, sw * 1.3, k)];
+      bp.setAttribute('d', `M${x + tr[0]} ${y}H${x + w - tr[0]}A${tr[0]} ${tr[1]} 0 0 1 ${x + w} ${y + tr[1]}V${y + h - br[1]}A${br[0]} ${br[1]} 0 0 1 ${x + w - br[0]} ${y + h}H${x + br[0]}A${br[0]} ${br[1]} 0 0 1 ${x} ${y + h - br[1]}V${y + tr[1]}A${tr[0]} ${tr[1]} 0 0 1 ${x + tr[0]} ${y}Z`);
+    };
+    set(0);
+    const hw = bw * .5, hh = bh * .52, sx = hw / (ur - ul), sy = hh / (u.h - sw);
+    const hcx = bx + bw / 2, hcy = by - hh / 2 + hh * .4;
+    const pose = `translate(${hcx - (ul + ur) / 2}px,${hcy - (u.y + u.h / 2)}px) rotate(180deg) scale(${sx},${sy})`;
+    await Promise.all([fade([svg], 1), fade([U, O], 0)]);
+    await Promise.all([hp.animate([{ transform: 'none' }, { transform: pose }], { duration: 760, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }).finished, tween(700, set, 120)]);
+    await swing(g, hcx, hcy - hh / 2, 6);
+    await Promise.all([hp.animate([{ transform: pose }, { transform: 'none' }], { duration: 720, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards' }).finished, tween(640, k => set(1 - k))]);
+    await Promise.all([fade([U, O], 1), fade([svg], 0)]);
+    done([U, O], f);
   }
 
   async function hanger() {
-    // the letters after the T step aside to make room, as in the reference, and come back after; the hanger stands in
-    // the middle of the room (the S keeps its place, so it does not close up to the first word)
-    const t = ink(T), sw = t.fs * .13, room = t.w * .32, cx = t.x + t.w / 2 + room, f = fx();
-    const after = L.slice(L.indexOf(T) + 1);
-    const aside = back => Promise.all(after.map(el => go(el, [{ transform: 'none' }, { transform: `translateX(${room * 2}px)` }], { duration: 500, direction: back ? 'reverse' : 'normal' })));
-    // a hanger the size of the T: the bar on the baseline, the shoulders up to the neck, the hook curling over it
-    const bar = t.y + t.h, half = t.w * .6, neck = t.y + t.h * .38, top = t.y - t.h * .1, r = t.h * .17;
-    f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px"><path pathLength="1" d="M${cx} ${neck}L${cx - half} ${bar}H${cx + half}Z"/><path pathLength="1" d="M${cx} ${neck}V${top + r}A${r} ${r} 0 1 1 ${cx + r} ${top}"/></svg>`;
-    const ps = $$('path', f);
-    ps.forEach(pth => { pth.style.strokeDasharray = '1 1'; pth.style.strokeDashoffset = 1; });
-    await Promise.all([aside(false), go(T, [{ opacity: 1 }, { opacity: 0 }], { duration: 260 }),
-      go(ps[0], [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 650, delay: 120 }),
-      go(ps[1], [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 450, delay: 560 })]);
-    await swing($('svg', f), cx, top, 9);
-    await Promise.all([go(ps[1], [{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { duration: 350 }),
-      go(ps[0], [{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { duration: 550, delay: 200 }),
-      go(T, [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 450 }), aside(true)]);
-    [T, ...after].forEach(el => el.getAnimations().forEach(x => x.cancel()));
-    f.remove();
+    const t = ink(T), sw = t.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
+    // a hanger shaped like one, as tall as the letters: wider than the T, so the letters after it step aside a little
+    // (the S keeps its place); its bar on the baseline, its hook reaching the cap height, open and turned back in, its
+    // curl at least so wide that the line does not close it up
+    const W = t.w * 1.4, room = W - t.w, after = L.slice(L.indexOf(T) + 1);
+    const cx = t.x + t.w / 2 + room / 2, top = t.y + sw / 2, base = t.y + t.h - sw / 2;
+    const tx0 = t.x + sw / 2, tx1 = t.x + t.w - sw / 2, x0 = cx - W / 2 + sw / 2, x1 = cx + W / 2 - sw / 2;
+    const neck = base - W * .4, r = Math.max(W * .11, sw * 1.15), hy = top + r;
+    g.innerHTML = `<path/><path/><path pathLength="1" d="M${cx} ${neck}L${x0} ${base}M${cx} ${neck}L${x1} ${base}"/><path pathLength="1" d="M${cx} ${hy}A${r} ${r} 0 1 1 ${cx + r + r * .94} ${hy + r * .34}"/>`;
+    const [bar, stem, sh, hook] = g.children;
+    const aside = back => Promise.all(after.map(el => el.animate([{ transform: 'none' }, { transform: `translateX(${room}px)` }], { duration: 600, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards', direction: back ? 'reverse' : 'normal' }).finished));
+    // lines not drawn yet stay hidden: an empty dash with round ends would still show a dot
+    [sh, hook].forEach(pth => { pth.style.strokeDasharray = '1 1'; pth.style.strokeDashoffset = 1; pth.style.opacity = 0; });
+    // the crossbar drops to the baseline and widens to the bar; the stem shortens to the neck under the hook
+    const set = k => { const by = mix(top, base, k), c = mix(t.x + t.w / 2, cx, k);
+      bar.setAttribute('d', `M${mix(tx0, x0, k)} ${by}H${mix(tx1, x1, k)}`);
+      stem.setAttribute('d', `M${c} ${mix(top, hy, k)}V${mix(base, neck, k)}`); };
+    set(0);
+    const kf = [{ strokeDashoffset: 1, opacity: 0 }, { strokeDashoffset: .97, opacity: 1, offset: .04 }, { strokeDashoffset: 0, opacity: 1 }];
+    const draw = (pth, on, ms, delay = 0) => pth.animate(on ? kf : [...kf].reverse().map((f, i) => ({ ...f, offset: [0, .96, 1][i] })), { duration: ms, delay, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished;
+    await Promise.all([fade([svg], 1), fade([T], 0)]);
+    await Promise.all([aside(false), tween(700, set), draw(sh, 1, 520, 420), draw(hook, 1, 420, 560)]);
+    await swing(g, cx + r, hy - r, 7);
+    await Promise.all([draw(hook, 0, 360), draw(sh, 0, 460, 120), tween(680, k => set(1 - k), 300), aside(true)]);
+    await Promise.all([fade([T], 1), fade([svg], 0)]);
+    done([T, ...after], f);
   }
 
   const scenes = [ui >= 0 && bag, T && hanger].filter(Boolean);
   if (!scenes.length) return;
-  let k = 0;
+  let n = 0;
   // waits while the tab is hidden, so a scene is never left half played
   const next = () => setTimeout(async () => {
     if (document.hidden || still()) return next();
-    try { await scenes[k++ % scenes.length](); } catch (e) {}
+    try { await scenes[n++ % scenes.length](); } catch (e) {}
     next();
-  }, k ? 5200 : 2400);
+  }, n ? 5200 : 2400);
   next();
 }
 // the store name letter by letter, for its entrance and its scenes (styles at .logo .ll)
