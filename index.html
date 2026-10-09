@@ -2025,9 +2025,9 @@ const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 // after a reference where the letters of GOAL play a goal). Each letter is redrawn in lines over its glyph, at the
 // glyph's size and stroke, and those lines turn into the thing (owner: the first try looked too big and came out of
 // thin air): the U of ECRUO flips over as the handle while the O flows from an oval into the body of a shopping bag,
-// and the bag swings; the T of STORE drops its crossbar to the baseline as the bar of a hanger, its stem rises into
-// the neck, the shoulders open out of it and the hook curls on top, inside the T's own width, and the hanger swings.
-// Then everything flows back into the letters. A scene whose letters a new name lacks is skipped.
+// and the bag swings; the O of STORE squeezes into the shoulders and bar of a hanger, its curled hook grows out of
+// the top, and the hanger swings. Then everything flows back into the letters. A scene whose letters a new name lacks
+// is skipped.
 function logoScenes(a) {
   const lw = $('.lw', a), L = $$('.ll', lw), ch = el => el.textContent.toUpperCase();
   const ctx = document.createElement('canvas').getContext('2d');
@@ -2052,7 +2052,9 @@ function logoScenes(a) {
   const swing = (el, ox, oy, deg) => { el.style.transformOrigin = `${ox}px ${oy}px`;
     return el.animate([0, 1, -.72, .42, -.18, 0].map(k => ({ transform: `rotate(${k * deg}deg)` })), { duration: 1800, easing: 'ease-in-out' }).finished; };
   const done = (els, f) => { els.forEach(el => el.getAnimations().forEach(x => x.cancel())); f.remove(); };
-  const ui = L.findIndex((el, i) => ch(el) === 'U' && L[i + 1] && ch(L[i + 1]) === 'O'), T = L.find(el => ch(el) === 'T');
+  const ui = L.findIndex((el, i) => ch(el) === 'U' && L[i + 1] && ch(L[i + 1]) === 'O');
+  // the hanger comes out of an O the bag does not use (the O of STORE)
+  const hO = L.find((el, i) => ch(el) === 'O' && i !== ui + 1);
 
   async function bag() {
     const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
@@ -2085,35 +2087,43 @@ function logoScenes(a) {
   }
 
   async function hanger() {
-    const t = ink(T), sw = t.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
-    // a hanger shaped like one, as tall as the letters: wider than the T, so the letters after it step aside a little
-    // (the S keeps its place); its bar on the baseline, its hook reaching the cap height, open and turned back in, its
-    // curl at least so wide that the line does not close it up
-    const W = t.w * 1.4, room = W - t.w, after = L.slice(L.indexOf(T) + 1);
-    const cx = t.x + t.w / 2 + room / 2, top = t.y + sw / 2, base = t.y + t.h - sw / 2;
-    const tx0 = t.x + sw / 2, tx1 = t.x + t.w - sw / 2, x0 = cx - W / 2 + sw / 2, x1 = cx + W / 2 - sw / 2;
-    const neck = base - W * .4, r = Math.max(W * .11, sw * 1.15), hy = top + r;
-    g.innerHTML = `<path/><path/><path pathLength="1" d="M${cx} ${neck}L${x0} ${base}M${cx} ${neck}L${x1} ${base}"/><path pathLength="1" d="M${cx} ${hy}A${r} ${r} 0 1 1 ${cx + r + r * .94} ${hy + r * .34}"/>`;
-    const [bar, stem, sh, hook] = g.children;
-    const aside = back => Promise.all(after.map(el => el.animate([{ transform: 'none' }, { transform: `translateX(${room}px)` }], { duration: 600, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards', direction: back ? 'reverse' : 'normal' }).finished));
-    // lines not drawn yet stay hidden: an empty dash with round ends would still show a dot
-    [sh, hook].forEach(pth => { pth.style.strokeDasharray = '1 1'; pth.style.strokeDashoffset = 1; pth.style.opacity = 0; });
-    // the crossbar drops to the baseline and widens to the bar; the stem shortens to the neck under the hook
-    const set = k => { const by = mix(top, base, k), c = mix(t.x + t.w / 2, cx, k);
-      bar.setAttribute('d', `M${mix(tx0, x0, k)} ${by}H${mix(tx1, x1, k)}`);
-      stem.setAttribute('d', `M${c} ${mix(top, hy, k)}V${mix(base, neck, k)}`); };
+    const O = hO, o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
+    // a hanger drawn like the classic icon, taller than the letters (owner: both earlier ones looked wrong, one not like
+    // a hanger at all): gently rounded shoulders like a wooden hanger, a straight bar on the baseline, a long neck and a
+    // round hook open to the side rising above the word. It is wider than the O, so the letters after it step aside
+    // (the ones before keep their place).
+    // (room: the extra width plus a little air on each side, so it does not touch the T and the R)
+    const W = o.w * 1.6, room = W - o.w + sw * .9, after = L.slice(L.indexOf(O) + 1);
+    const cx = o.x + o.w / 2 + room / 2, base = o.y + o.h - sw / 2, x0 = cx - W / 2 + sw / 2, x1 = cx + W / 2 - sw / 2;
+    const apex = base - W * .36, R = Math.max(W * .16, sw * 1.35), hy = apex - W * .2 - R;
+    // the shoulders bow upward a little: each a curve from the neck to an end of the bar
+    const q = (k, side) => { const ex = side > 0 ? x1 : x0, px = cx + side * W * .18, py = apex + W * .06, m = 1 - k;
+      return [m * m * cx + 2 * m * k * px + k * k * ex, m * m * apex + 2 * m * k * py + k * k * base]; };
+    // the O and the hanger's outline as the same number of points, both from the top going round clockwise (down the
+    // right shoulder, back along the bar, up the left shoulder), so the oval flows into the hanger point by point
+    const N = 120, M = N / 3, oa = (o.w - sw) / 2, ob = (o.h - sw) / 2, ocx = o.x + o.w / 2, ocy = o.y + o.h / 2;
+    const oval = Array.from({ length: N }, (_, i) => { const t = i / N * Math.PI * 2; return [ocx + oa * Math.sin(t), ocy - ob * Math.cos(t)]; });
+    const tri = Array.from({ length: N }, (_, i) => i < M ? q(i / M, 1) : i < 2 * M ? [mix(x1, x0, (i - M) / M), base] : q(1 - (i - 2 * M) / M, -1));
+    g.innerHTML = `<path/><path pathLength="1" d="M${cx} ${apex}V${hy + R}A${R} ${R} 0 1 0 ${cx - R} ${hy}"/>`;
+    const [body, hook] = g.children;
+    const set = k => body.setAttribute('d', 'M' + oval.map((p, i) => `${mix(p[0], tri[i][0], k)} ${mix(p[1], tri[i][1], k)}`).join('L') + 'Z');
     set(0);
+    // the hook is hidden until it starts to draw: an empty dash with round ends would still show a dot (and the gap
+    // is twice the path, so no next dash peeks in at its far end)
+    hook.style.strokeDasharray = '1 2'; hook.style.strokeDashoffset = 1; hook.style.opacity = 0;
     const kf = [{ strokeDashoffset: 1, opacity: 0 }, { strokeDashoffset: .97, opacity: 1, offset: .04 }, { strokeDashoffset: 0, opacity: 1 }];
-    const draw = (pth, on, ms, delay = 0) => pth.animate(on ? kf : [...kf].reverse().map((f, i) => ({ ...f, offset: [0, .96, 1][i] })), { duration: ms, delay, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished;
-    await Promise.all([fade([svg], 1), fade([T], 0)]);
-    await Promise.all([aside(false), tween(700, set), draw(sh, 1, 520, 420), draw(hook, 1, 420, 560)]);
-    await swing(g, cx + r, hy - r, 7);
-    await Promise.all([draw(hook, 0, 360), draw(sh, 0, 460, 120), tween(680, k => set(1 - k), 300), aside(true)]);
-    await Promise.all([fade([T], 1), fade([svg], 0)]);
-    done([T, ...after], f);
+    const draw = (on, ms, delay = 0) => hook.animate(on ? kf : [...kf].reverse().map((fr, i) => ({ ...fr, offset: [0, .96, 1][i] })), { duration: ms, delay, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished;
+    const aside = back => Promise.all(after.map(el => el.animate([{ transform: 'none' }, { transform: `translateX(${room}px)` }], { duration: 650, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards', direction: back ? 'reverse' : 'normal' }).finished));
+    await Promise.all([fade([svg], 1), fade([O], 0)]);
+    await Promise.all([aside(false), tween(760, set), draw(true, 520, 520)]);
+    const hb = hook.getBBox();
+    await swing(g, hb.x + hb.width / 2, hb.y, 7);
+    await Promise.all([draw(false, 380), tween(720, k => set(1 - k), 220), aside(true)]);
+    await Promise.all([fade([O], 1), fade([svg], 0)]);
+    done([O, ...after], f);
   }
 
-  const scenes = [ui >= 0 && bag, T && hanger].filter(Boolean);
+  const scenes = [ui >= 0 && bag, hO && hanger].filter(Boolean);
   if (!scenes.length) return;
   let n = 0;
   // waits while the tab is hidden, so a scene is never left half played
