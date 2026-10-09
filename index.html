@@ -99,17 +99,17 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .logo{display:flex;align-items:center;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
 /* desktop: name on the left, sections centred between the name and the icons */
 .hdr .logo{order:-1;padding-left:4px}
-/* the store name (owner's request: a quiet animation in the site's style, then a constant smooth loop): its letters
-   come in one after another, rising out of a light blur, when the site opens; then a soft wave keeps running through
-   them, each letter lifting a little and catching the light like the glass, with a rest between waves. The two
-   animations do not meet: the loop starts after the entrance has ended. Letters are split by the script, so a new
-   name works the same. */
+/* the store name (owner's request: a quiet animation in the site's style, a constant smooth loop, and the letters
+   must not jump): its letters come in one after another, rising out of a light blur, when the site opens; then a soft
+   light keeps gliding through them, each letter lightening and coming back in turn, neighbors overlapping, so it
+   reads as one sheen passing like on the glass. Nothing moves in the loop. The two animations do not meet: the loop
+   starts after the entrance has ended. Letters are split by the script, so a new name works the same. */
 .logo.pre{opacity:0}
 .logo .lw{display:inline-block;white-space:pre}
 .logo .ll{display:inline-block}
-.logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards,logo-wave 3.6s ease-in-out calc(var(--i) * 70ms + 1.6s) infinite}
+.logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards,logo-sheen 4.2s ease-in-out calc(var(--i) * 110ms + 1.6s) infinite}
 @keyframes logo-in{from{opacity:0;transform:translateY(.4em);filter:blur(4px)}}
-@keyframes logo-wave{0%,24%,100%{transform:none;color:var(--ink)}11%{transform:translateY(-2px);color:#999}}
+@keyframes logo-sheen{0%,30%,100%{color:var(--ink)}15%{color:#B4B4B4}}
 @media (prefers-reduced-motion:reduce){.logo .ll{animation:none!important}}
 .hdr{grid-template-columns:auto 1fr auto}
 .nav:not(.r){justify-content:center;padding:0 24px}
@@ -2021,7 +2021,7 @@ function dropToast() { clearTimeout(toastT); const t = $('#toast'); if (t) t.rem
 // ---- smooth changes (owner's request: no jumps anywhere). Every helper falls back to the instant change when the
 // browser has no Web Animations or the visitor asked for reduced motion.
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-// the store name letter by letter, for its entrance and its looping wave (styles at .logo .ll)
+// the store name letter by letter, for its entrance and its looping sheen (styles at .logo .ll)
 (() => {
   const a = $('.hdr .logo');
   if (!a) return;
