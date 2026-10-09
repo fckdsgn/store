@@ -531,6 +531,8 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 .field .chev{position:absolute;right:14px;top:16px;width:14px;height:14px;pointer-events:none}
 /* show / hide a password (owner's request): an eye at the right of the field, crossed out while the password shows */
 .field.pw input{padding-right:48px}
+.field input.masked{-webkit-text-security:disc}
+.field input.masked.shown{-webkit-text-security:none}
 .eye{position:absolute;right:4px;top:4px;width:38px;height:38px;display:grid;place-items:center;border-radius:9px;color:var(--ink-2);transition:color .2s,background .2s;-webkit-tap-highlight-color:transparent}
 .eye .ico{grid-area:1/1;width:19px;height:19px;stroke-width:1.5;transition:opacity .2s}
 .eye .ico:last-child,.eye[aria-pressed="true"] .ico:first-child{opacity:0}
@@ -1779,6 +1781,12 @@ V.wishlist = () => {
 };
 
 let accTab = 'in';
+// On phones the password fields are email fields drawn with dots (owner's request): the phone opens the English
+// layout in the email field but kept the Russian one in a password field, and the keyboard goes by the kind of field
+// only (asking for the email keyboard in a password field did not help). The cost: the phone does not save or fill
+// passwords on this site. Computers keep real password fields; so does a browser that cannot draw the dots.
+const PW = matchMedia('(pointer:coarse)').matches && window.CSS && CSS.supports('-webkit-text-security', 'disc')
+  ? { type: 'email', cls: 'masked' } : { type: 'password', cls: '' };
 V.account = () => {
   if (S.user) {
     return `${backBtn('home')}<div class="narrow" style="max-width:520px">
@@ -1790,16 +1798,14 @@ V.account = () => {
     </div>`;
   }
   const up = accTab === 'up';
-  // the password fields ask the phone for the same keyboard as the email field (owner's request: there it opens in
-  // English), with no suggestions or corrections; they stay real password fields for the phone's saved passwords
   return `${backBtn('home')}<div class="narrow">
     <h1 class="h-title" style="text-align:center">Account</h1>
     <div class="seg${up ? ' r' : ''}" role="tablist"><i></i><button role="tab" aria-selected="${!up}" class="${up ? '' : 'on'}" data-act="tab" data-t="in">Sign in</button><button role="tab" aria-selected="${up}" class="${up ? 'on' : ''}" data-act="tab" data-t="up">Create account</button></div>
     <form class="stack" id="acc-form" novalidate>
       ${up ? `<div class="field"><input id="a-name" placeholder=" " autocomplete="name" required><label for="a-name">Full name</label></div>` : ''}
       <div class="field"><input id="a-email" type="email" placeholder=" " autocomplete="email" required><label for="a-email">Email</label></div>
-      <div class="field pw"><input id="a-pass" type="password" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required minlength="8"><label for="a-pass">Password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>
-      ${up ? `<div class="field pw" id="a-pass2-f" hidden><input id="a-pass2" type="password" placeholder=" " autocomplete="new-password" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required><label for="a-pass2">Confirm password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>` : ''}
+      <div class="field pw"><input id="a-pass" type="${PW.type}" class="${PW.cls}" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" autocapitalize="off" autocorrect="off" spellcheck="false" required minlength="8"><label for="a-pass">Password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>
+      ${up ? `<div class="field pw" id="a-pass2-f" hidden><input id="a-pass2" type="${PW.type}" class="${PW.cls}" placeholder=" " autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" required><label for="a-pass2">Confirm password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>` : ''}
       <p class="form-err" id="acc-err" aria-live="polite" style="margin:2px 2px 0"></p>
       <button class="btn wide" type="submit" style="margin-top:6px">${up ? 'Create account' : 'Sign in'}</button>
     </form>
@@ -2588,8 +2594,8 @@ document.addEventListener('click', e => {
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
     case 'tab': if (d.t !== accTab) switchTab(d.t); break;
     case 'eye': {
-      const inp = $('input', a.parentElement), show = inp.type === 'password';
-      inp.type = show ? 'text' : 'password';
+      const inp = $('input', a.parentElement), show = a.getAttribute('aria-pressed') !== 'true';
+      if (inp.classList.contains('masked')) inp.classList.toggle('shown', show); else inp.type = show ? 'text' : 'password';
       a.setAttribute('aria-pressed', show); a.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
       break;
     }
@@ -2739,7 +2745,8 @@ document.addEventListener('keydown', e => {
   if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
 });
 // an email and a password are typed in English letters, numbers and symbols only (owner's request)
-const latin = v => /^[\x20-\x7e]*$/.test(v);
+// (an email field turns a non-English domain into xn--... itself, so that counts as not English too)
+const latin = v => /^[\x20-\x7e]*$/.test(v) && !/(^|[.@])xn--/i.test(v);
 const EN_MAIL = 'Type the email in English letters', EN_PASS = 'Use English letters, numbers and symbols in the password';
 const emailOk = v => latin(v) && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 document.addEventListener('submit', e => {
