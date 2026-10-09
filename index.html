@@ -193,7 +193,7 @@ main{flex:1;padding:0 var(--x);outline:none}
    invisible, then fades in (render() in the script). The header is never part of it and stays still. The browser's
    View Transitions were used before; on iPhones (Safari, the Claude app) their snapshots made the change look torn
    and the header lag, so the change is done by hand the same way in every browser. Opacity only: a transform on
-   #app would move the fixed bars inside the page (the phone "Add to bag" bar, the size sheet). */
+   #main-view would move the fixed bars inside the page (the phone "Add to bag" bar, the size sheet). */
 /* photos that are not in the cache yet fade in when they arrive instead of popping in (classes set in the script) */
 .view img:not(.ld):not(.ld0){opacity:0}
 .view img.ld{animation:fade .5s ease}
@@ -747,7 +747,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 
 <div class="tg-top" id="strip" hidden></div>
 <div id="layer"></div>
-<main id="app" tabindex="-1"></main>
+<main id="main-view" tabindex="-1"></main>
 
 <footer class="ftr">
   <nav aria-label="Store">
@@ -1349,7 +1349,7 @@ function removeLine(k, el) {
     S.bag = S.bag.filter(l => lineKey(l) !== k);
     if (!S.bag.length) S.promo = null;
     save();
-    if (S.bag.length) render(); else fadeSwap('#app .view');
+    if (S.bag.length) render(); else fadeSwap('#main-view .view');
   });
 }
 function toggleWish(id) {
@@ -1364,7 +1364,7 @@ function toggleWish(id) {
   });
   if (route().name === 'wishlist') {
     const c = $(`.view .card [data-act="wish"][data-id="${id}"]`)?.closest('.card');
-    rowOut(c, () => (S.wish.length ? render() : fadeSwap('#app .view')));
+    rowOut(c, () => (S.wish.length ? render() : fadeSwap('#main-view .view')));
   }
 }
 
@@ -1842,7 +1842,7 @@ function render(scroll) {
   // a redraw of the same page (sort, color, bag) stays instant here (its own helpers fade it); so does Back / Forward,
   // which brings the page back at once where it was, without fighting the phone's own back swipe
   const traverse = !!(history.state && history.state.k);
-  const app = $('#app'), parts = [app, $('#strip')];
+  const app = $('#main-view'), parts = [app, $('#strip')];
   if (!lastKey || key === lastKey || traverse || still() || !app.animate) {
     navN++;
     parts.forEach(e => e.getAnimations().forEach(a => a.cancel()));
@@ -1884,10 +1884,10 @@ function switchGender(g) {
   genderBy = g;
   $$('#strip .gpill button').forEach(b => { const on = b.dataset.g === g; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
   placeG(true);
-  fadeSwap('#app .view');
+  fadeSwap('#main-view .view');
 }
 function paint(r, key, scroll) {
-  const app = $('#app');
+  const app = $('#main-view');
   const y = window.scrollY;
   // the strip goes in before the page and the scroll, so a restored scroll position is not pushed down by it
   const strip = $('#strip'), sh = r.name === 'home' ? TG : r.name === 'list' ? genderHTML() : '';
@@ -2116,7 +2116,7 @@ function openSearch() {
 const fold = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 // words of a text, lower case, no accents, "T-shirt" as one word
 const words = t => fold(t).replace(/([a-z0-9])[-'’.]([a-z0-9])/g, '$1$2').split(/[^a-z0-9а-яё]+/).filter(Boolean);
-// Russian words for pieces, colors and houses (by their stem), and short names of the houses
+// Russian words for pieces, colors and houses (by their stem), and short names of the houses; other languages below
 const RU = [['худи', 'hoodie'], ['толстовк', 'hoodie sweatshirt'], ['свитшот', 'sweatshirt'], ['кофт', 'hoodie sweatshirt sweater'],
   ['куртк', 'jacket'], ['пухов', 'down puffer'], ['жилет', 'vest'], ['джинс', 'jeans'], ['штан', 'trousers sweatpants jeans'],
   ['брюк', 'trousers'], ['футболк', 'tshirt'], ['майк', 'tshirt'], ['поло', 'polo'], ['свитер', 'sweater knit'], ['одежд', 'clothing'],
@@ -2134,17 +2134,223 @@ const RU = [['худи', 'hoodie'], ['толстовк', 'hoodie sweatshirt'], [
   ['лоран', 'laurent'], ['гермес', 'hermes'], ['эрмес', 'hermes'], ['дольч', 'dolce'], ['габбан', 'gabbana'], ['тимберл', 'timberland'],
   ['спрейгр', 'sprayground'], ['комм', 'comme']];
 const SHORT = { lv: 'louis', ch: 'chrome', ysl: 'saint', dg: 'dolce', cdg: 'comme', erd: 'enfants', cp: 'cp', tee: 'tshirt', grey: 'gray', gray: 'grey' };
+// Search in the main world languages (owner's request: find pieces "in all languages"). Words for pieces, colors,
+// sections and houses are turned into the English words of the catalog; the list is a dictionary, not a translator,
+// so a word that is not in it is not understood. LANG: languages with spaces between words, by the start of a word,
+// like RU (Ukrainian, Kazakh, Uzbek, Spanish, French, German, Italian, Portuguese, Turkish, Polish). EXACT: short
+// words that match only whole, so they do not catch longer words. NOSPACE: Chinese, Japanese, Korean and Arabic,
+// found anywhere in the query, since there words carry particles or have no spaces around them. PHRASES: several
+// words for one piece. STOP: little words that do not have to match. GENDER: words for women and men pick the gender.
+const LANG = [
+  // Ukrainian
+  ['худі', 'hoodie'], ['світшот', 'sweatshirt'], ['светр', 'sweater knit'], ['пуховик', 'down puffer'], ['жилетк', 'vest'],
+  ['штан', 'trousers sweatpants jeans'], ['футболк', 'tshirt'], ['сумк', 'bag'], ['гаман', 'wallet'], ['кросівк', 'sneaker'],
+  ['черевик', 'boot'], ['чобіт', 'boot'], ['чоботи', 'boot'], ['взутт', 'shoes'], ['капці', 'slides'], ['ремін', 'belt'], ['ремен', 'belt'],
+  ['окуляр', 'glasses sunglasses eyewear'], ['рукавичк', 'gloves'], ['одяг', 'clothing'], ['аксесуар', 'accessories'],
+  ['знижк', 'sale'], ['розпродаж', 'sale'], ['новинк', 'new'], ['чорн', 'black'], ['біл', 'white'], ['сір', 'gray grey'],
+  ['рожев', 'pink'], ['червон', 'red'], ['блакит', 'blue'], ['зелен', 'green'], ['коричнев', 'brown'], ['бежев', 'beige'],
+  ['помаранч', 'orange'], ['фіолет', 'purple'], ['луі', 'louis'], ['віттон', 'vuitton'], ['адідас', 'adidas'], ['стоун', 'stone'],
+  ['тімберл', 'timberland'], ['баленсіаг', 'balenciaga'], ['гуччі', 'gucci'], ['живанші', 'givenchy'], ['гермес', 'hermes'],
+  // Kazakh
+  ['сөмке', 'bag'], ['әмиян', 'wallet'], ['етік', 'boot'], ['күрте', 'jacket'], ['шалбар', 'trousers'], ['жейде', 'polo tshirt'],
+  ['белдік', 'belt'], ['көзілдірік', 'glasses sunglasses eyewear'], ['бөрік', 'hat beanie'], ['қолғап', 'gloves'], ['киім', 'clothing'],
+  ['жеңілдік', 'sale'], ['жаңа', 'new'], ['қара', 'black'], ['сұр', 'gray grey'], ['қызғылт', 'pink'], ['қызыл', 'red'],
+  ['жасыл', 'green'], ['қоңыр', 'brown'],
+  // Uzbek
+  ['sumka', 'bag'], ['ryukzak', 'backpack'], ['hamyon', 'wallet'], ['krossovka', 'sneaker'], ['poyabzal', 'shoes'], ['kurtka', 'jacket'],
+  ['kamzul', 'vest'], ['shim', 'trousers'], ['jinsi', 'jeans'], ['futbolka', 'tshirt'], ['kofta', 'sweater hoodie'], ['xudi', 'hoodie'],
+  ['kamar', 'belt'], ['kozoynak', 'glasses sunglasses eyewear'], ['qalpoq', 'hat cap beanie'], ['shapka', 'beanie hat'], ['sharf', 'scarf scarves'],
+  ['qolqop', 'gloves'], ['niqob', 'mask'], ['kiyim', 'clothing'], ['aksessuar', 'accessories'], ['chegirma', 'sale'], ['yangi', 'new'],
+  ['qora', 'black'], ['kulrang', 'gray grey'], ['pushti', 'pink'], ['qizil', 'red'], ['yashil', 'green'], ['jigarrang', 'brown'],
+  ['binafsha', 'purple'],
+  // Spanish
+  ['sudadera', 'hoodie sweatshirt'], ['capucha', 'hoodie'], ['chaqueta', 'jacket'], ['cazadora', 'jacket'], ['abrigo', 'outerwear jacket'],
+  ['plumifero', 'down puffer'], ['chaleco', 'vest'], ['vaquero', 'jeans'], ['pantalon', 'trousers sweatpants jeans'], ['camiseta', 'tshirt'],
+  ['jersey', 'sweater knit'], ['bolso', 'bag'], ['bolsa', 'bag'], ['mochila', 'backpack'], ['cartera', 'wallet bag'], ['billetera', 'wallet'],
+  ['zapatilla', 'sneaker'], ['deportiva', 'sneaker'], ['bota', 'boot'], ['chancla', 'slides'], ['zapato', 'shoes'], ['calzado', 'shoes'],
+  ['cinturon', 'belt'], ['gafa', 'glasses sunglasses eyewear'], ['gorra', 'cap'], ['gorro', 'beanie'], ['sombrero', 'hat'], ['bufanda', 'scarf scarves'],
+  ['guante', 'gloves'], ['mascarilla', 'mask'], ['ropa', 'clothing'], ['accesorio', 'accessories'], ['rebaja', 'sale'], ['oferta', 'sale'],
+  ['descuento', 'sale'], ['nuevo', 'new'], ['negro', 'black'], ['negra', 'black'], ['blanco', 'white'], ['blanca', 'white'], ['gris', 'gray grey'],
+  ['rosa', 'pink'], ['rojo', 'red'], ['roja', 'red'], ['azul', 'blue'], ['marino', 'navy'], ['verde', 'green'], ['marron', 'brown'],
+  ['naranja', 'orange'], ['morado', 'purple'], ['granate', 'burgundy'],
+  // French
+  ['capuche', 'hoodie'], ['veste', 'jacket'], ['blouson', 'jacket'], ['manteau', 'outerwear jacket'], ['doudoune', 'down puffer'],
+  ['gilet', 'vest'], ['teeshirt', 'tshirt'], ['pull', 'sweater knit'], ['tricot', 'knit sweater'], ['sacoche', 'messenger bag'],
+  ['portefeuille', 'wallet'], ['basket', 'sneaker'], ['botte', 'boot'], ['bottine', 'boot'], ['chaussure', 'shoes'], ['claquette', 'slides'],
+  ['ceinture', 'belt'], ['lunette', 'glasses sunglasses eyewear'], ['casquette', 'cap'], ['bonnet', 'beanie'], ['chapeau', 'hat'],
+  ['echarpe', 'scarf scarves'], ['gant', 'gloves'], ['masque', 'mask'], ['vetement', 'clothing'], ['soldes', 'sale'], ['promo', 'sale'],
+  ['nouveau', 'new'], ['nouvelle', 'new'], ['noir', 'black'], ['blanc', 'white'], ['rose', 'pink'], ['rouge', 'red'], ['bleu', 'blue'],
+  ['vert', 'green'], ['violet', 'purple'], ['bordeaux', 'burgundy'],
+  // German
+  ['kapuzen', 'hoodie'], ['pullover', 'sweater knit'], ['strick', 'knit sweater'], ['jacke', 'jacket'], ['mantel', 'outerwear jacket'],
+  ['daunen', 'down puffer'], ['weste', 'vest'], ['hose', 'trousers sweatpants jeans'], ['tasche', 'bag'], ['handtasche', 'handbag bag'],
+  ['umhangetasche', 'messenger bag'], ['reisetasche', 'travel bag'], ['rucksack', 'backpack'], ['geldborse', 'wallet'], ['portemonnaie', 'wallet'],
+  ['brieftasche', 'wallet'], ['turnschuh', 'sneaker'], ['stiefel', 'boot'], ['schuh', 'shoes'], ['hausschuh', 'slides'], ['gurtel', 'belt'],
+  ['sonnenbrille', 'sunglasses glasses eyewear'], ['brille', 'glasses eyewear'], ['mutze', 'beanie cap hat'], ['kappe', 'cap'], ['schal', 'scarf scarves'],
+  ['handschuh', 'gloves'], ['maske', 'mask'], ['kleidung', 'clothing'], ['zubehor', 'accessories'], ['rabatt', 'sale'], ['reduziert', 'sale'],
+  ['schwarz', 'black'], ['weiss', 'white'], ['weiß', 'white'], ['grau', 'gray grey'], ['blau', 'blue'], ['grun', 'green'], ['braun', 'brown'],
+  ['lila', 'purple'],
+  // Italian
+  ['felpa', 'hoodie sweatshirt'], ['cappuccio', 'hoodie'], ['maglion', 'sweater knit'], ['maglia', 'sweater knit tshirt'], ['giacca', 'jacket'],
+  ['giubbott', 'jacket'], ['piumin', 'down puffer'], ['cappott', 'outerwear jacket'], ['pantalon', 'trousers sweatpants jeans'],
+  ['maglietta', 'tshirt'], ['borsa', 'bag'], ['borse', 'bag'], ['zaino', 'backpack'], ['portafogli', 'wallet'], ['scarpe', 'shoes'],
+  ['scarpa', 'shoes'], ['stival', 'boot'], ['ciabatt', 'slides'], ['cintur', 'belt'], ['occhial', 'glasses sunglasses eyewear'],
+  ['cappell', 'hat cap'], ['berretto', 'beanie cap'], ['sciarpa', 'scarf scarves'], ['guant', 'gloves'], ['mascherin', 'mask'],
+  ['abbigliament', 'clothing'], ['accessori', 'accessories'], ['saldi', 'sale'], ['sconto', 'sale'], ['nuovo', 'new'], ['nuova', 'new'],
+  ['nero', 'black'], ['nera', 'black'], ['bianc', 'white'], ['grigi', 'gray grey'], ['rosso', 'red'], ['rossa', 'red'], ['azzurr', 'blue'],
+  ['arancion', 'orange'], ['viola', 'purple'],
+  // Portuguese
+  ['moletom', 'hoodie sweatshirt'], ['capuz', 'hoodie'], ['casaco', 'jacket outerwear'], ['jaqueta', 'jacket'], ['colete', 'vest'],
+  ['calca', 'trousers sweatpants jeans'], ['sueter', 'sweater knit'], ['malha', 'knit sweater'], ['carteira', 'wallet'], ['tenis', 'sneaker'],
+  ['chinelo', 'slides'], ['sapato', 'shoes'], ['cinto', 'belt'], ['oculos', 'glasses sunglasses eyewear'], ['bone', 'cap'], ['chapeu', 'hat'],
+  ['cachecol', 'scarf scarves'], ['luva', 'gloves'], ['mascara', 'mask'], ['roupa', 'clothing'], ['acessorio', 'accessories'],
+  ['promocao', 'sale'], ['liquidacao', 'sale'], ['desconto', 'sale'], ['novo', 'new'], ['nova', 'new'], ['preto', 'black'], ['preta', 'black'],
+  ['branco', 'white'], ['branca', 'white'], ['cinza', 'gray grey'], ['vermelh', 'red'], ['marrom', 'brown'], ['bege', 'beige'],
+  ['laranja', 'orange'], ['roxo', 'purple'], ['roxa', 'purple'],
+  // Turkish
+  ['kapusonlu', 'hoodie'], ['kazak', 'sweater knit'], ['triko', 'knit sweater'], ['ceket', 'jacket'], ['mont', 'jacket outerwear'],
+  ['sisme', 'down puffer'], ['yelek', 'vest'], ['pantolon', 'trousers sweatpants jeans'], ['esofman', 'sweatpants'], ['tisort', 'tshirt'],
+  ['canta', 'bag'], ['cuzdan', 'wallet'], ['ayakkabı', 'shoes'], ['ayakkabi', 'shoes'], ['terlik', 'slides'], ['kemer', 'belt'],
+  ['gozluk', 'glasses sunglasses eyewear'], ['gozlug', 'glasses sunglasses eyewear'], ['sapka', 'hat cap'], ['bere', 'beanie'],
+  ['atkı', 'scarf scarves'], ['atki', 'scarf scarves'], ['eldiven', 'gloves'], ['giyim', 'clothing'], ['aksesuar', 'accessories'],
+  ['indirim', 'sale'], ['yeni', 'new'], ['siyah', 'black'], ['beyaz', 'white'], ['pembe', 'pink'], ['kırmız', 'red'], ['kirmiz', 'red'],
+  ['mavi', 'blue'], ['lacivert', 'navy blue'], ['yesil', 'green'], ['kahverengi', 'brown'], ['turuncu', 'orange'], ['bordo', 'burgundy'],
+  // Polish
+  ['bluz', 'hoodie sweatshirt'], ['sweter', 'sweater knit'], ['plaszcz', 'outerwear jacket'], ['płaszcz', 'outerwear jacket'], ['kamizelk', 'vest'], ['jeansy', 'jeans'],
+  ['spodni', 'trousers sweatpants jeans'], ['koszulk', 'tshirt polo'], ['torb', 'bag'], ['torebk', 'handbag bag'], ['plecak', 'backpack'],
+  ['portfel', 'wallet'], ['buty', 'shoes'], ['trampk', 'sneaker'], ['adidasy', 'sneaker'], ['kozaki', 'boot'], ['botki', 'boot'],
+  ['klapki', 'slides'], ['pasek', 'belt'], ['paski', 'belt'], ['okular', 'glasses sunglasses eyewear'], ['czapk', 'beanie cap hat'],
+  ['szalik', 'scarf scarves'], ['rekawiczk', 'gloves'], ['maseczk', 'mask'], ['ubrani', 'clothing'], ['akcesori', 'accessories'],
+  ['wyprzedaz', 'sale'], ['promocj', 'sale'], ['nowosc', 'new'], ['czarn', 'black'], ['biał', 'white'], ['bial', 'white'], ['szar', 'gray grey'],
+  ['rozow', 'pink'], ['czerwon', 'red'], ['niebiesk', 'blue'], ['granatow', 'navy blue'], ['zielon', 'green'], ['brazow', 'brown'],
+  ['bezow', 'beige'], ['pomarancz', 'orange'], ['fiolet', 'purple'],
+];
+const EXACT = { gri: 'gray grey', mor: 'purple', bot: 'boot', kot: 'jeans', neu: 'new', neue: 'new', rot: 'red', rote: 'red', blu: 'blue',
+  oq: 'white', kok: 'blue', 'ақ': 'white', 'көк': 'blue', sac: 'bag', sacs: 'bag', jean: 'jeans', gris: 'gray grey', marron: 'brown',
+  orange: 'orange', beige: 'beige', bej: 'beige', verde: 'green', verdi: 'green', rosa: 'pink', polo: 'polo', nowe: 'new', nowy: 'new' };
+const NOSPACE = [
+  // Chinese (simplified and traditional)
+  ['连帽卫衣', 'hoodie'], ['卫衣', 'hoodie sweatshirt'], ['衛衣', 'hoodie sweatshirt'], ['帽衫', 'hoodie'], ['运动衫', 'sweatshirt'],
+  ['毛衣', 'sweater knit'], ['针织', 'knit sweater'], ['針織', 'knit sweater'], ['夹克', 'jacket'], ['夾克', 'jacket'], ['外套', 'jacket outerwear'],
+  ['羽绒服', 'down puffer'], ['羽絨服', 'down puffer'], ['羽绒', 'down puffer'], ['马甲', 'vest'], ['背心', 'vest'], ['牛仔裤', 'jeans'],
+  ['牛仔褲', 'jeans'], ['运动裤', 'sweatpants'], ['裤', 'trousers sweatpants jeans'], ['褲', 'trousers sweatpants jeans'], ['t恤', 'tshirt'],
+  ['短袖', 'tshirt'], ['polo衫', 'polo'], ['双肩包', 'backpack'], ['雙肩包', 'backpack'], ['背包', 'backpack'], ['钱包', 'wallet'],
+  ['錢包', 'wallet'], ['手提包', 'handbag bag'], ['旅行包', 'travel bag'], ['斜挎包', 'messenger bag'], ['包', 'bag'], ['运动鞋', 'sneaker'],
+  ['運動鞋', 'sneaker'], ['球鞋', 'sneaker'], ['拖鞋', 'slides'], ['靴', 'boot'], ['鞋', 'shoes'], ['腰带', 'belt'], ['腰帶', 'belt'],
+  ['皮带', 'belt'], ['皮帶', 'belt'], ['墨镜', 'sunglasses'], ['墨鏡', 'sunglasses'], ['太阳镜', 'sunglasses'], ['眼镜', 'glasses eyewear'],
+  ['眼鏡', 'glasses eyewear'], ['棒球帽', 'cap'], ['毛线帽', 'beanie'], ['针织帽', 'beanie'], ['帽', 'hat cap beanie'], ['围巾', 'scarf scarves'],
+  ['圍巾', 'scarf scarves'], ['手套', 'gloves'], ['口罩', 'mask'], ['面罩', 'mask'], ['服装', 'clothing'], ['衣服', 'clothing'],
+  ['配饰', 'accessories'], ['配飾', 'accessories'], ['打折', 'sale'], ['折扣', 'sale'], ['特价', 'sale'], ['新品', 'new'], ['新款', 'new'],
+  ['酒红', 'burgundy'], ['黑', 'black'], ['白', 'white'], ['灰', 'gray grey'], ['粉', 'pink'], ['红', 'red'], ['紅', 'red'], ['蓝', 'blue'],
+  ['藍', 'blue'], ['绿', 'green'], ['綠', 'green'], ['棕', 'brown'], ['咖啡色', 'brown'], ['米色', 'beige'], ['橙', 'orange'], ['紫', 'purple'],
+  ['女', 'women'], ['男', 'men'],
+  ['路易威登', 'louis vuitton'], ['驴牌', 'louis vuitton'], ['戈雅', 'goyard'], ['克罗心', 'chrome hearts'], ['克羅心', 'chrome hearts'],
+  ['巴黎世家', 'balenciaga'], ['古驰', 'gucci'], ['古馳', 'gucci'], ['博柏利', 'burberry'], ['巴宝莉', 'burberry'], ['盟可睐', 'moncler'],
+  ['蒙克莱', 'moncler'], ['瑞克欧文斯', 'rick owens'], ['马吉拉', 'margiela'], ['馬吉拉', 'margiela'], ['阿迪达斯', 'adidas'],
+  ['愛迪達', 'adidas'], ['耐克', 'nike'], ['耐吉', 'nike'], ['石头岛', 'stone island'], ['猿人头', 'bape'], ['纪梵希', 'givenchy'],
+  ['圣罗兰', 'saint laurent'], ['爱马仕', 'hermes'], ['愛馬仕', 'hermes'], ['杜嘉班纳', 'dolce gabbana'], ['川久保玲', 'comme'],
+  ['添柏岚', 'timberland'],
+  // Japanese
+  ['パーカー', 'hoodie'], ['パーカ', 'hoodie'], ['スウェット', 'sweatshirt sweatpants'], ['トレーナー', 'sweatshirt'], ['セーター', 'sweater knit'],
+  ['ニット帽', 'beanie'], ['ニット', 'knit sweater'], ['ジャケット', 'jacket'], ['ブルゾン', 'jacket'], ['ダウン', 'down puffer'], ['ベスト', 'vest'],
+  ['ジーンズ', 'jeans'], ['デニム', 'jeans'], ['パンツ', 'trousers sweatpants jeans'], ['ズボン', 'trousers'], ['tシャツ', 'tshirt'], ['ポロ', 'polo'],
+  ['バックパック', 'backpack'], ['リュック', 'backpack'], ['バッグ', 'bag'], ['かばん', 'bag'], ['鞄', 'bag'], ['財布', 'wallet'], ['ウォレット', 'wallet'],
+  ['スニーカー', 'sneaker'], ['ブーツ', 'boot'], ['サンダル', 'slides'], ['シューズ', 'shoes'], ['ベルト', 'belt'], ['サングラス', 'sunglasses'],
+  ['メガネ', 'glasses eyewear'], ['キャップ', 'cap'], ['帽子', 'hat cap beanie'], ['ビーニー', 'beanie'], ['マフラー', 'scarf scarves'],
+  ['スカーフ', 'scarf scarves'], ['手袋', 'gloves'], ['グローブ', 'gloves'], ['マスク', 'mask'], ['アクセサリー', 'accessories'], ['セール', 'sale'],
+  ['新作', 'new'], ['ブラック', 'black'], ['ホワイト', 'white'], ['グレー', 'gray grey'], ['ピンク', 'pink'], ['レッド', 'red'], ['ブルー', 'blue'],
+  ['ネイビー', 'navy blue'], ['グリーン', 'green'], ['ブラウン', 'brown'], ['茶色', 'brown'], ['ベージュ', 'beige'], ['オレンジ', 'orange'],
+  ['パープル', 'purple'], ['レディース', 'women'], ['メンズ', 'men'],
+  ['ルイヴィトン', 'louis vuitton'], ['ヴィトン', 'vuitton'], ['ゴヤール', 'goyard'], ['クロムハーツ', 'chrome hearts'], ['バレンシアガ', 'balenciaga'],
+  ['グッチ', 'gucci'], ['バーバリー', 'burberry'], ['モンクレール', 'moncler'], ['リックオウエンス', 'rick owens'], ['シュプリーム', 'supreme'],
+  ['マルジェラ', 'margiela'], ['アミリ', 'amiri'], ['アディダス', 'adidas'], ['ナイキ', 'nike'], ['ストーンアイランド', 'stone island'],
+  ['ベイプ', 'bape'], ['ヴェトモン', 'vetements'], ['ジバンシィ', 'givenchy'], ['ジバンシー', 'givenchy'], ['サンローラン', 'saint laurent'],
+  ['エルメス', 'hermes'], ['ドルチェ', 'dolce'], ['ギャルソン', 'comme'], ['ティンバーランド', 'timberland'], ['スプレーグラウンド', 'sprayground'],
+  // Korean
+  ['후드티', 'hoodie'], ['후디', 'hoodie'], ['맨투맨', 'sweatshirt'], ['니트', 'knit sweater'], ['스웨터', 'sweater knit'], ['자켓', 'jacket'],
+  ['재킷', 'jacket'], ['패딩', 'down puffer'], ['조끼', 'vest'], ['청바지', 'jeans'], ['바지', 'trousers sweatpants jeans'], ['티셔츠', 'tshirt'],
+  ['반팔', 'tshirt'], ['폴로', 'polo'], ['백팩', 'backpack'], ['가방', 'bag'], ['지갑', 'wallet'], ['스니커즈', 'sneaker'], ['운동화', 'sneaker'],
+  ['부츠', 'boot'], ['슬리퍼', 'slides'], ['신발', 'shoes'], ['벨트', 'belt'], ['선글라스', 'sunglasses'], ['안경', 'glasses eyewear'],
+  ['볼캡', 'cap'], ['비니', 'beanie'], ['모자', 'hat cap beanie'], ['머플러', 'scarf scarves'], ['목도리', 'scarf scarves'], ['스카프', 'scarf scarves'],
+  ['장갑', 'gloves'], ['마스크', 'mask'], ['액세서리', 'accessories'], ['세일', 'sale'], ['할인', 'sale'], ['신상', 'new'], ['검정', 'black'],
+  ['검은', 'black'], ['블랙', 'black'], ['흰', 'white'], ['하얀', 'white'], ['화이트', 'white'], ['회색', 'gray grey'], ['그레이', 'gray grey'],
+  ['분홍', 'pink'], ['핑크', 'pink'], ['빨간', 'red'], ['빨강', 'red'], ['레드', 'red'], ['파란', 'blue'], ['파랑', 'blue'], ['블루', 'blue'],
+  ['네이비', 'navy blue'], ['초록', 'green'], ['녹색', 'green'], ['그린', 'green'], ['갈색', 'brown'], ['브라운', 'brown'], ['베이지', 'beige'],
+  ['주황', 'orange'], ['오렌지', 'orange'], ['보라', 'purple'], ['여성', 'women'], ['남성', 'men'], ['옷', 'clothing'],
+  ['루이비통', 'louis vuitton'], ['고야드', 'goyard'], ['크롬하츠', 'chrome hearts'], ['발렌시아가', 'balenciaga'], ['구찌', 'gucci'],
+  ['버버리', 'burberry'], ['몽클레어', 'moncler'], ['몽클레르', 'moncler'], ['릭오웬스', 'rick owens'], ['슈프림', 'supreme'],
+  ['마르지엘라', 'margiela'], ['아미리', 'amiri'], ['아디다스', 'adidas'], ['나이키', 'nike'], ['스톤아일랜드', 'stone island'], ['베이프', 'bape'],
+  ['베트멍', 'vetements'], ['지방시', 'givenchy'], ['생로랑', 'saint laurent'], ['에르메스', 'hermes'], ['돌체앤가바나', 'dolce gabbana'],
+  ['꼼데가르송', 'comme'], ['팀버랜드', 'timberland'],
+  // Arabic
+  ['هودي', 'hoodie'], ['سويت شيرت', 'sweatshirt'], ['كنزة', 'sweater knit'], ['سترة', 'jacket'], ['جاكيت', 'jacket'], ['معطف', 'outerwear jacket'],
+  ['بنطلون', 'trousers sweatpants jeans'], ['بنطال', 'trousers sweatpants jeans'], ['جينز', 'jeans'], ['تي شيرت', 'tshirt'], ['تيشيرت', 'tshirt'],
+  ['حقيبة ظهر', 'backpack'], ['حقيبة', 'bag'], ['حقائب', 'bag'], ['شنطة', 'bag'], ['محفظة', 'wallet'], ['حذاء رياضي', 'sneaker'],
+  ['سنيكرز', 'sneaker'], ['جزمة', 'boot'], ['حذاء', 'shoes'], ['أحذية', 'shoes'], ['احذية', 'shoes'], ['حزام', 'belt'],
+  ['نظارة شمسية', 'sunglasses'], ['نظارات', 'glasses sunglasses eyewear'], ['نظارة', 'glasses sunglasses eyewear'], ['قبعة', 'hat cap beanie'],
+  ['كاب', 'cap'], ['وشاح', 'scarf scarves'], ['قفازات', 'gloves'], ['كمامة', 'mask'], ['قناع', 'mask'], ['ملابس', 'clothing'],
+  ['إكسسوارات', 'accessories'], ['اكسسوارات', 'accessories'], ['تخفيضات', 'sale'], ['خصم', 'sale'], ['جديد', 'new'], ['أسود', 'black'],
+  ['اسود', 'black'], ['سوداء', 'black'], ['أبيض', 'white'], ['ابيض', 'white'], ['بيضاء', 'white'], ['رمادي', 'gray grey'], ['وردي', 'pink'],
+  ['أحمر', 'red'], ['احمر', 'red'], ['حمراء', 'red'], ['أزرق', 'blue'], ['ازرق', 'blue'], ['زرقاء', 'blue'], ['كحلي', 'navy blue'],
+  ['أخضر', 'green'], ['اخضر', 'green'], ['خضراء', 'green'], ['بني', 'brown'], ['بيج', 'beige'], ['برتقالي', 'orange'], ['بنفسجي', 'purple'],
+  ['نسائي', 'women'], ['رجالي', 'men'],
+  ['لويس فيتون', 'louis vuitton'], ['لوي فيتون', 'louis vuitton'], ['غويارد', 'goyard'], ['كروم هارتس', 'chrome hearts'], ['بالنسياغا', 'balenciaga'],
+  ['غوتشي', 'gucci'], ['جوتشي', 'gucci'], ['قوتشي', 'gucci'], ['بربري', 'burberry'], ['مونكلير', 'moncler'], ['سوبريم', 'supreme'],
+  ['مارجيلا', 'margiela'], ['أديداس', 'adidas'], ['اديداس', 'adidas'], ['نايكي', 'nike'], ['ستون آيلاند', 'stone island'], ['جيفنشي', 'givenchy'],
+  ['سان لوران', 'saint laurent'], ['هيرميس', 'hermes'], ['دولتشي', 'dolce'], ['تمبرلاند', 'timberland'],
+].sort((a, b) => b[0].length - a[0].length);
+const PHRASES = [['sac a dos', 'backpack'], ['lunettes de soleil', 'sunglasses'], ['gafas de sol', 'sunglasses'], ['occhiali da sole', 'sunglasses'],
+  ['oculos de sol', 'sunglasses'], ['sırt canta', 'backpack'], ['sirt canta', 'backpack'], ['spor ayakkabı', 'sneaker'], ['spor ayakkabi', 'sneaker'],
+  ['gunes gozlug', 'sunglasses'], ['okulary przeciws', 'sunglasses'], ['bas kiim', 'hat cap beanie'], ['аяқ киім', 'shoes'],
+  ['бас киім', 'hat cap beanie'], ['sonnen brille', 'sunglasses'], ['t shirt', 'tshirt'], ['tee shirt', 'tshirt']];
+const STOP = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'le', 'les', 'du', 'des', 'et', 'y', 'e', 'di', 'da', 'della', 'per', 'con', 'und',
+  'mit', 'der', 'die', 'das', 'fur', 'for', 'the', 'and', 'a', 'an', 'of', 'with', 'para', 'com', 'do', 'en', 'i', 'w', 'z', 'na', 'dla', 've',
+  'ile', 'va', 'и', 'для', 'з', 'і', 'в', 'на', 'с', 'од', 'от']);
+// women / men in every language of the dictionaries: whole words, then starts of words
+const GWORD = { women: 'women', woman: 'women', womens: 'women', womenswear: 'women', ladies: 'women', female: 'women', frau: 'women', frauen: 'women',
+  donna: 'women', donne: 'women', mujer: 'women', mujeres: 'women', mulher: 'women', mulheres: 'women', ayol: 'women', 'әйел': 'women',
+  men: 'men', man: 'men', mens: 'men', menswear: 'men', male: 'men', mann: 'men', manner: 'men', uomo: 'men', uomini: 'men', hombre: 'men',
+  hombres: 'men', homem: 'men', homens: 'men', erkak: 'men', erkek: 'men', 'ер': 'men' };
+const GSTEM = [['женск', 'women'], ['женщин', 'women'], ['девуш', 'women'], ['жіноч', 'women'], ['femme', 'women'], ['femenin', 'women'],
+  ['feminin', 'women'], ['damen', 'women'], ['damsk', 'women'], ['kobiet', 'women'], ['kadın', 'women'], ['kadin', 'women'],
+  ['мужск', 'men'], ['мужчин', 'men'], ['чоловіч', 'men'], ['homme', 'men'], ['masculin', 'men'], ['herren', 'men'], ['mesk', 'men'], ['mezczyzn', 'men']];
+const STEMS = [...RU, ...LANG].map(([s, e]) => [fold(s), e]);
+const PHRASES_F = PHRASES.map(([p, e]) => [new RegExp('(^|\\s)' + fold(p) + '\\S*', 'g'), e]);
+// what is left of those scripts after the dictionary is words it does not know: they are left out of the query
+const OTHER = /[\u0600-\u06ff\u0750-\u077f\u1100-\u11ff\u3040-\u30ff\u3130-\u318f\u3400-\u4dbf\u4e00-\u9fff\uac00-\ud7af\uff66-\uff9f]+/g;
+// words of a query in any alphabet ("T-shirt", "ko'k" as one word)
+const qwords = t => t.replace(/([\p{L}\p{N}])['’.\-]+(?=[\p{L}\p{N}])/gu, '$1').split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+// a query as the words that must match (each with its other ways to match) and the gender it names, if any
+function parseQuery(raw) {
+  let s = raw.normalize('NFC').toLowerCase().replace(/[・·]/g, '');
+  NOSPACE.forEach(([t], i) => { if (s.includes(t)) s = s.split(t).join(` qx${i} `); });
+  s = fold(s.replace(OTHER, ' '));
+  PHRASES_F.forEach(([re], i) => { s = s.replace(re, `$1qp${i}`); });
+  let g = 'all';
+  const terms = [];
+  for (const w of qwords(s)) {
+    const ph = /^q([xp])(\d+)$/.exec(w), en = ph && (ph[1] === 'x' ? NOSPACE : PHRASES_F)[+ph[2]][1];
+    const gw = GWORD[en] || GWORD[w] || (GSTEM.find(([st]) => w.startsWith(st)) || [])[1];
+    if (gw) g = gw; else if (!STOP.has(w)) terms.push(alts(w));
+  }
+  return { terms, g, any: terms.length > 0 || g !== 'all' };
+}
 // the ways one word of a query can match: itself, without a plural ending, its English word, the full name of a house
 function alts(w) {
+  // a placeholder for a term found by parseQuery() stands for its English words
+  const ph = /^q([xp])(\d+)$/.exec(w);
+  if (ph) return (ph[1] === 'x' ? NOSPACE : PHRASES_F)[+ph[2]][1].split(' ').flatMap(alts);
   const a = [w];
   if (w.length > 3 && w.endsWith('es')) a.push(w.slice(0, -2));
   if (w.length > 3 && w.endsWith('s')) a.push(w.slice(0, -1));
-  for (const [stem, en] of RU) if (w.startsWith(stem)) a.push(...en.split(' '));
+  for (const [stem, en] of STEMS) if (w.startsWith(stem)) a.push(...en.split(' '));
+  if (EXACT[w]) a.push(...EXACT[w].split(' '));
   if (SHORT[w]) a.push(SHORT[w]);
   return a;
 }
 function searchOut(q) {
-  q = fold(q.trim());
+  const raw = q.trim();
+  q = fold(raw);
   const out = $('#sr-out');
   if (!q) {
     // with a price range set the pieces in it show; otherwise the new ones, as before
@@ -2158,8 +2364,8 @@ function searchOut(q) {
   // every word of the query has to match the start of a word ("lv" finds LV, not "silver"); pieces that match by name,
   // brand, category or color come before those that match only in the description. A piece found by a color other
   // than its first opens in that color.
-  const terms = words(q).map(alts);
-  const hits = P.filter(p => gOK(sg)(p) && priceOK(PR.search)(p)).map(p => {
+  const { terms, g, any } = parseQuery(raw);
+  const hits = !any ? [] : P.filter(p => gOK(sg)(p) && gOK(g)(p) && priceOK(PR.search)(p)).map(p => {
     let best = null;
     p.variants.forEach((v, i) => {
       const strong = words([p.brand, p.name, p.cat, ...p.groups, p.was ? 'sale' : '', p.isNew ? 'new' : '', v.color.name].join(' '));
@@ -2174,7 +2380,7 @@ function searchOut(q) {
     return best && { p: best.i && p.variants.length > 1 ? vOf(p, p.variants[best.i].key) : p, score: best.score };
   }).filter(Boolean).sort((a, b) => b.score - a.score).map(h => h.p);
   out.innerHTML = hits.length ? `<div class="label sr-h">${hits.length} ${hits.length === 1 ? 'result' : 'results'}</div><div class="sr-list">${hits.map(srItem).join('')}</div>`
-    : `<p class="sr-empty">Nothing matches “${esc(q)}”. Try coat, knit or sneakers.</p>`;
+    : `<p class="sr-empty">Nothing matches “${esc(raw)}”. Try coat, knit or sneakers.</p>`;
 }
 const srItem = p => `<a class="sr-item" href="${vHref(p)}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${p.key && p.variants.length > 1 ? esc(p.color.name) + ', ' : ''}${p.from ? 'from ' : ''}${money(p.price)}</span></span></a>`;
 function openMenu() {
@@ -2299,7 +2505,7 @@ document.addEventListener('click', e => {
       // a fresh start in the section, with the price range set in search if there is one
       carry = a.closest('#sr-out') && priced(PR.search) ? { min: PR.search.min, max: PR.search.max } : null;
       brandList = '';
-      if (location.hash === a.getAttribute('href')) setTimeout(() => fadeSwap('#app .view'), 0);
+      if (location.hash === a.getAttribute('href')) setTimeout(() => fadeSwap('#main-view .view'), 0);
       break;
     case 'price-reset': { const pr = a.closest('.pr'), st = PR[pr ? pr.dataset.scope : 'list']; st.min = st.max = null; syncPrice(pr, true); applyPrice(pr); break; }
     case 'dd-pick': {
@@ -2347,7 +2553,7 @@ document.addEventListener('click', e => {
     case 'close': closeLayer(); break;
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
     case 'tab': if (d.t !== accTab) switchTab(d.t); break;
-    case 'signout': S.user = null; save(); fadeSwap('#app .view'); break;
+    case 'signout': S.user = null; save(); fadeSwap('#main-view .view'); break;
     case 'copy': {
       const el = document.getElementById(d.t);
       const done = () => { a.textContent = 'Copied'; setTimeout(() => (a.textContent = 'Copy'), 1600); };
@@ -2530,7 +2736,7 @@ document.addEventListener('submit', e => {
     if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = 'Enter a valid email, like name@mail.com'; return; }
     if (pass.length < 8) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Password needs at least 8 characters'; return; }
     const nm = name ? name.value.trim() : email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    S.user = { name: nm, email }; save(); fadeSwap('#app .view');
+    S.user = { name: nm, email }; save(); fadeSwap('#main-view .view');
   }
 });
 let lastY = -1;
