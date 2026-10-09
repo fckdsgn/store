@@ -1710,8 +1710,9 @@ function dealsHTML(all) {
     ${DEALS.small.map(b => `<div class="deal">${pics(val(b.ids, all))}${card(b, 'h2', all)}</div>`).join('')}
   </section>`;
 }
-// brandBy: the brands picked in the section (several at once, owner's request); none picked = all brands
-let sortBy = 'featured', brandBy = [], typeBy = 'all', brandList = '';
+// brandBy / typeBy: the brands and kinds of piece picked in the section (several at once, owner's request); none picked
+// = all of them. pickedLast: the list changed last, whose picks lead (the other list drops picks left with nothing)
+let sortBy = 'featured', brandBy = [], typeBy = [], brandList = '', pickedLast = 'brand';
 // Price ranges (null = no limit) with the lowest and highest price for their slider: one for the catalog section (in
 // its sort list), one for search. The slider runs on a log scale: prices go from $129 to $30,094 and most pieces cost
 // under $4,000, so the low end gets fine steps.
@@ -1773,10 +1774,11 @@ function refreshList(wait) {
     markSeen($('#lgrid'));
   });
 }
-// a brand ticked on or off: the list stays open and the pieces fade over to the new choice; the pill, the ticks and the
-// type list (it offers only the kinds the picked brands have) are brought up to date in place
+// a brand or a kind ticked on or off: its list stays open and the pieces fade over to the new choice; its pill and ticks
+// are brought up to date in place, and the other list (it offers only what goes with these picks) is redrawn
 let bfN = 0;
-function brandsChanged() {
+function picksChanged(key) {
+  const other = key === 'brand' ? 'type' : 'brand';
   const n = ++bfN, els = $$('#lgrid, #lcount');
   const swap = () => {
     if (n !== bfN) return;
@@ -1787,14 +1789,17 @@ function brandsChanged() {
     $('#lcount').innerHTML = $('#lcount', t).innerHTML;
     $('#lgrid').replaceWith($('#lgrid', t));
     markSeen($('#lgrid'));
-    const tb = $('#dd-type'), nb = $('#dd-type', t);
+    const tb = $('#dd-' + other), nb = $('#dd-' + other, t);
     if (tb && nb) tb.parentNode.replaceWith(nb.parentNode);
-    const bb = $('#dd-brand'), nbb = $('#dd-brand', t);
+    const bb = $('#dd-' + key), nbb = $('#dd-' + key, t);
     if (bb && nbb) {
       bb.firstElementChild.textContent = nbb.firstElementChild.textContent;
       bb.setAttribute('aria-label', nbb.getAttribute('aria-label'));
-      const now = $$('[data-act="dd-pick"]', nbb.nextElementSibling);
-      $$('[data-act="dd-pick"]', bb.nextElementSibling).forEach((o, i) => { const on = now[i] && now[i].classList.contains('on'); o.classList.toggle('on', on); o.setAttribute('aria-selected', on); });
+      const pop = bb.nextElementSibling, np = nbb.nextElementSibling, vals = el => $$('[data-act="dd-pick"]', el).map(o => o.dataset.v).join('\n');
+      // the options themselves changed (picks were dropped in the other list): the open list takes the new ones
+      if (vals(pop) !== vals(np)) { const f = document.activeElement?.dataset.v; pop.innerHTML = np.innerHTML; $$('[data-act="dd-pick"]', pop).find(o => o.dataset.v === f)?.focus({ preventScroll: true }); }
+      const now = new Set($$('[data-act="dd-pick"].on', np).map(o => o.dataset.v));
+      $$('[data-act="dd-pick"]', pop).forEach(o => { const on = now.has(o.dataset.v); o.classList.toggle('on', on); o.setAttribute('aria-selected', on); });
     }
     if (!still()) $$('#lgrid, #lcount').forEach(e => e.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300, easing: 'ease-out' }));
   };
@@ -1828,20 +1833,25 @@ V.list = key => {
   const mixed = !['clothing', 'bags', 'shoes', 'accessories'].includes(key);
   const typeOf = p => mixed ? p.groups[0] : p.cat;
   const typeName = t => mixed ? LISTS[t].title : t;
-  if (brandList !== key) { brandBy = []; typeBy = 'all'; PR.list.min = carry ? carry.min : null; PR.list.max = carry ? carry.max : null; carry = null; }
+  if (brandList !== key) { brandBy = []; typeBy = []; PR.list.min = carry ? carry.min : null; PR.list.max = carry ? carry.max : null; carry = null; }
   brandList = key;
   const tally = {};
   all.forEach(p => { tally[typeOf(p)] = (tally[typeOf(p)] || 0) + 1; });
   // the sections in menu order; kinds of piece with the most pieces first
   const order = Object.keys(LISTS);
   const types = Object.keys(tally).sort((a, b) => mixed ? order.indexOf(a) - order.indexOf(b) : tally[b] - tally[a] || a.localeCompare(b));
-  if (!types.includes(typeBy)) typeBy = 'all';
-  // each list offers only what goes with the other choice, so no pick leaves the section empty
-  const byType = typeBy === 'all' ? all : all.filter(p => typeOf(p) === typeBy);
-  const brands = [...new Set(byType.map(p => p.brand))].sort((a, b) => a.localeCompare(b));
-  brandBy = brandBy.filter(b => brands.includes(b));
+  // each list offers only what goes with the other's picks, so a pick never leaves the section empty; taking a pick off
+  // can, and then the other list keeps only its picks that still have pieces with this one
+  typeBy = typeBy.filter(t => types.includes(t));
+  brandBy = brandBy.filter(b => all.some(p => p.brand === b));
+  if (typeBy.length && brandBy.length && !all.some(p => typeBy.includes(typeOf(p)) && brandBy.includes(p.brand))) {
+    if (pickedLast === 'brand') typeBy = typeBy.filter(t => all.some(p => typeOf(p) === t && brandBy.includes(p.brand)));
+    else brandBy = brandBy.filter(b => all.some(p => p.brand === b && typeBy.includes(typeOf(p))));
+  }
+  const byType = !typeBy.length ? all : all.filter(p => typeBy.includes(typeOf(p)));
+  const brands = [...new Set([...byType.map(p => p.brand), ...brandBy])].sort((a, b) => a.localeCompare(b));
   const byBrand = !brandBy.length ? all : all.filter(p => brandBy.includes(p.brand));
-  const typesHere = types.filter(t => byBrand.some(p => typeOf(p) === t));
+  const typesHere = types.filter(t => typeBy.includes(t) || byBrand.some(p => typeOf(p) === t));
   setBounds(PR.list, all);
   const hasPrice = priced(PR.list);
   let list = byType.filter(p => (!brandBy.length || brandBy.includes(p.brand)) && priceOK(PR.list)(p));
@@ -1849,7 +1859,7 @@ V.list = key => {
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
   // in Sale the title goes above the banners, and the filters stay with the pieces under them
   return `${key === 'sale' ? `<h1 class="h-title sale-h">${L.title}</h1>${dealsHTML(all)}` : ''}<div class="cat-top">
-      <div>${key === 'sale' ? '' : `<h1 class="h-title">${L.title}</h1>`}<div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && typeBy === 'all' && !brandBy.length ? L.note : ''}</div></div>
+      <div>${key === 'sale' ? '' : `<h1 class="h-title">${L.title}</h1>`}<div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && !typeBy.length && !brandBy.length ? L.note : ''}</div></div>
       <div class="tools">
         ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
@@ -2992,13 +3002,15 @@ document.addEventListener('click', e => {
       break;
     case 'price-reset': { const pr = a.closest('.pr'), st = PR[pr ? pr.dataset.scope : 'list']; st.min = st.max = null; syncPrice(pr, true); applyPrice(pr); break; }
     case 'dd-pick': {
-      // brands: several at once, so the list stays open; "All brands" clears the picks
-      if (d.dd === 'brand') {
-        brandBy = d.v === 'all' ? [] : brandBy.includes(d.v) ? brandBy.filter(b => b !== d.v) : [...brandBy, d.v];
-        brandsChanged();
+      // brands and kinds: several at once, so the list stays open; "All …" clears the picks
+      if (d.dd === 'brand' || d.dd === 'type') {
+        const tick = l => d.v === 'all' ? [] : l.includes(d.v) ? l.filter(x => x !== d.v) : [...l, d.v];
+        if (d.dd === 'brand') brandBy = tick(brandBy); else typeBy = tick(typeBy);
+        pickedLast = d.dd;
+        picksChanged(d.dd);
         break;
       }
-      if (d.dd === 'type') typeBy = d.v; else sortBy = d.v;
+      sortBy = d.v;
       // the list closes as it is, the pieces fade over to the new choice
       ddOpen(null);
       fadeSwap('#lgrid, #lcount', () => $('#dd-' + d.dd)?.focus({ preventScroll: true }));
