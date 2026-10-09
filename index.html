@@ -99,6 +99,18 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .logo{display:flex;align-items:center;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
 /* desktop: name on the left, sections centred between the name and the icons */
 .hdr .logo{order:-1;padding-left:4px}
+/* the store name (owner's request: a quiet animation in the site's style): its letters come in one after another,
+   rising out of a light blur, when the site opens; on hover (a tap on phones) a wave runs through them, each letter
+   lifting a little and catching the light like the glass. The wave always runs to its end, so leaving does not jerk it
+   back. Letters are split by the script, so a new name works the same. */
+.logo.pre{opacity:0}
+.logo .lw{display:inline-block;white-space:pre}
+.logo .ll{display:inline-block}
+.logo.in .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards}
+.logo.wave .ll{animation:logo-wave .75s var(--ease) calc(var(--i) * 42ms)}
+@keyframes logo-in{from{opacity:0;transform:translateY(.4em);filter:blur(4px)}}
+@keyframes logo-wave{0%,100%{transform:none;color:var(--ink)}40%{transform:translateY(-2px);color:#999}}
+@media (prefers-reduced-motion:reduce){.logo .ll{animation:none!important}}
 .hdr{grid-template-columns:auto 1fr auto}
 .nav:not(.r){justify-content:center;padding:0 24px}
 .hdr-m{display:none}
@@ -740,7 +752,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
     <a href="#accessories" data-r="accessories">Accessories</a>
     <a href="#sale" data-r="sale">Sale</a>
   </nav>
-  <a class="logo" href="#home" aria-label="Pale Store, home">Pale Store</a>
+  <a class="logo pre" href="#home" aria-label="Pale Store, home">Pale Store</a>
   <nav class="nav r" aria-label="Account">
     <button class="icon-btn" data-act="search" aria-label="Search" title="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.75" cy="10.75" r="6.25"/><path d="m15.5 15.5 4.25 4.25"/></svg></button>
     <a class="icon-btn" href="#account" data-r="account" aria-label="Account" title="Account"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.75"/><path d="M4.75 20c.6-3.6 3.6-6 7.25-6s6.65 2.4 7.25 6"/></svg></a>
@@ -2009,6 +2021,22 @@ function dropToast() { clearTimeout(toastT); const t = $('#toast'); if (t) t.rem
 // ---- smooth changes (owner's request: no jumps anywhere). Every helper falls back to the instant change when the
 // browser has no Web Animations or the visitor asked for reduced motion.
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+// the store name letter by letter, for its entrance and its wave (styles at .logo .ll)
+(() => {
+  const a = $('.hdr .logo');
+  if (!a) return;
+  let n = 0;
+  a.innerHTML = `<span class="lw" aria-hidden="true">${[...a.textContent].map(c => c === ' ' ? ' ' : `<span class="ll" style="--i:${n++}">${esc(c)}</span>`).join('')}</span>`;
+  // hidden until split (class pre in the markup), so the whole name does not flash before its letters come in
+  a.classList.remove('pre');
+  if (still()) return;
+  a.classList.add('in');
+  const wave = () => { if (!a.classList.contains('in')) a.classList.add('wave'); };
+  a.addEventListener('mouseenter', wave);
+  a.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') wave(); });
+  // the last letter ends each run
+  a.addEventListener('animationend', e => { if (+e.target.style.getPropertyValue('--i') === n - 1) a.classList.remove(e.animationName === 'logo-in' ? 'in' : 'wave'); });
+})();
 // a part of the page fades out, the change is drawn, and it fades back in; the newest change wins
 let fT = 0;
 function fadeSwap(sel, after) {
