@@ -1,6 +1,6 @@
 {
-  "name": "Pale Store",
-  "short_name": "Pale Store",
+  "name": "Ecruo Store",
+  "short_name": "Ecruo Store",
   "start_url": "./#home",
   "display": "standalone",
   "background_color": "#FFFFFF",

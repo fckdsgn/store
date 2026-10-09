@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pale Store</title>
-<meta name="description" content="Pale Store: clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler and more.">
+<title>Ecruo Store</title>
+<meta name="description" content="Ecruo Store: clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler and more.">
 <meta name="theme-color" content="#FFFFFF">
 <link rel="icon" href="data:,">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
@@ -99,17 +99,17 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .logo{display:flex;align-items:center;font-weight:600;font-size:19px;letter-spacing:.01em;line-height:1;text-transform:uppercase}
 /* desktop: name on the left, sections centred between the name and the icons */
 .hdr .logo{order:-1;padding-left:4px}
-/* the store name (owner's request: a quiet animation in the site's style, a constant smooth loop, and the letters
-   must not jump): its letters come in one after another, rising out of a light blur, when the site opens; then a soft
-   light keeps gliding through them, each letter lightening and coming back in turn, neighbors overlapping, so it
-   reads as one sheen passing like on the glass. Nothing moves in the loop. The two animations do not meet: the loop
-   starts after the entrance has ended. Letters are split by the script, so a new name works the same. */
+/* the store name: its letters come in one after another, rising out of a light blur, when the site opens; then now
+   and again they act out the shop for a moment (owner's request, after a reference where the letters of GOAL play a
+   goal): logoScenes() in the script. Letters are split by the script. */
 .logo.pre{opacity:0}
-.logo .lw{display:inline-block;white-space:pre}
+.logo .lw{display:inline-block;white-space:pre;position:relative}
+.logo .fx{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.logo .fx .body{position:absolute;box-sizing:border-box;border:solid currentColor}
+.logo .fx svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
 .logo .ll{display:inline-block}
-.logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards,logo-sheen 4.2s ease-in-out calc(var(--i) * 110ms + 1.6s) infinite}
+.logo .ll{animation:logo-in .7s var(--ease) calc(var(--i) * 38ms + 80ms) backwards}
 @keyframes logo-in{from{opacity:0;transform:translateY(.4em);filter:blur(4px)}}
-@keyframes logo-sheen{0%,30%,100%{color:var(--ink)}15%{color:#B4B4B4}}
 @media (prefers-reduced-motion:reduce){.logo .ll{animation:none!important}}
 .hdr{grid-template-columns:auto 1fr auto}
 .nav:not(.r){justify-content:center;padding:0 24px}
@@ -752,7 +752,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
     <a href="#accessories" data-r="accessories">Accessories</a>
     <a href="#sale" data-r="sale">Sale</a>
   </nav>
-  <a class="logo pre" href="#home" aria-label="Pale Store, home">Pale Store</a>
+  <a class="logo pre" href="#home" aria-label="Ecruo Store, home">Ecruo Store</a>
   <nav class="nav r" aria-label="Account">
     <button class="icon-btn" data-act="search" aria-label="Search" title="Search"><svg class="ico" viewBox="0 0 24 24"><circle cx="10.75" cy="10.75" r="6.25"/><path d="m15.5 15.5 4.25 4.25"/></svg></button>
     <a class="icon-btn" href="#account" data-r="account" aria-label="Account" title="Account"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.75"/><path d="M4.75 20c.6-3.6 3.6-6 7.25-6s6.65 2.4 7.25 6"/></svg></a>
@@ -782,7 +782,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
     <div class="soc">
       <a href="https://telegram.org" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg></a>
     </div>
-    <span class="copy">Pale Store © <span id="year">2026</span></span>
+    <span class="copy">Ecruo Store © <span id="year">2026</span></span>
   </div>
 </footer>
 
@@ -1825,8 +1825,8 @@ V.account = () => {
 };
 
 const PAGES = {
-  about: ['About', `<p>Pale Store brings together clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler, Balenciaga and other houses.</p><p>Every piece is shown on the same gray backdrop, so you can compare colors and details side by side.</p>`],
-  contact: ['Contact', `<p>Questions about an order, sizing or returns? Write to us and we answer within one business day.</p><h2>Email</h2><div class="copy-row"><span id="mail">hello@palestore.shop</span><button class="btn" style="height:30px;font-size:10.5px" data-act="copy" data-t="mail">Copy</button></div><h2>Hours</h2><p>Monday to Friday, 10:00 to 19:00</p>`],
+  about: ['About', `<p>Ecruo Store brings together clothing, bags, shoes and belts from Louis Vuitton, Chrome Hearts, Burberry, Moncler, Balenciaga and other houses.</p><p>Every piece is shown on the same gray backdrop, so you can compare colors and details side by side.</p>`],
+  contact: ['Contact', `<p>Questions about an order, sizing or returns? Write to us and we answer within one business day.</p><h2>Email</h2><div class="copy-row"><span id="mail">hello@ecruostore.shop</span><button class="btn" style="height:30px;font-size:10.5px" data-act="copy" data-t="mail">Copy</button></div><h2>Hours</h2><p>Monday to Friday, 10:00 to 19:00</p>`],
   faq: ['FAQ', `<div class="faq">${[
     ['How long does delivery take?', 'Standard shipping takes 3 to 5 business days and is free. Express takes 1 to 2 business days.'],
     ['Can I return an order?', 'Yes. Returns are free within 30 days of delivery, as long as the piece is unworn and has its tags.'],
@@ -1834,8 +1834,8 @@ const PAGES = {
     ['Which payment methods do you accept?', 'Visa, Mastercard, UnionPay and American Express. You enter your card at checkout.'],
     ['How do I track my order?', 'Your orders are listed in your account. A tracking link arrives by email once the parcel ships.'],
   ].map(([q, a]) => `<details><summary>${q}<span class="pm"></span></summary><div class="body">${a}</div></details>`).join('')}</div>`],
-  privacy: ['Privacy', `<p>We keep only what we need to deliver your order: your name, email and shipping address.</p><p>We never sell your data. Your bag and wishlist are stored in this browser.</p><p>To delete your account and data, write to hello@palestore.shop.</p>`],
-  app: ['Mobile app', `<p>The Pale Store app for iPhone and Android is in the works. Until then, this site works the same on your phone: add it to your home screen from the browser menu.</p>`],
+  privacy: ['Privacy', `<p>We keep only what we need to deliver your order: your name, email and shipping address.</p><p>We never sell your data. Your bag and wishlist are stored in this browser.</p><p>To delete your account and data, write to hello@ecruostore.shop.</p>`],
+  app: ['Mobile app', `<p>The Ecruo Store app for iPhone and Android is in the works. Until then, this site works the same on your phone: add it to your home screen from the browser menu.</p>`],
 };
 V.page = k => `${backBtn('home')}<div class="page"><h1 class="h-title">${PAGES[k][0]}</h1><div style="margin-top:18px">${PAGES[k][1]}</div></div>`;
 V.missing = () => `<div class="empty"><h1 class="h-title">Not found</h1><p>This page moved or never existed.</p><a class="btn" href="#home">Back to the store</a></div>`;
@@ -1960,11 +1960,11 @@ function paint(r, key, scroll) {
   if (r.name === 'product') mountProduct();
 }
 function titleFor(r) {
-  if (r.name === 'product' && BY[r.arg]) { const p = vOf(BY[r.arg], PV.v); return p.brand + ' ' + p.name + (p.variants.length > 1 ? ', ' + p.color.name : '') + ' | Pale Store'; }
-  if (r.name === 'list') return LISTS[r.arg].title + ' | Pale Store';
-  if (r.name === 'page') return PAGES[r.arg][0] + ' | Pale Store';
-  if (r.name === 'home') return 'Pale Store';
-  return r.name.charAt(0).toUpperCase() + r.name.slice(1) + ' | Pale Store';
+  if (r.name === 'product' && BY[r.arg]) { const p = vOf(BY[r.arg], PV.v); return p.brand + ' ' + p.name + (p.variants.length > 1 ? ', ' + p.color.name : '') + ' | Ecruo Store'; }
+  if (r.name === 'list') return LISTS[r.arg].title + ' | Ecruo Store';
+  if (r.name === 'page') return PAGES[r.arg][0] + ' | Ecruo Store';
+  if (r.name === 'home') return 'Ecruo Store';
+  return r.name.charAt(0).toUpperCase() + r.name.slice(1) + ' | Ecruo Store';
 }
 window.addEventListener('hashchange', () => render(true));
 // Photos already shown once show at once when a page is drawn again (Back, a filter); the rest fade in when they arrive.
@@ -2021,7 +2021,93 @@ function dropToast() { clearTimeout(toastT); const t = $('#toast'); if (t) t.rem
 // ---- smooth changes (owner's request: no jumps anywhere). Every helper falls back to the instant change when the
 // browser has no Web Animations or the visitor asked for reduced motion.
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-// the store name letter by letter, for its entrance and its looping sheen (styles at .logo .ll)
+// The store name acts out the shop for a moment, one scene after the other with a rest between (owner's request,
+// after a reference where the letters of GOAL play a goal): the U of ECRUO flips over the O as its handle and the O
+// squares into a shopping bag that swings; the T of STORE turns into a clothes hanger, drawn in one line, that swings
+// on its hook. Then the letters come back as they were. A scene whose letters a new name lacks is skipped. Shapes are
+// placed by the ink of the letters (measured on a canvas), so they meet the letters at any font size.
+function logoScenes(a) {
+  const lw = $('.lw', a), L = $$('.ll', lw), ch = el => el.textContent.toUpperCase();
+  const ctx = document.createElement('canvas').getContext('2d');
+  // where a letter's ink sits inside the name, in px
+  const ink = el => {
+    const cs = getComputedStyle(el), fs = parseFloat(cs.fontSize);
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const m = ctx.measureText(ch(el)), base = (fs - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
+    const x = el.offsetLeft - m.actualBoundingBoxLeft, y = el.offsetTop + base - m.actualBoundingBoxAscent;
+    return { x, y, w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight, h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent, fs };
+  };
+  const E = 'cubic-bezier(.22,.8,.24,1)', go = (el, k, o) => el.animate(k, { fill: 'forwards', easing: E, ...o }).finished;
+  const fx = () => { const f = document.createElement('span'); f.className = 'fx'; lw.append(f); return f; };
+  const swing = (el, ox, oy, deg) => { el.style.transformOrigin = `${ox}px ${oy}px`;
+    return el.animate([0, 1, -.75, .45, -.2, 0].map(k => ({ transform: `rotate(${k * deg}deg)` })), { duration: 1700, easing: 'ease-in-out' }).finished; };
+  const ui = L.findIndex((el, i) => ch(el) === 'U' && L[i + 1] && ch(L[i + 1]) === 'O'), T = L.find(el => ch(el) === 'T');
+
+  async function bag() {
+    const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.fs * .13;
+    // the bag drawn like the bag icon in the header (a 24-unit box: body from 8.25 to 21, handle legs inside it), as
+    // tall as the letters with its handle, centred where the U and the O stood
+    const k = o.h * 1.18 / 17, bw = 14 * k, bh = 12.75 * k, cx = (u.x + o.x + o.w) / 2, bx = cx - bw / 2, by = o.y + o.h - bh;
+    const X = v => bx + (v - 5) * k, Y = v => by + (v - 8.25) * k, r = 2.25 * k + sw / 2, c = sw * .3;
+    const f = fx(), body = document.createElement('i');
+    body.className = 'body';
+    f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px;opacity:0"><path d="M${X(9)} ${Y(11.25)}V${Y(7)}A${3 * k} ${3 * k} 0 0 1 ${X(15)} ${Y(7)}V${Y(11.25)}"/></svg>`;
+    f.prepend(body);
+    const svg = $('svg', f);
+    const ring = { left: o.x + 'px', top: o.y + 'px', width: o.w + 'px', height: o.h + 'px', borderRadius: '50%', borderWidth: sw + 'px' };
+    const box = { left: bx + 'px', top: by + 'px', width: bw + 'px', height: bh + 'px', borderRadius: `${c}px ${c}px ${r}px ${r}px`, borderWidth: sw + 'px' };
+    Object.assign(body.style, ring, { opacity: 0 });
+    // the U upside down is the handle: it flies over the bag, turning and shrinking to the handle's size
+    const hx0 = X(9) - sw / 2, hx1 = X(15) + sw / 2, hy0 = Y(4) - sw / 2, hy1 = Y(11.25);
+    const dx = (hx0 + hx1) / 2 - (u.x + u.w / 2), dy = (hy0 + hy1) / 2 - (u.y + u.h / 2);
+    const pose = `translate(${dx}px,${dy}px) rotate(180deg) scale(${(hx1 - hx0) / u.w},${(hy1 - hy0) / u.h})`;
+    U.style.transformOrigin = `${u.x - U.offsetLeft + u.w / 2}px ${u.y - U.offsetTop + u.h / 2}px`;
+    const fade = (a, b, d = 180) => Promise.all([go(a, [{ opacity: 1 }, { opacity: 0 }], { duration: d }), go(b, [{ opacity: 0 }, { opacity: 1 }], { duration: d })]);
+    await fade(O, body, 160);
+    await Promise.all([go(U, [{ transform: 'none' }, { transform: pose }], { duration: 700 }), go(body, [ring, box], { duration: 620, delay: 100 })]);
+    await fade(U, svg);
+    await swing(f, cx, hy0, 7);
+    await fade(svg, U);
+    await Promise.all([go(U, [{ transform: pose }, { transform: 'none' }], { duration: 650 }), go(body, [box, ring], { duration: 560 })]);
+    await fade(body, O, 160);
+    [U, O].forEach(el => { el.getAnimations().forEach(x => x.cancel()); el.style.transformOrigin = ''; });
+    f.remove();
+  }
+
+  async function hanger() {
+    // the letters after the T step aside to make room, as in the reference, and come back after; the hanger stands in
+    // the middle of the room (the S keeps its place, so it does not close up to the first word)
+    const t = ink(T), sw = t.fs * .13, room = t.w * .32, cx = t.x + t.w / 2 + room, f = fx();
+    const after = L.slice(L.indexOf(T) + 1);
+    const aside = back => Promise.all(after.map(el => go(el, [{ transform: 'none' }, { transform: `translateX(${room * 2}px)` }], { duration: 500, direction: back ? 'reverse' : 'normal' })));
+    // a hanger the size of the T: the bar on the baseline, the shoulders up to the neck, the hook curling over it
+    const bar = t.y + t.h, half = t.w * .6, neck = t.y + t.h * .38, top = t.y - t.h * .1, r = t.h * .17;
+    f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px"><path pathLength="1" d="M${cx} ${neck}L${cx - half} ${bar}H${cx + half}Z"/><path pathLength="1" d="M${cx} ${neck}V${top + r}A${r} ${r} 0 1 1 ${cx + r} ${top}"/></svg>`;
+    const ps = $$('path', f);
+    ps.forEach(pth => { pth.style.strokeDasharray = '1 1'; pth.style.strokeDashoffset = 1; });
+    await Promise.all([aside(false), go(T, [{ opacity: 1 }, { opacity: 0 }], { duration: 260 }),
+      go(ps[0], [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 650, delay: 120 }),
+      go(ps[1], [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 450, delay: 560 })]);
+    await swing($('svg', f), cx, top, 9);
+    await Promise.all([go(ps[1], [{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { duration: 350 }),
+      go(ps[0], [{ strokeDashoffset: 0 }, { strokeDashoffset: 1 }], { duration: 550, delay: 200 }),
+      go(T, [{ opacity: 0 }, { opacity: 1 }], { duration: 300, delay: 450 }), aside(true)]);
+    [T, ...after].forEach(el => el.getAnimations().forEach(x => x.cancel()));
+    f.remove();
+  }
+
+  const scenes = [ui >= 0 && bag, T && hanger].filter(Boolean);
+  if (!scenes.length) return;
+  let k = 0;
+  // waits while the tab is hidden, so a scene is never left half played
+  const next = () => setTimeout(async () => {
+    if (document.hidden || still()) return next();
+    try { await scenes[k++ % scenes.length](); } catch (e) {}
+    next();
+  }, k ? 5200 : 2400);
+  next();
+}
+// the store name letter by letter, for its entrance and its scenes (styles at .logo .ll)
 (() => {
   const a = $('.hdr .logo');
   if (!a) return;
@@ -2029,6 +2115,7 @@ const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   a.innerHTML = `<span class="lw" aria-hidden="true">${[...a.textContent].map(c => c === ' ' ? ' ' : `<span class="ll" style="--i:${n++}">${esc(c)}</span>`).join('')}</span>`;
   // hidden until split (class pre in the markup), so the whole name does not flash before its letters come in
   a.classList.remove('pre');
+  if (!still() && a.animate) logoScenes(a);
 })();
 // a part of the page fades out, the change is drawn, and it fades back in; the newest change wins
 let fT = 0;
@@ -2792,7 +2879,7 @@ document.addEventListener('submit', e => {
     });
     if (bad) { $('#co-err').textContent = msg; bad.focus(); return; }
     const sub = subtotal(), d = discount(), ship = express ? EXPRESS : 0;
-    const n = 'PS-' + (1041 + S.orders.length);
+    const n = 'ES-' + (1041 + S.orders.length);
     // only the brand and the last 4 digits are kept, as on a receipt
     const pay = { brand: CARDS[payBy].name, last4: digits($('#cc-num').value).slice(-4) };
     // the order is built now but held until the SMS code is confirmed
