@@ -529,6 +529,13 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 .field input:focus,.field select:focus{border-color:#AFAFAF;box-shadow:0 0 0 3px rgba(0,0,0,.04)}
 .field.bad input{border-color:var(--err)}
 .field .chev{position:absolute;right:14px;top:16px;width:14px;height:14px;pointer-events:none}
+/* show / hide a password (owner's request): an eye at the right of the field, crossed out while the password shows */
+.field.pw input{padding-right:48px}
+.eye{position:absolute;right:4px;top:4px;width:38px;height:38px;display:grid;place-items:center;border-radius:9px;color:var(--ink-2);transition:color .2s,background .2s;-webkit-tap-highlight-color:transparent}
+.eye .ico{grid-area:1/1;width:19px;height:19px;stroke-width:1.5;transition:opacity .2s}
+.eye .ico:last-child,.eye[aria-pressed="true"] .ico:first-child{opacity:0}
+.eye[aria-pressed="true"] .ico:last-child{opacity:1}
+@media (hover:hover){.eye:hover{color:var(--ink);background:rgba(0,0,0,.045)}}
 .opts{display:grid;gap:8px}
 .opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:border-color .2s,background .2s}
 .opt:has(input:checked){border-color:var(--ink);background:#FAFAFA}
@@ -1316,6 +1323,8 @@ const pic = (p, v = [50, 50, 1], lazy = true) =>
 const I = {
   heart: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 20.25S3.75 15.4 3.75 9.4A4.65 4.65 0 0 1 8.4 4.75c1.5 0 2.85.7 3.6 1.95.75-1.25 2.1-1.95 3.6-1.95a4.65 4.65 0 0 1 4.65 4.65c0 6-8.25 10.85-8.25 10.85z"/></svg>',
   x: '<svg class="ico" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
+  eye: '<svg class="ico" viewBox="0 0 24 24"><path d="M2.75 12S6.25 5.75 12 5.75 21.25 12 21.25 12 17.75 18.25 12 18.25 2.75 12 2.75 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg class="ico" viewBox="0 0 24 24"><path d="M2.75 12S6.25 5.75 12 5.75 21.25 12 21.25 12 17.75 18.25 12 18.25 2.75 12 2.75 12z"/><circle cx="12" cy="12" r="3"/><path d="M4.5 4.5l15 15"/></svg>',
   chev: '<svg class="ico" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></svg>',
   arrow: '<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
   back: '<svg class="ico" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
@@ -1787,8 +1796,8 @@ V.account = () => {
     <form class="stack" id="acc-form" novalidate>
       ${up ? `<div class="field"><input id="a-name" placeholder=" " autocomplete="name" required><label for="a-name">Full name</label></div>` : ''}
       <div class="field"><input id="a-email" type="email" placeholder=" " autocomplete="email" required><label for="a-email">Email</label></div>
-      <div class="field"><input id="a-pass" type="password" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="8"><label for="a-pass">Password</label></div>
-      ${up ? `<div class="field" id="a-pass2-f" hidden><input id="a-pass2" type="password" placeholder=" " autocomplete="new-password" required><label for="a-pass2">Confirm password</label></div>` : ''}
+      <div class="field pw"><input id="a-pass" type="password" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="8"><label for="a-pass">Password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>
+      ${up ? `<div class="field pw" id="a-pass2-f" hidden><input id="a-pass2" type="password" placeholder=" " autocomplete="new-password" required><label for="a-pass2">Confirm password</label><button type="button" class="eye" data-act="eye" aria-label="Show password" aria-pressed="false">${I.eye}${I.eyeOff}</button></div>` : ''}
       <p class="form-err" id="acc-err" aria-live="polite" style="margin:2px 2px 0"></p>
       <button class="btn wide" type="submit" style="margin-top:6px">${up ? 'Create account' : 'Sign in'}</button>
     </form>
@@ -2471,7 +2480,7 @@ const FILL = 'Fill in the highlighted fields';
 function fieldErr(i) {
   const v = i.value.trim(), c = CARDS[payBy];
   if (!v) return FILL;
-  if (i.type === 'email' && !emailOk(v)) return 'Check the email address';
+  if (i.type === 'email' && !emailOk(v)) return latin(v) ? 'Check the email address' : 'Type the email in English letters';
   if (i.type === 'tel' && !/^\+?[\d\s()-]{7,20}$/.test(v)) return 'Check the phone number';
   if (i.id === 'cc-num') {
     const n = digits(v), k = cardOf(n);
@@ -2489,6 +2498,8 @@ function fieldErr(i) {
 }
 
 /* ---------- events ---------- */
+// the eye keeps the caret (and the phone keyboard) in the password field
+document.addEventListener('mousedown', e => { if (e.target.closest('.eye')) e.preventDefault(); });
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-act]');
   const pop = $('#size-pop');
@@ -2574,6 +2585,12 @@ document.addEventListener('click', e => {
     case 'close': closeLayer(); break;
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
     case 'tab': if (d.t !== accTab) switchTab(d.t); break;
+    case 'eye': {
+      const inp = $('input', a.parentElement), show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      a.setAttribute('aria-pressed', show); a.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      break;
+    }
     case 'signout': S.user = null; save(); fadeSwap('#main-view .view'); break;
     case 'copy': {
       const el = document.getElementById(d.t);
@@ -2711,7 +2728,9 @@ document.addEventListener('keydown', e => {
   }
   if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
 });
-const emailOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+// an email and a password are typed in English letters, numbers and symbols only (owner's request)
+const latin = v => /^[\x20-\x7e]*$/.test(v);
+const emailOk = v => latin(v) && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 document.addEventListener('submit', e => {
   const f = e.target;
   e.preventDefault();
@@ -2755,7 +2774,8 @@ document.addEventListener('submit', e => {
     const name = $('#a-name'), email = $('#a-email').value.trim(), pass = $('#a-pass').value, err = $('#acc-err');
     $$('.field', f).forEach(x => x.classList.remove('bad'));
     if (name && !name.value.trim()) { name.parentElement.classList.add('bad'); err.textContent = 'Enter your name'; return; }
-    if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = 'Enter a valid email, like name@mail.com'; return; }
+    if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = latin(email) ? 'Enter a valid email, like name@mail.com' : 'Type the email in English letters'; return; }
+    if (!latin(pass)) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Use English letters, numbers and symbols in the password'; return; }
     if (pass.length < 8) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Password needs at least 8 characters'; return; }
     const p2 = $('#a-pass2');
     if (p2 && p2.value !== pass) { p2.parentElement.classList.add('bad'); err.textContent = p2.value ? 'Passwords don’t match' : 'Confirm your password'; p2.focus(); return; }
