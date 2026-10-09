@@ -2066,11 +2066,12 @@ function logoScenes(a) {
 
   async function bag() {
     const U = L[ui], O = L[ui + 1], u = ink(U), o = ink(O), sw = o.sw, f = layer(sw), svg = $('svg', f), g = $('g', f);
-    // the bag (owner: as big as the hanger and in its style): a body narrowing a little to the top like the hanger's
-    // shoulders, its bottom corners rounded, a round handle standing on its top edge; as wide and as tall as the
-    // hanger, centred where the U and the O stood
-    const { W, H } = hangerSize(o), cx = (u.x + o.x + o.w) / 2, b = o.y + o.h - sw / 2;
-    const bw = W - sw, tw = bw * .82, hr = tw * .28, legs = hr * .75, top = b - (H - hr - legs), rb = sw, rt = sw * .35;
+    // the bag (owner: as tall as the hanger and in its style, then taller in shape after a reference icon): a body
+    // narrowing to its straight top edge, the bottom corners rounded, a tall narrow round handle standing on the top
+    // edge; as tall as the hanger and narrower than it, centred where the U and the O stood. The handle is kept at
+    // least about as wide as the line, or its opening would close up.
+    const { H } = hangerSize(o), cx = (u.x + o.x + o.w) / 2, b = o.y + o.h - sw / 2;
+    const bw = H * .8, tw = bw * .74, hr = Math.max(tw * .29, sw * .95), legs = hr * 1.05, top = b - (H - hr - legs), rb = sw * 1.1, rt = sw * .45;
     const xl = cx - bw / 2, xr = cx + bw / 2, tl = cx - tw / 2, tr = cx + tw / 2, k1 = rt / (b - top), k2 = rb / (b - top);
     const bodyD = `M${cx} ${top}H${tr - rt}Q${tr} ${top} ${mix(tr, xr, k1)} ${top + rt}L${mix(xr, tr, k2)} ${b - rb}Q${xr} ${b} ${xr - rb} ${b}H${xl + rb}Q${xl} ${b} ${mix(xl, tl, k2)} ${b - rb}L${mix(tl, xl, k1)} ${top + rt}Q${tl} ${top} ${tl + rt} ${top}Z`;
     // the U and the O in lines over their glyphs: the U as two stems and a bowl, the O as an oval from its top
