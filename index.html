@@ -2480,7 +2480,7 @@ const FILL = 'Fill in the highlighted fields';
 function fieldErr(i) {
   const v = i.value.trim(), c = CARDS[payBy];
   if (!v) return FILL;
-  if (i.type === 'email' && !emailOk(v)) return latin(v) ? 'Check the email address' : 'Type the email in English letters';
+  if (i.type === 'email' && !emailOk(v)) return latin(v) ? 'Check the email address' : EN_MAIL;
   if (i.type === 'tel' && !/^\+?[\d\s()-]{7,20}$/.test(v)) return 'Check the phone number';
   if (i.id === 'cc-num') {
     const n = digits(v), k = cardOf(n);
@@ -2700,6 +2700,14 @@ document.addEventListener('input', e => {
   if (f) { f.classList.remove('bad'); const b = $('#co-form .field.bad input'), m = $('#co-err'); if (m) m.textContent = b ? fieldErr(b) : ''; }
   // moves on only when a digit was added (not on delete), whatever the keyboard reports as the kind of input
   const t = e.target;
+  // email and password: any language can be typed, but a letter that is not English shows the error at once
+  // (owner's request); it goes as soon as the letter is gone
+  const en = { 'a-email': EN_MAIL, email: EN_MAIL, 'a-pass': EN_PASS, 'a-pass2': EN_PASS }[t.id];
+  if (en) {
+    const bad = !latin(t.value), m = $(t.closest('#co-form') ? '#co-err' : '#acc-err');
+    t.parentElement.classList.toggle('bad', bad);
+    if (m && bad) m.textContent = en; else if (m && m.textContent === en) m.textContent = '';
+  }
   if (NEXT[t.id]) {
     const n = digits(t.value).length, was = +(t.dataset.n || 0);
     t.dataset.n = n;
@@ -2730,6 +2738,7 @@ document.addEventListener('keydown', e => {
 });
 // an email and a password are typed in English letters, numbers and symbols only (owner's request)
 const latin = v => /^[\x20-\x7e]*$/.test(v);
+const EN_MAIL = 'Type the email in English letters', EN_PASS = 'Use English letters, numbers and symbols in the password';
 const emailOk = v => latin(v) && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 document.addEventListener('submit', e => {
   const f = e.target;
@@ -2774,8 +2783,8 @@ document.addEventListener('submit', e => {
     const name = $('#a-name'), email = $('#a-email').value.trim(), pass = $('#a-pass').value, err = $('#acc-err');
     $$('.field', f).forEach(x => x.classList.remove('bad'));
     if (name && !name.value.trim()) { name.parentElement.classList.add('bad'); err.textContent = 'Enter your name'; return; }
-    if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = latin(email) ? 'Enter a valid email, like name@mail.com' : 'Type the email in English letters'; return; }
-    if (!latin(pass)) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Use English letters, numbers and symbols in the password'; return; }
+    if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = latin(email) ? 'Enter a valid email, like name@mail.com' : EN_MAIL; return; }
+    if (!latin(pass)) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = EN_PASS; return; }
     if (pass.length < 8) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Password needs at least 8 characters'; return; }
     const p2 = $('#a-pass2');
     if (p2 && p2.value !== pass) { p2.parentElement.classList.add('bad'); err.textContent = p2.value ? 'Passwords don’t match' : 'Confirm your password'; p2.focus(); return; }
