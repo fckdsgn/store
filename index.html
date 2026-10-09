@@ -171,6 +171,22 @@ button{background:none;border:0;padding:0;cursor:pointer}
 .sr-item b{display:block;font-weight:500}
 .sr-item span{font-size:12px;color:var(--ink-2)}
 .sr-empty{padding:18px 6px;color:var(--ink-2)}
+/* nothing found: a card that sends the visitor to order through Telegram (owner's request); the whole card is the link,
+   the blue icon and the tinted "Order in Telegram" pill say where it leads */
+.tg-ask{display:flex;align-items:center;flex-wrap:wrap;gap:12px 14px;margin:0 0 4px;padding:14px;border-radius:18px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 1px 2px rgba(0,0,0,.04);transition:box-shadow .4s var(--ease),transform .4s var(--ease)}
+.tg-ask>svg{width:40px;height:40px;flex:none}
+.tg-ask circle{fill:var(--tg)}
+.tg-ask .tx{flex:1 1 180px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.tg-ask .tx b{font-weight:600}
+.tg-ask .tx span{color:var(--ink-2);font-size:13px}
+.tg-ask .go{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex:none;height:36px;padding:0 16px;border-radius:999px;background:rgba(42,171,238,.12);color:#1b7fb8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.tg-ask .go svg{width:13px;height:13px}
+@media (hover:hover){
+  .tg-ask:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.05),0 10px 24px -10px rgba(0,0,0,.18)}
+  .tg-ask .go svg{animation:go-nudge 1.4s ease-in-out infinite paused}
+  .tg-ask:hover .go svg{animation-play-state:running}
+}
+@media (max-width:480px){.tg-ask .go{width:100%}}
 .menu a{display:block;font-size:22px;font-weight:500;padding:8px 4px;letter-spacing:-.01em}
 /* Men / Women first, then the sections (owner's reference): in search the switch sits under the field with the
    sections listed under it; the phone menu goes in two steps, Women / Men / All, then the sections for that choice */
@@ -1588,6 +1604,8 @@ function card(p) {
 }
 // The strip under the header: the Telegram pill on Home only (owner's request), the Men / Women / Unisex switch on the
 // catalog pages, nothing on the other pages.
+// nothing found in search: order it through Telegram instead (owner's request)
+const TG_ASK = `<a class="tg-ask" href="https://telegram.org" target="_blank" rel="noopener"><svg viewBox="2 2 20 20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg><span class="tx"><b>Didn’t find what you need?</b><span>Message us on Telegram and order it there.</span></span><span class="go">Order in Telegram<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>`;
 const TG = '<a class="tg-pill" href="https://telegram.org" target="_blank" rel="noopener" aria-label="Join our Telegram channel: new drops land there first"><span class="tg-row"><svg viewBox="2 2 20 20" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path fill="#fff" d="M6.4 11.7l9.7-3.8c.5-.2.9.1.7.8l-1.7 7.8c-.1.6-.5.7-.9.4l-2.5-1.8-1.2 1.2c-.1.1-.3.2-.5.2l.2-2.5 4.6-4.1c.2-.2 0-.3-.3-.1l-5.6 3.5-2.4-.8c-.5-.2-.5-.5.1-.8z"/></svg><span class="t">New drops land in Telegram first</span><b>Join<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></b></span></a>';
 const GENDERS = [['all', 'All'], ['men', 'Men'], ['women', 'Women'], ['unisex', 'Unisex']];
 let genderBy = 'all';
@@ -2807,7 +2825,7 @@ function searchOut(q) {
     return best && { p: best.i && p.variants.length > 1 ? vOf(p, p.variants[best.i].key) : p, score: best.score };
   }).filter(Boolean).sort((a, b) => b.score - a.score).map(h => h.p);
   out.innerHTML = hits.length ? `<div class="label sr-h">${hits.length} ${hits.length === 1 ? 'result' : 'results'}</div><div class="sr-list">${hits.map(srItem).join('')}</div>`
-    : `<p class="sr-empty">Nothing matches “${esc(raw)}”. Try coat, knit or sneakers.</p>`;
+    : `<p class="sr-empty">Nothing matches “${esc(raw)}”. Try coat, knit or sneakers.</p>${TG_ASK}`;
 }
 const srItem = p => `<a class="sr-item" href="${vHref(p)}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${p.key && p.variants.length > 1 ? esc(p.color.name) + ', ' : ''}${p.from ? 'from ' : ''}${money(p.price)}</span></span></a>`;
 function openMenu() {
