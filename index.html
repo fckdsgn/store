@@ -1788,6 +1788,7 @@ V.account = () => {
       ${up ? `<div class="field"><input id="a-name" placeholder=" " autocomplete="name" required><label for="a-name">Full name</label></div>` : ''}
       <div class="field"><input id="a-email" type="email" placeholder=" " autocomplete="email" required><label for="a-email">Email</label></div>
       <div class="field"><input id="a-pass" type="password" placeholder=" " autocomplete="${up ? 'new-password' : 'current-password'}" required minlength="8"><label for="a-pass">Password</label></div>
+      ${up ? `<div class="field" id="a-pass2-f" hidden><input id="a-pass2" type="password" placeholder=" " autocomplete="new-password" required><label for="a-pass2">Confirm password</label></div>` : ''}
       <p class="form-err" id="acc-err" aria-live="polite" style="margin:2px 2px 0"></p>
       <button class="btn wide" type="submit" style="margin-top:6px">${up ? 'Create account' : 'Sign in'}</button>
     </form>
@@ -1879,6 +1880,26 @@ function switchTab(t) {
     nf.animate([{ opacity: 0, height: h0 + 'px' }, { opacity: 1, height: h1 + 'px' }], { duration: 320, easing: 'cubic-bezier(.22,.8,.24,1)' })
       .finished.then(() => { nf.style.overflow = ''; });
   });
+}
+// Create account: the Confirm password field slides out under the password once something is typed there (owner's
+// request), and folds away again when the password is cleared. The margin runs with the height, so the gap of the
+// form does not jump.
+let pcT = 0;
+function passConfirm(show) {
+  const w = $('#a-pass2-f');
+  if (!w || (show ? !w.hidden && !w.dataset.out : w.hidden || w.dataset.out)) return;
+  const n = ++pcT;
+  w.getAnimations().forEach(a => a.cancel());
+  if (show) { delete w.dataset.out; w.hidden = false; }
+  else { w.dataset.out = '1'; $('#a-pass2').value = ''; w.classList.remove('bad'); }
+  if (still() || !w.animate) { w.hidden = !show; delete w.dataset.out; return; }
+  const h = w.offsetHeight, closed = { height: '0px', marginTop: '-8px', opacity: 0 }, open = { height: h + 'px', marginTop: '0px', opacity: 1 };
+  w.style.overflow = 'hidden';
+  w.animate(show ? [closed, open] : [open, closed], { duration: show ? 320 : 240, easing: 'cubic-bezier(.22,.8,.24,1)' }).finished.then(() => {
+    if (n !== pcT) return;
+    w.style.overflow = '';
+    if (!show) { w.hidden = true; delete w.dataset.out; }
+  }, () => {});
 }
 function switchGender(g) {
   genderBy = g;
@@ -2624,6 +2645,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'q') searchOut(e.target.value);
+  if (e.target.id === 'a-pass') passConfirm(!!e.target.value);
   if (e.target.id === 'cc-num') {
     const n = digits(e.target.value).slice(0, 19), k = cardOf(n);
     reformat(e.target, groupCard(n, k || payBy));
@@ -2735,6 +2757,8 @@ document.addEventListener('submit', e => {
     if (name && !name.value.trim()) { name.parentElement.classList.add('bad'); err.textContent = 'Enter your name'; return; }
     if (!emailOk(email)) { $('#a-email').parentElement.classList.add('bad'); err.textContent = 'Enter a valid email, like name@mail.com'; return; }
     if (pass.length < 8) { $('#a-pass').parentElement.classList.add('bad'); err.textContent = 'Password needs at least 8 characters'; return; }
+    const p2 = $('#a-pass2');
+    if (p2 && p2.value !== pass) { p2.parentElement.classList.add('bad'); err.textContent = p2.value ? 'Passwords don’t match' : 'Confirm your password'; p2.focus(); return; }
     const nm = name ? name.value.trim() : email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     S.user = { name: nm, email }; save(); fadeSwap('#main-view .view');
   }
