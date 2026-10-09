@@ -405,7 +405,11 @@ main{flex:1;padding:0 var(--x);outline:none}
 .pr-h .label{color:var(--ink-2)}
 .pr-reset,.dd-pop .pr-reset{min-height:0;padding:0;font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px;background:none}
 .pr-reset:hover,.dd-pop .pr-reset:hover{background:none;color:var(--ink)}
-.pr.in-sheet{max-width:420px;margin:0;padding:16px 2px 4px;border:0}
+.pr.solo{margin:0;padding:8px 8px 6px;border:0}
+.sr-tools{margin-top:14px}
+.sheet{transition:min-height .3s var(--ease)}
+.sr-clear{height:36px;padding:0 6px;font-size:12px;color:var(--ink-2);text-decoration:underline;text-underline-offset:2px}
+.sr-clear:hover{color:var(--ink)}
 .pr-f{display:flex;align-items:center;gap:8px}
 .pr-f>i{width:8px;height:1px;background:var(--ink-3);flex:none}
 .pr-in{flex:1;display:flex;align-items:center;gap:2px;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:12.5px;transition:border-color .2s,box-shadow .2s}
@@ -1750,13 +1754,16 @@ const dropdown = (key, label, cur, opts, end, head = '') => {
 };
 function ddOpen(btn, open) {
   const shut = pop => popOut(pop, () => { pop.hidden = true; });
-  $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); shut(b.nextElementSibling); } });
+  $$('.dd-btn[aria-expanded="true"]').forEach(b => { if (b !== btn) { b.setAttribute('aria-expanded', 'false'); shut(b.nextElementSibling); const sh = b.closest('.sheet'); if (sh) sh.style.minHeight = ''; } });
   if (!btn) return;
   const pop = btn.nextElementSibling;
   open = open === undefined ? pop.hidden || !!pop.dataset.out : open;
   if (open) { popIn(pop); pop.hidden = false; } else if (!pop.hidden) shut(pop);
   btn.setAttribute('aria-expanded', open);
   if (open) { const o = $('button.on', pop) || $('button', pop); o.scrollIntoView({ block: 'nearest' }); o.focus({ preventScroll: true }); }
+  // in the search sheet a list can reach past its bottom: the sheet grows to hold it (up to its own height limit)
+  const sh = btn.closest('.sheet');
+  if (sh) sh.style.minHeight = open ? Math.ceil(pop.getBoundingClientRect().bottom - sh.getBoundingClientRect().top + sh.scrollTop + 18) + 'px' : '';
 }
 // the price range redraws only the count and the pieces, so the open list with the fields and the slider stays as it is
 // (typed prices wait until the typing pauses, so "1200" does not empty the list at "1")
@@ -2584,6 +2591,7 @@ let sg = 'all';
 function openSearch() {
   sg = genderBy === 'unisex' ? 'all' : genderBy;
   PR.search.min = PR.search.max = null;
+  SF = { sec: 'all', types: [], brands: [], last: 'brand' };
   setBounds(PR.search, P.filter(gOK(sg)));
   const l = $('#layer');
   clearLayer();
@@ -2591,7 +2599,7 @@ function openSearch() {
     <div class="sheet glass" role="dialog" aria-label="Search">
       <form class="search-row" id="search-form" role="search">${I.search}<label class="sr" for="q">Search the store</label><input id="q" placeholder="Search hoodies, Keepall, belts…" autocomplete="off"><button type="button" class="icon-btn" data-act="close" aria-label="Close search">${I.x}</button></form>
       <div class="utabs" id="sg" role="radiogroup" aria-label="Shop for"><i aria-hidden="true"></i>${GENDERS.slice(0, 3).map(([k, t]) => `<button role="radio" aria-checked="${k === sg}" class="${k === sg ? 'on' : ''}" data-act="sg" data-g="${k}">${t}</button>`).join('')}</div>
-      <div id="sr-pr">${priceBox('search', 'in-sheet')}</div>
+      <div class="tools sr-tools" id="sr-f"></div>
       <div id="sr-out"></div>
     </div>`;
   document.body.style.overflow = 'hidden';
@@ -2839,24 +2847,20 @@ function alts(w) {
   if (SHORT[w]) a.push(SHORT[w]);
   return a;
 }
-function searchOut(q) {
-  const raw = q.trim();
-  q = fold(raw);
-  const out = $('#sr-out');
-  if (!q) {
-    // with a price range set the pieces in it show; otherwise the new ones, as before
-    const pool = P.filter(p => gOK(sg)(p) && priceOK(PR.search)(p)), some = priced(PR.search) ? pool : pool.filter(p => p.isNew);
-    out.innerHTML = `<div class="crows">${catRows(sg)}</div>
-      <div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
-      ${some.length ? `<div class="label sr-h">${priced(PR.search) ? `${some.length} ${some.length === 1 ? 'piece' : 'pieces'}, ${priceText(PR.search)}` : 'New in'}</div><div class="sr-list">${some.map(srItem).join('')}</div>`
-        : priced(PR.search) ? `<p class="sr-empty">Nothing in this price range.</p>` : ''}`;
-    return;
-  }
-  // every word of the query has to match the start of a word ("lv" finds LV, not "silver"); pieces that match by name,
-  // brand, category or color come before those that match only in the description. A piece found by a color other
-  // than its first opens in that color.
+// Search filters (owner's request): the section first, then the kinds of piece in it, brands (several of each at
+// once, as in the catalog) and the price, as pills under the Men / Women tabs. They work with or without words typed:
+// with filters alone the pieces that fit show at once. Each list offers only what goes with the other's picks and the
+// words typed; nothing typed or picked shows the sections, Popular and New in.
+let SF = { sec: 'all', types: [], brands: [], last: 'brand' };
+const SEC4 = ['clothing', 'bags', 'shoes', 'accessories'];
+const sfOn = () => SF.sec !== 'all' || SF.types.length || SF.brands.length || priced(PR.search);
+// every word of the query has to match the start of a word ("lv" finds LV, not "silver"); pieces that match by name,
+// brand, category or color come before those that match only in the description. A piece found by a color other
+// than its first opens in that color.
+function queryHits(raw, pool) {
   const { terms, g, any } = parseQuery(raw);
-  const hits = !any ? [] : P.filter(p => gOK(sg)(p) && gOK(g)(p) && priceOK(PR.search)(p)).map(p => {
+  if (!any) return [];
+  return pool.filter(gOK(g)).map(p => {
     let best = null;
     p.variants.forEach((v, i) => {
       const strong = words([p.brand, p.name, p.cat, ...p.groups, p.was ? 'sale' : '', p.isNew ? 'new' : '', v.color.name].join(' '));
@@ -2870,8 +2874,72 @@ function searchOut(q) {
     });
     return best && { p: best.i && p.variants.length > 1 ? vOf(p, p.variants[best.i].key) : p, score: best.score };
   }).filter(Boolean).sort((a, b) => b.score - a.score).map(h => h.p);
-  out.innerHTML = hits.length ? `<div class="label sr-h">${hits.length} ${hits.length === 1 ? 'result' : 'results'}</div><div class="sr-list">${hits.map(srItem).join('')}</div>`
-    : `<p class="sr-empty">Nothing matches “${esc(raw)}”. Try coat, knit or sneakers.</p>${TG_ASK}`;
+}
+// the filter row is redrawn as the choice changes, all but the list that is open: that one keeps its place (and the
+// focus in it), and only its pill, its ticks and, if they changed, its options are brought up to date
+function patchTools(row, html) {
+  const t = document.createElement('div');
+  t.innerHTML = html;
+  const open = $('.dd-btn[aria-expanded="true"]', row), nb = open && $('#' + open.id, t);
+  if (!nb) { row.innerHTML = html; return; }
+  open.firstElementChild.textContent = nb.firstElementChild.textContent;
+  open.setAttribute('aria-label', nb.getAttribute('aria-label'));
+  const pop = open.nextElementSibling, np = nb.nextElementSibling;
+  if (!$('.pr', pop)) {
+    const vals = el => $$('[data-act="dd-pick"]', el).map(o => o.dataset.v).join('\n');
+    if (vals(pop) !== vals(np)) { const f = document.activeElement?.dataset.v; pop.innerHTML = np.innerHTML; $$('[data-act="dd-pick"]', pop).find(o => o.dataset.v === f)?.focus({ preventScroll: true }); }
+    const now = new Set($$('[data-act="dd-pick"].on', np).map(o => o.dataset.v));
+    $$('[data-act="dd-pick"]', pop).forEach(o => { const on = now.has(o.dataset.v); o.classList.toggle('on', on); o.setAttribute('aria-selected', on); });
+  }
+  const live = open.parentNode, kids = [...t.children], at = kids.indexOf(nb.parentNode);
+  [...row.children].forEach(c => { if (c !== live) c.remove(); });
+  kids.slice(0, at).forEach(c => row.insertBefore(c, live));
+  kids.slice(at + 1).forEach(c => row.append(c));
+}
+function searchOut(q) {
+  const raw = q.trim(), out = $('#sr-out'), row = $('#sr-f');
+  const mine = P.filter(gOK(sg)), base = fold(raw) ? queryHits(raw, mine) : mine;
+  const inSec = p => SF.sec === 'all' || p.groups.includes(SF.sec);
+  // the price slider spans the prices of the gender and section picked (not while its list is open and in use)
+  if (!$('#dd-sprice[aria-expanded="true"]')) setBounds(PR.search, mine.filter(inSec).length ? mine.filter(inSec) : mine);
+  const pool = base.filter(p => inSec(p) && priceOK(PR.search)(p));
+  const tally = {};
+  if (SF.sec !== 'all') pool.forEach(p => { tally[p.cat] = (tally[p.cat] || 0) + 1; });
+  const types = Object.keys(tally).sort((a, b) => tally[b] - tally[a] || a.localeCompare(b));
+  // each list offers what goes with the other's picks; a pick taken off that leaves nothing makes the other list keep
+  // only its picks that still have pieces
+  SF.types = SF.types.filter(t => types.includes(t));
+  if (SF.types.length && SF.brands.length && !pool.some(p => SF.types.includes(p.cat) && SF.brands.includes(p.brand))) {
+    if (SF.last === 'brand') SF.types = SF.types.filter(t => pool.some(p => p.cat === t && SF.brands.includes(p.brand)));
+    else SF.brands = SF.brands.filter(b => pool.some(p => p.brand === b && SF.types.includes(p.cat)));
+  }
+  const byType = SF.types.length ? pool.filter(p => SF.types.includes(p.cat)) : pool;
+  const byBrand = SF.brands.length ? pool.filter(p => SF.brands.includes(p.brand)) : pool;
+  const brands = [...new Set([...byType.map(p => p.brand), ...SF.brands])].sort((a, b) => a.localeCompare(b));
+  const typesHere = types.filter(t => SF.types.includes(t) || byBrand.some(p => p.cat === t));
+  const secs = SEC4.filter(k => k === SF.sec || base.some(p => p.groups.includes(k)));
+  const list = byType.filter(p => !SF.brands.length || SF.brands.includes(p.brand));
+  const pt = priced(PR.search) ? cap(priceText(PR.search)) : 'Price';
+  patchTools(row, `${dropdown('ssec', 'Section', SF.sec, [['all', 'All categories'], ...secs.map(k => [k, LISTS[k].title])])}
+    ${SF.sec !== 'all' && types.length ? dropdown('stype', 'Type', SF.types, [['all', 'All ' + LISTS[SF.sec].title.toLowerCase()], ...typesHere.map(t => [t, t])]) : ''}
+    ${dropdown('sbrand', 'Brand', SF.brands, [['all', 'All brands'], ...brands.map(b => [b, b])])}
+    <div class="dd"><button class="dd-btn" id="dd-sprice" data-act="dd" aria-haspopup="dialog" aria-expanded="false" aria-label="Price: ${pt}"><span>${pt}</span>${I.chev}</button>
+      <div class="dd-pop glass wide" hidden>${priceBox('search', 'solo')}</div></div>
+    ${sfOn() ? '<button type="button" class="sr-clear" data-act="sf-clear">Clear filters</button>' : ''}`);
+  if (!raw && !sfOn()) {
+    const some = mine.filter(p => p.isNew);
+    out.innerHTML = `<div class="crows">${catRows(sg)}</div>
+      <div class="label sr-h">Popular</div><div class="chips">${['Chrome Hearts', 'Louis Vuitton', 'Keepall', 'Hoodie', 'Belt', 'Sneakers'].map(t => `<button class="chip-b" data-act="q" data-q="${t}">${t}</button>`).join('')}</div>
+      ${some.length ? `<div class="label sr-h">New in</div><div class="sr-list">${some.map(srItem).join('')}</div>` : ''}`;
+    return;
+  }
+  out.innerHTML = list.length ? `<div class="label sr-h">${list.length} ${raw ? (list.length === 1 ? 'result' : 'results') : (list.length === 1 ? 'piece' : 'pieces')}</div><div class="sr-list">${list.map(srItem).join('')}</div>`
+    : `<p class="sr-empty">${raw ? `Nothing matches “${esc(raw)}”${sfOn() ? ' with these filters' : ''}. Try coat, knit or sneakers.` : 'Nothing with these filters.'}</p>${TG_ASK}`;
+}
+// a filter picked in search: the results fade over to it
+function sfChanged() {
+  searchOut($('#q').value);
+  if (!still()) $('#sr-out').animate([{ opacity: 0, translate: '0 4px' }, { opacity: 1, translate: '0 0' }], { duration: 280, easing: 'ease-out' });
 }
 const srItem = p => `<a class="sr-item" href="${vHref(p)}"><span class="ph">${pic(p)}</span><span style="min-width:0"><b>${esc(p.brand)} ${esc(p.name)}</b><span>${esc(p.cat)}, ${p.key && p.variants.length > 1 ? esc(p.color.name) + ', ' : ''}${p.from ? 'from ' : ''}${money(p.price)}</span></span></a>`;
 function openMenu() {
@@ -2979,9 +3047,6 @@ document.addEventListener('click', e => {
       sg = d.g;
       $$('#sg button').forEach(b => { const on = b.dataset.g === sg; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
       placeSeg($('#sg'), true);
-      // the price slider spans the prices of the new choice
-      setBounds(PR.search, P.filter(gOK(sg)));
-      $('#sr-pr').innerHTML = priceBox('search', 'in-sheet');
       searchOut($('#q').value);
       if (!still()) $('#sr-out').animate([{ opacity: 0, translate: '0 4px' }, { opacity: 1, translate: '0 0' }], { duration: 280, easing: 'ease-out' });
     } break;
@@ -3002,6 +3067,15 @@ document.addEventListener('click', e => {
       break;
     case 'price-reset': { const pr = a.closest('.pr'), st = PR[pr ? pr.dataset.scope : 'list']; st.min = st.max = null; syncPrice(pr, true); applyPrice(pr); break; }
     case 'dd-pick': {
+      // search: the section closes its list (its kinds of piece start afresh); kinds and brands tick on and off
+      if (d.dd === 'ssec') { if (SF.sec !== d.v) { SF.sec = d.v; SF.types = []; PR.search.min = PR.search.max = null; } ddOpen(null); sfChanged(); $('#dd-ssec')?.focus({ preventScroll: true }); break; }
+      if (d.dd === 'stype' || d.dd === 'sbrand') {
+        const tick = l => d.v === 'all' ? [] : l.includes(d.v) ? l.filter(x => x !== d.v) : [...l, d.v];
+        if (d.dd === 'sbrand') SF.brands = tick(SF.brands); else SF.types = tick(SF.types);
+        SF.last = d.dd === 'sbrand' ? 'brand' : 'type';
+        sfChanged();
+        break;
+      }
       // brands and kinds: several at once, so the list stays open; "All …" clears the picks
       if (d.dd === 'brand' || d.dd === 'type') {
         const tick = l => d.v === 'all' ? [] : l.includes(d.v) ? l.filter(x => x !== d.v) : [...l, d.v];
@@ -3053,6 +3127,7 @@ document.addEventListener('click', e => {
     case 'menu': openMenu(); break;
     case 'close': closeLayer(); break;
     case 'q': $('#q').value = d.q; searchOut(d.q); break;
+    case 'sf-clear': ddOpen(null); SF = { sec: 'all', types: [], brands: [], last: 'brand' }; PR.search.min = PR.search.max = null; sfChanged(); break;
     case 'tab': if (d.t !== accTab) switchTab(d.t); break;
     case 'eye': {
       const inp = $('input', a.parentElement), show = a.getAttribute('aria-pressed') !== 'true';
