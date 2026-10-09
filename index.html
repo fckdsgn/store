@@ -2049,7 +2049,7 @@ function logoScenes(a) {
     const step = now => { const k = Math.min(1, (now - t0) / ms); fn(linear ? k : inOut(k)); k < 1 ? requestAnimationFrame(step) : res(); };
     requestAnimationFrame(step);
   }, delay));
-  const fade = (els, to, ms = 220) => Promise.all(els.map(el => el.animate([{ opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0 }], { duration: ms, fill: 'forwards' }).finished));
+  const fade = (els, to, ms = 160) => Promise.all(els.map(el => el.animate([{ opacity: to ? 0 : 1 }, { opacity: to ? 1 : 0 }], { duration: ms, fill: 'forwards' }).finished));
   const layer = sw => { const f = document.createElement('span'); f.className = 'fx';
     f.innerHTML = `<svg viewBox="0 0 ${lw.offsetWidth} ${lw.offsetHeight}" style="stroke-width:${sw}px;opacity:0"><g></g></svg>`; lw.append(f); return f; };
   // the swing like a pendulum settling, frame by frame on the group's own transform (no new layer mid-scene, so no
@@ -2109,9 +2109,9 @@ function logoScenes(a) {
     const set = k => { bp.setAttribute('d', blend(oval, body, k, true)); hp.setAttribute('d', blend(uPts, hPts, k, false, Math.PI * k, c, d)); };
     set(0);
     await toLines(svg, [U, O]);
-    await tween(1000, set);
+    await tween(800, set);
     await swing(g, cx, top - hr - legs - sw / 2, 6);
-    await tween(1000, k => set(1 - k));
+    await tween(800, k => set(1 - k));
     await toGlyphs(svg, [U, O]);
     done([U, O], f);
   }
@@ -2149,10 +2149,10 @@ function logoScenes(a) {
     // the way back mirrors the way there: the hook draws out after the oval has nearly become the hanger, and on the
     // way back it draws in first, then the hanger flows into the O at the same pace
     await toLines(svg, [O]);
-    await Promise.all([tween(1000, set), draw(true, 620, 680)]);
+    await Promise.all([tween(780, set), draw(true, 480, 540)]);
     const hb = hook.getBBox();
     await swing(g, hb.x + hb.width / 2, hb.y, 7);
-    await Promise.all([draw(false, 620), tween(1000, k => set(1 - k), 300)]);
+    await Promise.all([draw(false, 480), tween(780, k => set(1 - k), 220)]);
     await toGlyphs(svg, [O]);
     set(0);
     done([O], f);
