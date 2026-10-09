@@ -806,6 +806,7 @@ const BAG = [[50, 50, 1], [50, 40, 1.8], [32, 60, 1.9]];
 const BELTV = [[50, 50, 1], [50, 50, 2.1], [24, 50, 2]];
 const SHOEV = [[50, 50, 1], [38, 48, 1.9], [62, 56, 1.9]];
 const SMALL = [[50, 50, 1], [50, 42, 1.8], [50, 62, 1.8]];
+const EYE = [[50, 50, 1], [34, 50, 2], [70, 48, 2.2]];
 const two = (file, v) => [v[0], [50, 50, 1, file], v[1]];
 // Prices and sizes are placeholders taken from brand sites and resale listings; the owner sets the real ones.
 // The sale prices (`was` = the price found online, `price` = 20 to 40% off) are placeholders too.
@@ -1258,7 +1259,177 @@ const P = [
   { id: 'vetements-logo-belt', brand: 'Vetements', name: 'Logo Letters Belt', cat: 'Belts', groups: ['accessories'], price: 800, img: 'vetements-logo-belt.webp',
     color: { name: 'Black / silver', hex: '#151515' }, sizes: BELT, out: [], views: BELTV,
     text: 'Black leather belt with VETEMENTS spelled out in silver letters along the strap.',
-    details: ['Black leather', 'Silver logo letters', 'Sized in centimeters'] },
+    details: ['Black leather', 'Silver logo letters', 'Sized in centimeters'] },  // the third upload (mostly womenswear); the croc B bag, the racer jacket and the destroyed cap are named after what
+  // the photo shows and priced after similar pieces: their exact models were not found
+  { id: 'balenciaga-bb-tank', brand: 'Balenciaga', name: 'BB Logo Tank Top', cat: 'Tops', groups: ['clothing'], price: 995, sizes: WEAR, out: [], views: TOP,
+    text: 'Fitted rib-knit tank top with the BB monogram and the Balenciaga logo knitted into the front.',
+    details: ['Viscose and polyester rib knit', 'Knitted-in BB logo', 'Scoop neck, fitted', 'Made in Italy'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'balenciaga-bb-tank-black.webp' },
+      { key: 'white', color: { name: 'White / black', hex: '#F1F1EE' }, img: 'balenciaga-bb-tank-white.webp', views: two('balenciaga-bb-tank-white-2.webp', TOP) },
+    ] },
+  { id: 'miumiu-logo-tank', brand: 'Miu Miu', name: 'Logo Knit Tank Top', cat: 'Tops', groups: ['clothing'], price: 1370, img: 'miumiu-logo-tank.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Ribbed viscose knit tank top with the Miu Miu logo knitted in white across the chest.',
+    details: ['Viscose and polyester rib knit', 'Intarsia logo', 'Ribbed scoop neck', 'Made in Italy'] },
+  { id: 'loewe-anagram-tank', brand: 'Loewe', name: 'Anagram Tank Top', cat: 'Tops', groups: ['clothing'], price: 450, sizes: WEAR, out: [], views: TOP,
+    text: 'Slim tank top in stretch ribbed cotton with the Loewe Anagram embroidered on the chest.',
+    details: ['Cotton with elastane', 'Embroidered Anagram', 'Scoop neck, slim fit'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'loewe-anagram-tank-black.webp' },
+      { key: 'white', color: { name: 'White', hex: '#F4F4F2' }, img: 'loewe-anagram-tank-white.webp' },
+    ] },
+  { id: 'blumarine-mesh-tee', brand: 'Blumarine', name: 'Logo-Embellished Mesh T-Shirt', cat: 'T-shirts', groups: ['clothing'], price: 450, img: 'blumarine-mesh-tee.webp',
+    color: { name: 'Pink', hex: '#F1D6DB' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Sheer stretch mesh T-shirt with the Blumarine script logo picked out in rhinestones.',
+    details: ['Stretch mesh', 'Rhinestone logo', 'Crew neck, short sleeves', 'Made in Italy'] },
+  { id: 'balenciaga-racer-jacket', brand: 'Balenciaga', name: 'Script Logo Leather Racer Jacket', cat: 'Outerwear', groups: ['clothing'], price: 9500, img: 'balenciaga-racer-jacket.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Black leather racer jacket with Balenciaga script logos across the chest and down both sleeves.',
+    details: ['Lambskin leather', 'Two-way zip', 'Zipped cuffs', 'Script logo prints'] },
+  { id: 'balenciaga-soccer-jacket', brand: 'Balenciaga', name: 'Soccer Tracksuit Jacket', cat: 'Outerwear', groups: ['clothing'], price: 2950, img: 'balenciaga-soccer-jacket.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Black nylon track jacket from the Balenciaga soccer line with an embroidered crest, the b emblem and the balenciaga logo.',
+    details: ['Nylon', 'Embroidered crest', 'Full zip, stand collar', 'Elastic cuffs and hem'] },
+  { id: 'balenciaga-3b-track-jacket', brand: 'Balenciaga', name: '3B Sports Icon Tracksuit Jacket', cat: 'Outerwear', groups: ['clothing'], price: 2090, img: 'balenciaga-3b-track-jacket.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: WEAR, out: [], views: TOP,
+    text: 'Regular-fit nylon track jacket with the 3B Sports Icon logo on the chest and the shoulders.',
+    details: ['100% polyamide', 'High neck, two-way zip', 'Embroidered 3B Sports Icon logos', 'Made in Italy'] },
+  { id: 'margiela-tabi-boots', brand: 'Maison Margiela', name: 'Tabi Ankle Boots H80', cat: 'Boots', groups: ['shoes'], price: 1490, img: 'margiela-tabi-boots.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
+    text: 'The split-toe Tabi boot in black nappa leather on an 8 cm cylindrical heel.',
+    details: ['Nappa leather upper', 'Split Tabi toe', '8 cm block heel', 'Made in Italy'] },
+  { id: 'margiela-tabi-ballerina', brand: 'Maison Margiela', name: 'Tabi Ballerina Flats', cat: 'Flats', groups: ['shoes'], price: 995, img: 'margiela-tabi-ballerina.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: two('margiela-tabi-ballerina-2.webp', SHOEV),
+    text: 'Flat split-toe ballerinas in soft black nappa leather, tied with a small knot at the front.',
+    details: ['Nappa leather upper', 'Split Tabi toe', 'Front knot', 'Made in Italy'] },
+  { id: 'margiela-tabi-h30', brand: 'Maison Margiela', name: 'Tabi Ballerina H30', cat: 'Heels', groups: ['shoes'], price: 1090, img: 'margiela-tabi-h30.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: SHOE, out: [], views: SHOEV,
+    text: 'Split-toe ballerina pumps in black nappa leather on a 3 cm cylindrical heel, with a hand-applied vintage finish.',
+    details: ['Nappa leather upper', '3 cm block heel', 'Front drawstring knot', 'Made in Italy'] },
+  { id: 'dior-walk-n-dior', brand: 'Dior', name: 'Walk’n’Dior Sneaker', cat: 'Sneakers', groups: ['shoes'], price: 1100, sizes: SHOE, out: [], views: SHOEV,
+    text: 'Low-top sneaker in Dior Oblique embroidered cotton on a white rubber sole with the lucky star.',
+    details: ['Embroidered cotton upper', 'Lambskin lining', 'Rubber sole', 'Made in Italy'],
+    variants: [
+      { key: 'stone-gray', color: { name: 'Stone gray', hex: '#A9A49B' }, img: 'dior-walk-n-dior-stone-gray.webp' },
+      { key: 'deep-blue', color: { name: 'Deep blue', hex: '#2B3550' }, img: 'dior-walk-n-dior-deep-blue.webp' },
+    ] },
+  { id: 'balenciaga-le-city-small', brand: 'Balenciaga', name: 'Le City Small Bag', cat: 'Handbags', groups: ['bags'], price: 2390, sizes: ['Small'], out: [], views: BAG,
+    text: 'The relaunched City bag in Arena lambskin with braided handles, a removable strap and the original mirror.',
+    details: ['Arena lambskin', 'Hand-braided handles', 'Removable shoulder strap', 'Removable mirror'],
+    variants: [
+      { key: 'black', color: { name: 'Black', hex: '#151515' }, img: 'balenciaga-le-city-small-black.webp' },
+      { key: 'light-pink', color: { name: 'Light pink', hex: '#E8C9CF' }, img: 'balenciaga-le-city-small-light-pink.webp' },
+    ] },
+  { id: 'balenciaga-le-city-medium', brand: 'Balenciaga', name: 'Le City Medium Bag', cat: 'Handbags', groups: ['bags'], price: 2990, img: 'balenciaga-le-city-medium.webp',
+    color: { name: 'Pink', hex: '#D2508A' }, sizes: ['Medium'], out: [], views: BAG,
+    text: 'The City bag in its medium size: pink Arena lambskin, aged-brass studs, a padded shoulder strap and a mirror.',
+    details: ['Arena lambskin', 'Aged-brass hardware', 'Padded shoulder strap', 'Front zip pocket and mirror'] },
+  { id: 'balenciaga-le-cagole-small', brand: 'Balenciaga', name: 'Le Cagole Small Shoulder Bag', cat: 'Shoulder bags', groups: ['bags'], price: 2950, img: 'balenciaga-le-cagole-small.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['Small'], out: [], views: BAG,
+    text: 'Crescent-shaped shoulder bag in Arena lambskin with oversized studs, buckles, a braided strap and a heart mirror.',
+    details: ['Arena lambskin', 'Aged-silver studs and buckles', 'Zip closure', 'Removable heart mirror'] },
+  { id: 'balenciaga-le-cagole-xs', brand: 'Balenciaga', name: 'Le Cagole XS Shoulder Bag', cat: 'Shoulder bags', groups: ['bags'], price: 2550, sizes: ['XS'], out: [], views: BAG,
+    text: 'The Le Cagole in its smallest size, with the heart mirror and a zipped pouch hanging from the strap.',
+    details: ['Arena lambskin', 'Aged-silver studs', 'Removable heart mirror', 'Removable zipped pouch'],
+    variants: [
+      { key: 'optic-white', color: { name: 'Optic white', hex: '#F1F1EE' }, img: 'balenciaga-le-cagole-xs-white.webp' },
+      { key: 'light-pink', color: { name: 'Light pink', hex: '#EBC9D1' }, img: 'balenciaga-le-cagole-xs-light-pink.webp' },
+    ] },
+  { id: 'balenciaga-le-cagole-piercing', brand: 'Balenciaga', name: 'Le Cagole XS Shoulder Bag with Piercing', cat: 'Shoulder bags', groups: ['bags'], price: 3350, img: 'balenciaga-le-cagole-piercing.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['XS'], out: [], views: BAG,
+    text: 'The XS Le Cagole in black, hung with metal piercings and rings, with an eyelet strap and the heart mirror.',
+    details: ['Arena lambskin', 'Metal piercings and rings', 'Eyelet shoulder strap', 'Removable heart mirror'] },
+  { id: 'balenciaga-neo-cagole-xs', brand: 'Balenciaga', name: 'Neo Cagole City XS Handbag', cat: 'Handbags', groups: ['bags'], price: 2450, img: 'balenciaga-neo-cagole-xs.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['XS'], out: [], views: BAG,
+    text: 'A mini City bag with Le Cagole hardware: braided handles, a long eyelet strap, the heart mirror and a zipped pouch.',
+    details: ['Arena lambskin', 'Aged-silver hardware', 'Removable eyelet strap', 'Heart mirror and zipped pouch'] },
+  { id: 'balenciaga-croc-b-bag', brand: 'Balenciaga', name: 'Croc-Embossed B Shoulder Bag', cat: 'Shoulder bags', groups: ['bags'], price: 2650, img: 'balenciaga-croc-b-bag.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Small black shoulder bag in croc-embossed leather, closed with a large silver-tone B buckle.',
+    details: ['Croc-embossed leather', 'Silver-tone B buckle', 'Shoulder strap'] },
+  { id: 'chloe-paddington', brand: 'Chloé', name: 'Paddington Bag', cat: 'Handbags', groups: ['bags'], price: 2990, img: 'chloe-paddington.webp',
+    color: { name: 'Earthy pink', hex: '#C9A49B' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'The relaunched Paddington in grained leather, with its signature padlock and key.',
+    details: ['Grained leather', 'Padlock and key', 'Zip closure', 'Made in Italy'] },
+  { id: 'chloe-paddington-small', brand: 'Chloé', name: 'Small Paddington Bag', cat: 'Handbags', groups: ['bags'], price: 2450, img: 'chloe-paddington-small.webp',
+    color: { name: 'Aqua gray', hex: '#C7D3D8' }, sizes: ['Small'], out: [], views: BAG,
+    text: 'The Paddington in its small size, in pale aqua gray grained leather with the padlock and key.',
+    details: ['Grained leather', 'Padlock and key', '26 × 12 × 12 cm', 'Made in Italy'] },
+  { id: 'chloe-paddington-vintage', brand: 'Chloé', name: 'Vintage Paddington Bag', cat: 'Handbags', groups: ['bags'], price: 700, img: 'chloe-paddington-vintage.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'An original 2000s Paddington in black grained calfskin with the heavy brass padlock, key and side buckles.',
+    details: ['Grained calfskin', 'Brass padlock and key', 'Side buckle straps', 'Pre-owned'] },
+  { id: 'acne-camero-party', brand: 'Acne Studios', name: 'Camero Party Shoulder Bag', cat: 'Shoulder bags', groups: ['bags'], price: 2000, img: 'acne-camero-party.webp',
+    color: { name: 'Pale pink', hex: '#EBD6D8' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Pale pink leather shoulder bag with zip pockets, a sprayed Acne Studios script logo and a branded key charm.',
+    details: ['Calf leather', 'Sprayed script logo', 'Adjustable crossbody strap', '26 × 16 × 7 cm'] },
+  { id: 'blumarine-kiss-me', brand: 'Blumarine', name: 'Kiss Me Bag', cat: 'Shoulder bags', groups: ['bags'], price: 1230, img: 'blumarine-kiss-me.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['Regular'], out: [], views: BAG,
+    text: 'Trapezoid shoulder bag in glossy black leather with a large gold-tone B on the front.',
+    details: ['Leather', 'Gold-tone B monogram', 'Zip closure', 'Metal feet'] },
+  { id: 'blumarine-kiss-me-mini', brand: 'Blumarine', name: 'Kiss Me Mini Bag', cat: 'Handbags', groups: ['bags'], price: 1200, img: 'blumarine-kiss-me-mini.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['Mini'], out: [], views: BAG,
+    text: 'The Kiss Me bag in mini size with rolled top handles, a detachable shoulder strap and a rhinestone B.',
+    details: ['Leather', 'Rhinestone B monogram', 'Detachable shoulder strap', 'Zip closure'] },
+  { id: 'blumarine-rhinestone-bag', brand: 'Blumarine', name: 'Patent Leather Bag with Rhinestone Logo', cat: 'Shoulder bags', groups: ['bags'], price: 900, img: 'blumarine-rhinestone-bag.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ['OS'], out: [], views: BAG,
+    text: 'Small black patent leather shoulder bag with the Blumarine script logo in rhinestones.',
+    details: ['Patent calf leather', 'Rhinestone logo', 'Top zip', '19 × 13 × 5 cm'] },
+  { id: 'miumiu-runway', brand: 'Miu Miu', name: 'Runway Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 670, sizes: ONE, out: [], views: EYE,
+    text: 'Rimless wraparound sunglasses (MU 54YS) with the stacked Miu Miu logo in gold on the lenses.',
+    details: ['Gold-tone metal', 'Rimless, curved lenses', 'Logo on the lenses', '100% UV protection'],
+    variants: [
+      { key: 'slate-gray', color: { name: 'Gold / slate gray', hex: '#5A5C60' }, img: 'miumiu-runway-slate-gray.webp' },
+      { key: 'mauve', color: { name: 'Gold / mauve', hex: '#8C6E78' }, img: 'miumiu-runway-mauve.webp' },
+    ] },
+  { id: 'miumiu-aube', brand: 'Miu Miu', name: 'Aube Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 670, sizes: ONE, out: [], views: EYE,
+    text: 'Rounder rimless wraparound sunglasses (MU A51S) with gold Miu Miu logos on the lenses.',
+    details: ['Gold-tone metal', 'Rimless, curved lenses', 'Logo on the lenses', '100% UV protection'],
+    variants: [
+      { key: 'bronze', color: { name: 'Gold / bronze', hex: '#A88A6A' }, img: 'miumiu-aube-bronze.webp' },
+      { key: 'dark-gray', color: { name: 'Gold / dark gray', hex: '#3E3F42' }, img: 'miumiu-aube-dark-gray.webp' },
+      { key: 'light-blue', color: { name: 'Pale gold / light blue', hex: '#A9C8DE' }, img: 'miumiu-aube-light-blue.webp' },
+    ] },
+  { id: 'miumiu-shield', brand: 'Miu Miu', name: 'Logo Shield Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 545, img: 'miumiu-shield.webp',
+    color: { name: 'Gold / brown mirror', hex: '#A5876C' }, sizes: ONE, out: [], views: EYE,
+    text: 'Rimless one-piece shield sunglasses (MU 50ZS) with the stacked logo on the lens and gold-tone arms.',
+    details: ['Gold-tone metal', 'One-piece shield lens', 'Logo on the lens', '100% UV protection'] },
+  { id: 'miumiu-nocturne', brand: 'Miu Miu', name: 'Nocturne Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 610, img: 'miumiu-nocturne.webp',
+    color: { name: 'Gold / yellow', hex: '#E3C98A' }, sizes: ONE, out: [], views: EYE,
+    text: 'Curved oval metal sunglasses (MU A50S) with yellow gradient lenses and the logo on the temples.',
+    details: ['Metal frame', 'Gradient lenses', 'Logo on the temples', 'Adjustable nose pads'] },
+  { id: 'miumiu-cat-eye', brand: 'Miu Miu', name: 'Logo Cat-Eye Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 433, img: 'miumiu-cat-eye.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: EYE,
+    text: 'Black acetate cat-eye sunglasses (MU 03ZS) with dark gray lenses and a gold logo on the wide temples.',
+    details: ['Acetate frame', 'Dark gray lenses', 'Metal logo on the temples', '100% UV protection'] },
+  { id: 'miumiu-glimpse', brand: 'Miu Miu', name: 'Glimpse Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 518, img: 'miumiu-glimpse.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: EYE,
+    text: 'Thick black acetate oval sunglasses (MU 11WS) with a large gold Miu Miu logo on the temples.',
+    details: ['Acetate frame', 'Dark gray lenses', 'Gold metal logo', '100% UV protection'] },
+  { id: 'miumiu-rectangular', brand: 'Miu Miu', name: 'Logo Rectangular Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 518, img: 'miumiu-rectangular.webp',
+    color: { name: 'Black', hex: '#151515' }, sizes: ONE, out: [], views: EYE,
+    text: 'Slim black acetate rectangular sunglasses (MU 08ZS) with a small stacked logo at the hinges.',
+    details: ['Acetate frame', 'Dark gray lenses', 'Logo at the hinges', '100% UV protection'] },
+  { id: 'balenciaga-swift-oval', brand: 'Balenciaga', name: 'Swift Oval Sunglasses', cat: 'Eyewear', groups: ['accessories'], price: 530, img: 'balenciaga-swift-oval.webp',
+    color: { name: 'Black / gray', hex: '#151515' }, sizes: ONE, out: [], views: EYE,
+    text: 'Wraparound sunglasses (BB0157S) in black bio-based nylon with gray lenses and the logo on the temple.',
+    details: ['Bio-based nylon frame', 'Gray lenses', 'Wraparound shape', 'Made in Japan'] },
+  { id: 'balenciaga-destroyed-cap', brand: 'Balenciaga', name: 'Destroyed Logo Cap', cat: 'Hats', groups: ['accessories'], price: 550, img: 'balenciaga-destroyed-cap.webp',
+    color: { name: 'Washed black', hex: '#2E3236' }, sizes: ONE, out: [], views: SMALL,
+    text: 'Washed black cotton cap with a white embroidered Balenciaga logo and laser-cut destroyed panels.',
+    details: ['Cotton', 'Embroidered logo', 'Destroyed effect', 'Adjustable back strap'] },
+  { id: 'loewe-scarf', brand: 'Loewe', name: 'Logo Mohair Scarf', cat: 'Scarves', groups: ['accessories'], price: 850, sizes: ONE, out: [], views: SMALL,
+    text: 'Long fringed scarf in brushed mohair and wool with LOEWE spelled out in giant letters.',
+    details: ['Mohair, wool and polyamide', '23 × 185 cm', 'Fringed ends', 'Anagram leather tab'],
+    variants: [
+      { key: 'khaki', color: { name: 'Khaki green / white', hex: '#A39F8E' }, img: 'loewe-scarf-khaki.webp' },
+      { key: 'navy', color: { name: 'Navy / gray', hex: '#1F2740' }, img: 'loewe-scarf-navy.webp' },
+    ] },
+  { id: 'loewe-scarf-two-tone', brand: 'Loewe', name: 'Two-Tone Logo Mohair Scarf', cat: 'Scarves', groups: ['accessories'], price: 690, img: 'loewe-scarf-two-tone.webp',
+    color: { name: 'Gray / blue', hex: '#A9AAA8' }, sizes: ONE, out: [], views: SMALL,
+    text: 'Gray mohair and wool scarf with the LOEWE letters in mint and blue for a blurred, two-tone effect.',
+    details: ['Mohair, wool and polyamide', '23 × 185 cm', 'Fringed ends', 'Anagram leather tab'] },
 ];
 // one piece in several colors keeps them in `variants`; a single-color piece gets one variant of its own.
 // The piece shows its first color and its lowest price ("From" when the colors cost differently).
@@ -1272,7 +1443,12 @@ P.forEach(p => {
 // Who a piece is for, as the houses list it; everything not named here is unisex. A placeholder until the owner checks it.
 const GENDER = {
   women: ['ysl-loulou-puffer', 'lv-speedy-trunk-20', 'lv-neverfull-mm', 'lv-alma-bb', 'lv-alma-pm', 'balenciaga-hourglass-graffiti',
-    'burberry-check-hood-puffer'],
+    'burberry-check-hood-puffer', 'balenciaga-bb-tank', 'miumiu-logo-tank', 'loewe-anagram-tank', 'blumarine-mesh-tee',
+    'margiela-tabi-boots', 'margiela-tabi-ballerina', 'margiela-tabi-h30', 'dior-walk-n-dior', 'balenciaga-le-city-small',
+    'balenciaga-le-city-medium', 'balenciaga-le-cagole-small', 'balenciaga-le-cagole-xs', 'balenciaga-le-cagole-piercing',
+    'balenciaga-neo-cagole-xs', 'balenciaga-croc-b-bag', 'chloe-paddington', 'chloe-paddington-small', 'chloe-paddington-vintage',
+    'acne-camero-party', 'blumarine-kiss-me', 'blumarine-kiss-me-mini', 'blumarine-rhinestone-bag', 'miumiu-runway', 'miumiu-aube',
+    'miumiu-shield', 'miumiu-nocturne', 'miumiu-cat-eye', 'miumiu-glimpse', 'miumiu-rectangular'],
   men: ['moncler-hooded-vest', 'moncler-maya', 'moncler-fur-hood-jacket', 'burberry-puffer', 'givenchy-destroyed-hoodie',
     'burberry-check-hood-hoodie', 'rick-owens-gimp-jacket', 'cp-goggle-down-jacket', 'gucci-blind-for-love-hoodie', 'lv-planes-hoodie',
     'rick-owens-champion-sweatshirt', 'stone-island-knit', 'gucci-snake-polo', 'burberry-check-collar-polo', 'amiri-mx1-jeans',
@@ -2084,10 +2260,11 @@ function logoScenes(a) {
   };
   // sine in-out: a gentle start and stop without the rush in the middle that a cubic curve has
   const inOut = k => (1 - Math.cos(Math.PI * k)) / 2, mix = (p, q, k) => p + (q - p) * k;
-  // a frame-by-frame tween for what the browser cannot animate itself (path shapes, rect corners)
+  // a frame-by-frame tween for what the browser cannot animate itself (path shapes, rect corners); the first frame's
+  // time can be a little before the start, so k is kept from going below 0
   const tween = (ms, fn, delay = 0, linear = false) => new Promise(res => setTimeout(() => {
     const t0 = performance.now();
-    const step = now => { const k = Math.min(1, (now - t0) / ms); fn(linear ? k : inOut(k)); k < 1 ? requestAnimationFrame(step) : res(); };
+    const step = now => { const k = Math.max(0, Math.min(1, (now - t0) / ms)); fn(linear ? k : inOut(k)); k < 1 ? requestAnimationFrame(step) : res(); };
     requestAnimationFrame(step);
   }, delay));
   const layer = sw => { const f = document.createElement('span'), r = lw.getBoundingClientRect(); f.className = 'fx';
@@ -2362,13 +2539,13 @@ function openSearch() {
 // lower case without accents, so "belvedere" finds Belvedère and "hermes" finds Hermès
 const fold = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 // words of a text, lower case, no accents, "T-shirt" as one word
-const words = t => fold(t).replace(/([a-z0-9])[-'’.]([a-z0-9])/g, '$1$2').split(/[^a-z0-9а-яё]+/).filter(Boolean);
+const words = t => fold(t).replace(/([a-z0-9])[-'’.](?=[a-z0-9])/g, '$1').split(/[^a-z0-9а-яё]+/).filter(Boolean);
 // Russian words for pieces, colors and houses (by their stem), and short names of the houses; other languages below
 const RU = [['худи', 'hoodie'], ['толстовк', 'hoodie sweatshirt'], ['свитшот', 'sweatshirt'], ['кофт', 'hoodie sweatshirt sweater'],
   ['куртк', 'jacket'], ['пухов', 'down puffer'], ['жилет', 'vest'], ['джинс', 'jeans'], ['штан', 'trousers sweatpants jeans'],
-  ['брюк', 'trousers'], ['футболк', 'tshirt'], ['майк', 'tshirt'], ['поло', 'polo'], ['свитер', 'sweater knit'], ['одежд', 'clothing'],
+  ['брюк', 'trousers'], ['футболк', 'tshirt'], ['майк', 'tshirt tank'], ['топ', 'tank'], ['поло', 'polo'], ['свитер', 'sweater knit'], ['одежд', 'clothing'],
   ['сумк', 'bag'], ['рюкзак', 'backpack'], ['кошел', 'wallet'], ['кроссов', 'sneaker'], ['кеды', 'sneaker'], ['ботин', 'boot'],
-  ['сапог', 'boot'], ['обув', 'shoes'], ['шлеп', 'slides'], ['сланц', 'slides'], ['ремен', 'belt'], ['ремн', 'belt'], ['пояс', 'belt'],
+  ['сапог', 'boot'], ['обув', 'shoes'], ['балетк', 'ballerina flats'], ['туфл', 'heels ballerina flats'], ['шлеп', 'slides'], ['сланц', 'slides'], ['ремен', 'belt'], ['ремн', 'belt'], ['пояс', 'belt'],
   ['очк', 'glasses sunglasses eyewear'], ['кепк', 'cap'], ['бейсболк', 'cap'], ['шапк', 'beanie'], ['шарф', 'scarf'],
   ['перчат', 'gloves'], ['маск', 'mask'], ['аксессуар', 'accessories'], ['скидк', 'sale'], ['распродаж', 'sale'], ['нов', 'new'],
   ['черн', 'black'], ['чёрн', 'black'], ['бел', 'white'], ['сер', 'gray grey'], ['розов', 'pink'], ['красн', 'red'],
@@ -2379,7 +2556,9 @@ const RU = [['худи', 'hoodie'], ['толстовк', 'hoodie sweatshirt'], [
   ['суприм', 'supreme'], ['маржел', 'margiela'], ['марджел', 'margiela'], ['амири', 'amiri'], ['адидас', 'adidas'], ['найк', 'nike'],
   ['стон', 'stone'], ['айленд', 'island'], ['бейп', 'bape'], ['ветем', 'vetements'], ['живанш', 'givenchy'], ['сен', 'saint'],
   ['лоран', 'laurent'], ['гермес', 'hermes'], ['эрмес', 'hermes'], ['дольч', 'dolce'], ['габбан', 'gabbana'], ['тимберл', 'timberland'],
-  ['спрейгр', 'sprayground'], ['комм', 'comme']];
+  ['спрейгр', 'sprayground'], ['комм', 'comme'], ['миу', 'miu'], ['лоэв', 'loewe'], ['лоев', 'loewe'], ['диор', 'dior'],
+  ['хлое', 'chloe'], ['шлое', 'chloe'], ['блюмарин', 'blumarine'], ['блумарин', 'blumarine'], ['акне', 'acne'], ['таби', 'tabi'],
+  ['кагол', 'cagole'], ['паддингтон', 'paddington'], ['падингтон', 'paddington']];
 const SHORT = { lv: 'louis', ch: 'chrome', ysl: 'saint', dg: 'dolce', cdg: 'comme', erd: 'enfants', cp: 'cp', tee: 'tshirt', grey: 'gray', gray: 'grey' };
 // Search in the main world languages (owner's request: find pieces "in all languages"). Words for pieces, colors,
 // sections and houses are turned into the English words of the catalog; the list is a dictionary, not a translator,
@@ -2549,7 +2728,8 @@ const NOSPACE = [
 const PHRASES = [['sac a dos', 'backpack'], ['lunettes de soleil', 'sunglasses'], ['gafas de sol', 'sunglasses'], ['occhiali da sole', 'sunglasses'],
   ['oculos de sol', 'sunglasses'], ['sırt canta', 'backpack'], ['sirt canta', 'backpack'], ['spor ayakkabı', 'sneaker'], ['spor ayakkabi', 'sneaker'],
   ['gunes gozlug', 'sunglasses'], ['okulary przeciws', 'sunglasses'], ['bas kiim', 'hat cap beanie'], ['аяқ киім', 'shoes'],
-  ['бас киім', 'hat cap beanie'], ['sonnen brille', 'sunglasses'], ['t shirt', 'tshirt'], ['tee shirt', 'tshirt']];
+  ['бас киім', 'hat cap beanie'], ['sonnen brille', 'sunglasses'], ['t shirt', 'tshirt'], ['tee shirt', 'tshirt'], ['walk n dior', 'walkndior'],
+  ['walk and dior', 'walkndior']];
 const STOP = new Set(['de', 'del', 'la', 'las', 'el', 'los', 'le', 'les', 'du', 'des', 'et', 'y', 'e', 'di', 'da', 'della', 'per', 'con', 'und',
   'mit', 'der', 'die', 'das', 'fur', 'for', 'the', 'and', 'a', 'an', 'of', 'with', 'para', 'com', 'do', 'en', 'i', 'w', 'z', 'na', 'dla', 've',
   'ile', 'va', 'и', 'для', 'з', 'і', 'в', 'на', 'с', 'од', 'от']);

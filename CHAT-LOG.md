@@ -171,14 +171,16 @@
 64. **Сценки плавнее:** мягкая кривая ускорения, превращение чуть дольше, покачивание и превращение без стыков, убраны пропуски кадров (лишняя перерисовка шапки, сборка мусора), буквы сменяются линиями без бледного момента.
 65. **Прежняя скорость сценок** (стало медленно): превращение снова ~0,8 секунды, плавность осталась.
 66. **Буква сама превращается, без наложения:** линии снимаются с самой буквы по пикселям и подменяют её в один кадр (раньше 0,16 с плавной смены, а на iPhone линии ещё и стояли на 1-2 px в стороне — было видно двойную букву).
+67. **Третья заливка фото:** из 89 файлов 40 оказались точными копиями, удалены; на сайте 36 новых товаров (Balenciaga, Chloé, Miu Miu, Loewe, Blumarine, Maison Margiela Tabi, Dior, Acne Studios), цвета одной модели — в одном товаре. Поиск понимает новые слова. Кепка «Saint Warehouse» ждёт ответа: бренд не найден.
 
 ---
 
 ## Что сейчас есть на сайте
 
-- 92 товара (бренды: Louis Vuitton, Goyard, Chrome Hearts, Balenciaga, Gucci, Burberry, Moncler,
+- 128 товаров (бренды: Louis Vuitton, Goyard, Chrome Hearts, Balenciaga, Gucci, Burberry, Moncler,
   Rick Owens, Supreme, Maison Margiela, MM6, Amiri, adidas, Nike, C.P. Company, Stone Island, BAPE,
-  Vetements, Givenchy, Saint Laurent, Hermès, Dolce & Gabbana, Comme des Garçons, ERD, Sprayground, Timberland).
+  Vetements, Givenchy, Saint Laurent, Hermès, Dolce & Gabbana, Comme des Garçons, ERD, Sprayground, Timberland,
+  Miu Miu, Loewe, Chloé, Blumarine, Dior, Acne Studios).
 - Разделы: Home (видео + New in + категории), Clothing, Bags, Shoes, Accessories, Sale, New in.
 - Выбор цвета у повторяющихся моделей; фильтры по полу, типу и бренду; сортировка; поиск (рус/англ);
   таблица размеров; избранное; корзина; промокод `PALE10`; оформление с картой и кодом из СМС; аккаунт с заказами.
