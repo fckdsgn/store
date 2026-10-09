@@ -282,6 +282,7 @@ main{flex:1;padding:0 var(--x);outline:none}
   .reel .tag i::after{content:"";position:absolute;inset:0;border-radius:50%;opacity:0;transition:opacity .4s var(--ease);animation:go-ping 1.6s ease-out infinite paused}
   .reel .tag:hover i::after,.reel .tag.lit i::after{opacity:1;animation-play-state:running}
 }
+@keyframes bar-fill{from{width:0}to{width:100%}}
 @keyframes go-nudge{0%,100%{transform:none}50%{transform:translateX(3px)}}
 @keyframes go-ping{0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}80%,100%{box-shadow:0 0 0 9px rgba(255,255,255,0)}}
 .hot{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
@@ -321,6 +322,8 @@ main{flex:1;padding:0 var(--x);outline:none}
 .cat-plate{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 14px 14px 18px;border-radius:16px}
 .cat-plate b{display:block;color:var(--ink);font-weight:500;font-size:15px;text-transform:uppercase;letter-spacing:.01em}
 .cat-plate span{font-size:12px;color:var(--ink-2)}
+.cat-plate b span{font-size:inherit;color:inherit}
+.cat-t,.cat-shop,.cat-bars{display:none}
 .arrow{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.06);flex:none;transition:transform .35s var(--ease)}
 
 /* ---------- product card ---------- */
@@ -669,9 +672,24 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   :root{--r-tile:18px}
   .grid,.grid.four{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 10px}
   .grid.four>.card:nth-child(4){display:block}
-  .cats{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 calc(var(--x) * -1);padding:0 var(--x);scroll-padding:0 var(--x)}
+  /* the categories as one big card at a time, like stories (mountCats() turns them) */
+  .cats-wrap{position:relative;border-radius:var(--r-tile);overflow:hidden;background:var(--tile)}
+  .cats{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
   .cats::-webkit-scrollbar{display:none}
-  .cat{flex:0 0 74%;aspect-ratio:4/5;scroll-snap-align:start}
+  .cat{flex:0 0 100%;aspect-ratio:3/4;scroll-snap-align:start;scroll-snap-stop:always;border-radius:0}
+  .cat img{object-position:50% 40%}
+  .cat::after{content:"";position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(to top,rgba(0,0,0,.34),rgba(0,0,0,.12) 55%,rgba(0,0,0,0));pointer-events:none}
+  .cat-t{display:block;position:absolute;z-index:1;left:20px;right:20px;bottom:86px;color:#fff;font-size:24px;font-weight:500;line-height:1.1;text-transform:uppercase;letter-spacing:.01em;text-shadow:0 1px 12px rgba(0,0,0,.18)}
+  .cat-plate{z-index:1;left:12px;right:12px;bottom:12px;padding:10px 10px 10px 18px}
+  .cat-plate b{font-size:13px;letter-spacing:.04em}
+  .cat-shop{display:inline}
+  .cat-bars{display:flex;gap:6px;position:absolute;z-index:2;left:20px;right:20px;bottom:128px;pointer-events:none}
+  .cat-bars i{flex:1;height:2px;border-radius:2px;background:rgba(255,255,255,.42);overflow:hidden}
+  .cat-bars b{display:block;width:0;height:100%;background:#fff}
+  .cat-bars i.past b{width:100%}
+  .cat-bars i.on b{animation:bar-fill 5s linear forwards}
+  .cats-wrap.hold .cat-bars i.on b,.cats-wrap.away .cat-bars i.on b{animation-play-state:paused}
+  .cats-wrap.still .cat-bars i.on b{animation:none;width:100%}
   .stage-box{aspect-ratio:1/1;margin-bottom:0;--r:22px}
   .reel video{--plate:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='22'/%3E%3C/svg%3E")}
   .tag{height:28px;gap:7px;padding:0 10px 0 8px;font-size:11px;translate:-12px -50%}
@@ -1687,10 +1705,11 @@ V.home = () => {
   </section>
   <section class="sec">
     <div class="sec-h"><h2 class="h-title">Shop by category</h2></div>
-    <div class="cats">
-      ${[['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55'], ['shoes', 'timberland-cross-boot'], ['accessories', 'gucci-gg-belt']].map(([k, id]) => {
-        return `<a class="cat" href="#${k}">${pic(BY[id])}<span class="cat-plate glass"><span><b>${LISTS[k].title}</b></span><span class="arrow">${I.arrow}</span></span></a>`;
-      }).join('')}
+    <div class="cats-wrap">
+      <div class="cats">
+      ${CATS.map(([k, id]) => `<a class="cat" href="#${k}">${pic(BY[id])}<span class="cat-t" aria-hidden="true">${LISTS[k].title}</span><span class="cat-plate glass"><span><b><span class="cat-shop">Shop </span>${LISTS[k].title}</b></span><span class="arrow">${I.arrow}</span></span></a>`).join('')}
+      </div>
+      <div class="cat-bars" aria-hidden="true">${CATS.map(() => '<i><b></b></i>').join('')}</div>
     </div>
   </section>`;
 };
@@ -2186,6 +2205,45 @@ function switchGender(g) {
   placeG(true);
   fadeSwap('#main-view .view');
 }
+// the home page's categories (the piece shown on each tile)
+const CATS = [['clothing', 'givenchy-destroyed-hoodie'], ['bags', 'lv-keepall-55'], ['shoes', 'timberland-cross-boot'], ['accessories', 'gucci-gg-belt']];
+// On phones the categories are one big card at a time, like stories (owner's request, after a reference): bars at the
+// top of the text show which card is up, the current one fills over 5 s and the next card slides in; a swipe or a tap
+// on the left or right third of the photo turns the cards too, the middle opens the section. The bars wait while a
+// finger is on the cards, while they are off screen, in a hidden tab and with reduced motion.
+let catsIO = null;
+function mountCats() {
+  const wrap = $('.cats-wrap'), row = wrap && $('.cats', wrap);
+  if (catsIO) { catsIO.disconnect(); catsIO = null; }
+  if (!row) return;
+  const bars = $$('.cat-bars i', wrap), n = bars.length;
+  let at = 0;
+  const show = i => {
+    at = i;
+    bars.forEach((b, j) => { b.classList.toggle('past', j < i); b.classList.remove('on'); });
+    void wrap.offsetWidth; // the fill starts over on the current bar
+    bars[i].classList.add('on');
+  };
+  const go = i => { i = (i + n) % n; row.scrollTo({ left: i * row.clientWidth, behavior: still() ? 'auto' : 'smooth' }); show(i); };
+  show(0);
+  if (still()) wrap.classList.add('hold', 'still');
+  bars.forEach((b, i) => b.addEventListener('animationend', () => { if (i === at && phone() && !still()) go(at + 1); }));
+  let st = 0;
+  row.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => { const i = Math.round(row.scrollLeft / row.clientWidth); if (i !== at) show(i); }, 80); }, { passive: true });
+  const hold = on => wrap.classList.toggle('hold', on || still());
+  row.addEventListener('touchstart', () => hold(true), { passive: true });
+  row.addEventListener('touchend', () => hold(false), { passive: true });
+  row.addEventListener('touchcancel', () => hold(false), { passive: true });
+  row.addEventListener('click', e => {
+    if (!phone() || e.target.closest('.cat-plate')) return;
+    const r = row.getBoundingClientRect(), x = (e.clientX - r.left) / r.width;
+    if (x < 1 / 3) { e.preventDefault(); go(at - 1); } else if (x > 2 / 3) { e.preventDefault(); go(at + 1); }
+  });
+  catsIO = new IntersectionObserver(([en]) => wrap.classList.toggle('away', !en.isIntersecting), { threshold: .4 });
+  catsIO.observe(wrap);
+}
+const phone = () => matchMedia('(max-width:719px)').matches;
+document.addEventListener('visibilitychange', () => { const w = $('.cats-wrap'); if (w) w.classList.toggle('away', document.hidden); });
 function paint(r, key, scroll) {
   const app = $('#main-view');
   const y = window.scrollY;
@@ -2208,6 +2266,7 @@ function paint(r, key, scroll) {
   closeLayer();
   document.body.classList.toggle('has-pbar', r.name === 'product' && !!BY[r.arg]);
   if (r.name === 'product') mountProduct();
+  if (r.name === 'home') mountCats();
 }
 function titleFor(r) {
   if (r.name === 'product' && BY[r.arg]) { const p = vOf(BY[r.arg], PV.v); return p.brand + ' ' + p.name + (p.variants.length > 1 ? ', ' + p.color.name : '') + ' | Ecruo Store'; }
