@@ -2106,21 +2106,26 @@ function logoScenes(a) {
     const tri = Array.from({ length: N }, (_, i) => i < M ? q(i / M, 1) : i < 2 * M ? [mix(x1, x0, (i - M) / M), base] : q(1 - (i - 2 * M) / M, -1));
     g.innerHTML = `<path/><path pathLength="1" d="M${cx} ${apex}V${hy + R}A${R} ${R} 0 1 0 ${cx - R} ${hy}"/>`;
     const [body, hook] = g.children;
-    const set = k => body.setAttribute('d', 'M' + oval.map((p, i) => `${mix(p[0], tri[i][0], k)} ${mix(p[1], tri[i][1], k)}`).join('L') + 'Z');
+    // the letters after the O move with the shape itself (owner: on the way back they pressed against the O before it
+    // had settled), so the gap stays the same all the way
+    const set = k => { body.setAttribute('d', 'M' + oval.map((p, i) => `${mix(p[0], tri[i][0], k)} ${mix(p[1], tri[i][1], k)}`).join('L') + 'Z');
+      after.forEach(el => { el.style.transform = k ? `translateX(${room * k}px)` : ''; }); };
     set(0);
     // the hook is hidden until it starts to draw: an empty dash with round ends would still show a dot (and the gap
     // is twice the path, so no next dash peeks in at its far end)
     hook.style.strokeDasharray = '1 2'; hook.style.strokeDashoffset = 1; hook.style.opacity = 0;
     const kf = [{ strokeDashoffset: 1, opacity: 0 }, { strokeDashoffset: .97, opacity: 1, offset: .04 }, { strokeDashoffset: 0, opacity: 1 }];
     const draw = (on, ms, delay = 0) => hook.animate(on ? kf : [...kf].reverse().map((fr, i) => ({ ...fr, offset: [0, .96, 1][i] })), { duration: ms, delay, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).finished;
-    const aside = back => Promise.all(after.map(el => el.animate([{ transform: 'none' }, { transform: `translateX(${room}px)` }], { duration: 650, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'forwards', direction: back ? 'reverse' : 'normal' }).finished));
+    // the way back mirrors the way there: the hook draws out after the oval has nearly become the hanger, and on the
+    // way back it draws in first, then the hanger flows into the O at the same pace
     await Promise.all([fade([svg], 1), fade([O], 0)]);
-    await Promise.all([aside(false), tween(760, set), draw(true, 520, 520)]);
+    await Promise.all([tween(760, set), draw(true, 480, 560)]);
     const hb = hook.getBBox();
     await swing(g, hb.x + hb.width / 2, hb.y, 7);
-    await Promise.all([draw(false, 380), tween(720, k => set(1 - k), 220), aside(true)]);
+    await Promise.all([draw(false, 480), tween(760, k => set(1 - k), 200)]);
     await Promise.all([fade([O], 1), fade([svg], 0)]);
-    done([O, ...after], f);
+    set(0);
+    done([O], f);
   }
 
   const scenes = [ui >= 0 && bag, hO && hanger].filter(Boolean);
