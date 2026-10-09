@@ -340,7 +340,10 @@ main{flex:1;padding:0 var(--x);outline:none}
 .deal-card p{margin:0;color:var(--ink-2);font-size:13px;max-width:34ch}
 .deal:not(.main) .deal-card{width:min(260px,calc(40% - 14px));padding:16px 16px 14px}
 .deal:not(.main) .deal-card h2{font-size:clamp(18px,1.6vw,22px)}
-.cat-top .h-title{font-size:clamp(24px,2.6vw,34px)}
+.cat-top .h-title,.sale-h{font-size:clamp(24px,2.6vw,34px)}
+.sale-h{padding-top:44px}
+.sale-h + .deals{padding-top:22px}
+.deals + .cat-top{padding-top:30px}
 .cat-top .muted{font-size:12.5px;margin-top:8px}
 /* no piece counts under the section titles (owner's request); the line shows the price range or the section's note */
 .cat-top .muted:empty{display:none}
@@ -398,18 +401,18 @@ main{flex:1;padding:0 var(--x);outline:none}
 @media (max-width:719px){.back{margin-top:12px}.back + .pdp{padding-top:12px}}
 
 /* ---------- product page ---------- */
-.pdp{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:32px;padding-top:22px;min-height:calc(100vh - var(--top) - var(--hdr) - 150px)}
-.thumbs{justify-self:center;display:flex;flex-direction:column;gap:12px}
+.pdp{display:grid;grid-template-columns:auto auto minmax(0,300px);justify-content:center;align-items:center;gap:40px;padding-top:22px;min-height:calc(100vh - var(--top) - var(--hdr) - 150px)}
+.thumbs{justify-self:end;display:flex;flex-direction:column;gap:12px}
 .th{width:60px;aspect-ratio:3/5;border-radius:12px;overflow:hidden;background:var(--tile);outline:1.5px solid transparent;outline-offset:2px;transition:outline-color .25s,opacity .25s;opacity:.72}
 .th:hover{opacity:1}
 .th.on{outline-color:#CFCFCF;opacity:1}
 .th img,.slide img{width:100%;height:100%;object-fit:cover}
-.stage-p{position:relative;height:min(calc(100vh - var(--top) - var(--hdr) - 110px),680px);min-height:420px;aspect-ratio:3/4;max-width:100%;border-radius:var(--r-tile);overflow:hidden;background:var(--tile)}
+.stage-p{position:relative;height:min(calc(100vh - var(--top) - var(--hdr) - 110px),680px,calc((100vw - 2 * var(--x) - 500px) * 4 / 3));min-height:420px;aspect-ratio:3/4;max-width:100%;border-radius:var(--r-tile);overflow:hidden;background:var(--tile)}
 .slide{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .5s ease}
 .slide.on{opacity:1}
 .slide img{transition:transform .6s var(--ease)}
 .dots{display:none}
-.info{justify-self:center;width:min(280px,100%);display:flex;flex-direction:column;align-items:center;text-align:center}
+.info{justify-self:start;width:300px;max-width:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
 .info h1{font-size:20px;font-weight:500;letter-spacing:-.01em;margin:14px 0 12px;line-height:1.25;text-wrap:balance}
 .info .price{font-size:18px}
 .swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:14px}
@@ -419,7 +422,7 @@ button.sw{width:26px;height:15px;margin:3px;padding:0;cursor:pointer;transition:
 button.sw:hover:not(.on){box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 1.5px #fff,0 0 0 2.5px #BDBDBD}
 .sw.on{box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 1.5px #fff,0 0 0 2.5px var(--ink)}
 .sw-name{font-size:12.5px;margin-top:6px}
-.actions{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:30px;width:190px;position:relative}
+.actions{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:30px;width:100%;position:relative}
 .size-btn{width:100%;justify-content:space-between;padding:0 16px 0 20px}
 .size-btn.need{animation:nudge .45s ease}
 .size-pop{position:absolute;z-index:20;top:48px;left:50%;width:268px;background-color:rgba(255,255,255,.86);transform:translateX(-50%);border-radius:18px;padding:12px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;animation:pop .28s var(--ease) both}
@@ -483,6 +486,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 .item .mid small{display:block;font-size:13.5px;line-height:1.35}
 .item .end{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;padding:2px 4px 4px 0}
 .item .end .price{font-size:17px}
+.item .ctl{display:flex;align-items:center;gap:12px}
 .x{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;margin:-2px -4px 0 0}
 .x:hover{background:var(--pill)}
 .qty{display:inline-flex;align-items:center;height:26px;border-radius:999px;background:var(--pill);font-size:12px}
@@ -503,6 +507,7 @@ details[open].shut .pm::after{transform:rotate(90deg)}
 .promo-msg{font-size:12px;min-height:18px;margin:6px 2px 4px}
 .promo-msg.err{color:var(--err)}
 .promo-msg.ok{color:var(--ok)}
+.co-peek{display:none}
 .sum-items{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
 .sum-item{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:10px;align-items:center;font-size:13px}
 .sum-item .ph{border-radius:8px}
@@ -594,6 +599,15 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   .hdr .logo{justify-self:start;font-size:17px;order:0;padding-left:2px}
   .two{grid-template-columns:minmax(0,1fr);gap:28px;max-width:560px;margin:0 auto}
   .two .div{min-height:0;height:1px}
+  .co-peek{display:block;border:1px solid var(--line);border-radius:var(--r-card);margin:0 0 24px;padding:0 14px}
+  .co-peek summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 0;cursor:pointer;font-size:13px;font-weight:500}
+  .co-peek summary::-webkit-details-marker{display:none}
+  .co-peek summary>span:first-child{display:flex;align-items:center;gap:6px}
+  .co-peek summary .ico{width:15px;height:15px;transition:transform .3s var(--ease)}
+  .co-peek[open] summary .ico{transform:rotate(180deg)}
+  .co-peek[open].shut summary .ico{transform:none}
+  .co-peek .body{padding:2px 0 14px}
+  .co-peek .sum-items{margin-bottom:16px}
   .pdp{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"main info" "thumbs info";align-items:start;gap:16px 28px}
   .thumbs{grid-area:thumbs;flex-direction:row;justify-self:start}
   .main-p{grid-area:main;min-width:0}
@@ -622,13 +636,18 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   /* three filter pills fit one row on a phone; a long choice (Messenger bags, Dolce & Gabbana) still wraps */
   .tools{gap:6px}
   .dd-btn{height:34px;gap:6px;padding:0 9px 0 13px}
-  .deal{height:auto;aspect-ratio:4/5;border-radius:20px}
-  .deal.main{height:auto;aspect-ratio:1/1.05;border-radius:22px}
-  .deal .pics,.deal:not(.main) .pics{inset:4% 3% auto 3%;width:auto;height:62%;justify-content:center}
-  .deal:not(.main) .pics{height:58%}
+  /* on phones the pieces sit above the card, never under it, and the banners are lower so the pieces of the sale
+     come sooner */
+  .sale-h{padding-top:28px}
+  .sale-h + .deals{padding-top:16px}
+  .deals + .cat-top{padding-top:26px}
+  .deal,.deal.main{display:flex;flex-direction:column;height:auto;padding:10px;border-radius:20px}
+  .deal.main{aspect-ratio:5/4;border-radius:22px}
+  .deal .pics,.deal:not(.main) .pics{position:static;inset:auto;width:auto;height:auto;flex:1 1 0;min-height:0;justify-content:center}
+  .deal:not(.main) .pics{flex:none;height:116px}
   .deal:not(.main) .pics a:nth-child(n+2),.deal.main .pics a:nth-child(n+3){display:none}
-  .deal-card,.deal:not(.main) .deal-card{left:10px;right:10px;bottom:10px;width:auto;padding:14px 14px 12px;border-radius:16px}
-  .deal-card h2{font-size:24px}
+  .deal-card,.deal:not(.main) .deal-card{position:relative;left:auto;right:auto;bottom:auto;width:auto;margin-top:6px;padding:14px 14px 12px;border-radius:16px}
+  .deal-card h2{font-size:22px;margin:6px 0 6px}
   .deal:not(.main) .deal-card h2{font-size:15px;margin:5px 0 3px}
   .deal:not(.main) .deal-card p{font-size:11.5px}
   .deal:not(.main) .deal-card .label{font-size:10px}
@@ -641,13 +660,17 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   .card-sub{display:none}
   .pdp{display:block;padding-top:14px}
   .thumbs{display:none}
-  .stage-p{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:3/4;height:auto}
+  .main-p{position:relative}
+  .stage-p{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;aspect-ratio:auto;
+    height:min(calc((100vw - 2 * var(--x)) * 4 / 3),max(300px,calc(100vh - var(--top) - var(--hdr) - 280px)));
+    height:min(calc((100vw - 2 * var(--x)) * 4 / 3),max(300px,calc(100svh - var(--top) - var(--hdr) - 280px)))}
+  .slide img{object-fit:contain}
   .stage-p::-webkit-scrollbar{display:none}
   .slide{position:relative;flex:0 0 100%;opacity:1;scroll-snap-align:center}
-  .dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
-  .dots i{width:6px;height:6px;border-radius:99px;background:#CFCFCF;transition:width .3s var(--ease),background .3s}
+  .dots{display:flex;justify-content:center;gap:6px;position:absolute;left:0;right:0;bottom:12px;pointer-events:none}
+  .dots i{width:6px;height:6px;border-radius:99px;background:rgba(0,0,0,.18);transition:width .3s var(--ease),background .3s}
   .dots i.on{width:18px;background:var(--ink)}
-  .info{width:100%;margin-top:22px}
+  .info{width:100%;margin-top:16px}
   .actions{width:100%;max-width:320px}
   .size-pop{position:fixed;z-index:50;top:auto;left:10px;right:10px;background-color:rgba(255,255,255,.9);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:auto;border-radius:24px;padding:16px;animation-name:sheetup}
   .size-pop button{height:44px}
@@ -657,7 +680,16 @@ details[open].shut .pm::after{transform:rotate(90deg)}
   .pbar span{font-size:12px;color:var(--ink-2)}
   .pbar .btn{height:40px}
   .fs{grid-template-columns:1fr}
-  .ftr{flex-direction:column;align-items:flex-start;padding-top:56px}
+  .item{grid-template-columns:72px minmax(0,1fr) auto;grid-template-areas:"ph mid x" "ph ctl ctl";gap:6px 12px;padding:8px}
+  .item .ph{grid-area:ph;height:auto;min-height:96px}
+  .item .mid{grid-area:mid;justify-content:flex-start;gap:4px;padding:2px 0 0}
+  .item .end{display:contents}
+  .item .x{grid-area:x;align-self:start}
+  .item .ctl{grid-area:ctl;justify-content:space-between;align-self:end}
+  .ftr{flex-direction:column;align-items:flex-start;gap:8px;padding-top:44px}
+  .ftr nav{gap:0 22px}
+  .ftr nav a{padding:14px 0}
+  .soc a{width:44px;height:44px;margin:-11px}
   .ftr .side{width:100%;justify-content:space-between}
   .toast{right:16px}
   body.has-pbar .ftr{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
@@ -1266,8 +1298,7 @@ save(); // keep the tidied bag and wishlist (merged pieces, sizes renamed)
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const money = n => '$' + n.toLocaleString('en-US');
-const money2 = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = n => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 });
 const isShoe = p => p.sizes === SHOE;
 const isBelt = p => p.sizes === BELT;
 const sizeLabel = (p, s) => isShoe(p) ? 'US ' + s : isBelt(p) ? s + ' cm' : s;
@@ -1295,7 +1326,7 @@ const I = {
 const lineKey = l => l.id + '|' + l.size + '|' + (l.v || '');
 const bagCount = () => S.bag.reduce((n, l) => n + l.qty, 0);
 const subtotal = () => S.bag.reduce((n, l) => n + vOf(BY[l.id], l.v).price * l.qty, 0);
-const discount = () => S.promo && PROMOS[S.promo] ? Math.round(subtotal() * PROMOS[S.promo] * 100) / 100 : 0;
+const discount = () => S.promo && PROMOS[S.promo] ? Math.round(subtotal() * PROMOS[S.promo]) : 0;
 function addToBag(id, size, v = BY[id].variants[0].key) {
   const l = S.bag.find(x => x.id === id && x.size === size && x.v === v);
   if (l) l.qty = Math.min(9, l.qty + 1); else S.bag.push({ id, size, v, qty: 1 });
@@ -1440,7 +1471,7 @@ const DEALS = {
     ids: ['burberry-check-hood-puffer', 'balenciaga-3b-sports-hoodie', 'rick-owens-geobasket'] },
   small: [
     { label: 'Most wanted', title: 'Picked most often', text: 'The sale pieces people choose first.', ids: ['gucci-gg-messenger', 'balenciaga-runner-graffiti'] },
-    { label: 'Under $600', title: 'Small prices', text: list => `${list.filter(p => p.price < 600).length} pieces under $600.`, ids: list => list.filter(p => p.price < 600).slice(0, 2).map(p => p.id) },
+    { label: 'Under $600', title: 'Small prices', text: 'Sale pieces at the lowest prices.', ids: list => list.filter(p => p.price < 600).slice(0, 2).map(p => p.id) },
   ],
 };
 function dealsHTML(all) {
@@ -1554,8 +1585,9 @@ V.list = key => {
   let list = byType.filter(p => (brandBy === 'all' || p.brand === brandBy) && priceOK(PR.list)(p));
   if (sortBy === 'low') list = [...list].sort((a, b) => a.price - b.price);
   if (sortBy === 'high') list = [...list].sort((a, b) => b.price - a.price);
-  return `${key === 'sale' ? dealsHTML(all) : ''}<div class="cat-top">
-      <div><h1 class="h-title">${L.title}</h1><div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && typeBy === 'all' && brandBy === 'all' ? L.note : ''}</div></div>
+  // in Sale the title goes above the banners, and the filters stay with the pieces under them
+  return `${key === 'sale' ? `<h1 class="h-title sale-h">${L.title}</h1>${dealsHTML(all)}` : ''}<div class="cat-top">
+      <div>${key === 'sale' ? '' : `<h1 class="h-title">${L.title}</h1>`}<div class="muted" id="lcount">${hasPrice ? cap(priceText(PR.list)) : L.note && typeBy === 'all' && brandBy === 'all' ? L.note : ''}</div></div>
       <div class="tools">
         ${dropdown('type', 'Type', typeBy, [['all', mixed ? 'All categories' : 'All ' + L.title.toLowerCase()], ...typesHere.map(t => [t, typeName(t)])])}
         ${dropdown('brand', 'Brand', brandBy, [['all', 'All brands'], ...brands.map(b => [b, b])])}
@@ -1618,14 +1650,15 @@ V.product = (id, key = '') => {
   ${rel.length ? `<section class="sec"><div class="sec-h"><h2 class="h-title">You may also like</h2></div>${grid(rel, 'four')}</section>` : ''}`;
 };
 
-function summaryRows(express, atCheckout) {
+const total = express => subtotal() - discount() + (express ? EXPRESS : 0);
+const sumItems = () => S.bag.map(l => { const p = vOf(BY[l.id], l.v); return `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>`; }).join('');
+function summaryRows(express) {
   const sub = subtotal(), d = discount(), ship = express ? EXPRESS : 0;
   return `<div class="rows num">
-    <div><span>Subtotal</span><span>${money2(sub)}</span></div>
-    ${d ? `<div class="disc"><span>Promo ${esc(S.promo)}</span><span>−${money2(d)}</span></div>` : ''}
-    <div><span>Shipping</span><span>${ship ? money2(ship) : 'Free'}</span></div>
-    <div><span>Tax</span><span>${atCheckout ? 'Calculated at payment' : 'Calculated at checkout'}</span></div>
-    <div class="tot"><span>Total</span><span>${money2(sub - d + ship)}</span></div>
+    <div><span>Subtotal</span><span>${money(sub)}</span></div>
+    ${d ? `<div class="disc"><span>Promo ${esc(S.promo)}</span><span>−${money(d)}</span></div>` : ''}
+    <div><span>Shipping</span><span>${ship ? money(ship) : 'Free'}</span></div>
+    <div class="tot"><span>Total</span><span>${money(total(express))}</span></div>
   </div>`;
 }
 
@@ -1641,7 +1674,7 @@ V.bag = () => {
           <div class="mid"><b>${esc(p.name)}</b><div><small>Size - ${sizeLabel(p, l.size)}</small><small>Color - ${esc(p.color.name)}</small></div></div>
           <div class="end">
             <button class="x" data-act="rm" data-k="${k}" aria-label="Remove ${esc(p.name)}">${I.x}</button>
-            <div style="display:flex;align-items:center;gap:12px">
+            <div class="ctl">
               <span class="qty"><button data-act="qty" data-k="${k}" data-d="-1" aria-label="One less">${I.minus}</button><span class="num">${l.qty}</span><button data-act="qty" data-k="${k}" data-d="1" aria-label="One more">${I.plus}</button></span>
               <span class="price num">${money(p.price * l.qty)}</span>
             </div>
@@ -1671,6 +1704,8 @@ V.checkout = () => {
   return `${backBtn('bag')}<div class="two">
     <section>
       <h1 class="h-title">Checkout</h1>
+      <details class="co-peek"><summary><span>Order summary${I.chev}</span><span class="num" id="co-peek-tot">${money(total(express))}</span></summary>
+        <div class="body"><div class="sum-items">${sumItems()}</div><div id="co-peek-sum">${summaryRows(express)}</div></div></details>
       <form class="form" id="co-form" novalidate>
         <fieldset class="fs"><legend>Contact</legend>${f('email', 'Email', 'email', 'email', false, u.email || '')}${f('phone', 'Phone', 'tel', 'tel', false, u.phone || '', ' inputmode="tel" maxlength="20"')}</fieldset>
         <fieldset class="fs"><legend>Shipping address</legend>
@@ -1697,10 +1732,9 @@ V.checkout = () => {
     <span class="div" aria-hidden="true"></span>
     <section>
       <h2 class="sum-h">Order summary</h2>
-      <div class="sum-items">${S.bag.map(l => { const p = vOf(BY[l.id], l.v); return `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>`; }).join('')}</div>
-      <div id="co-sum">${summaryRows(express, true)}</div>
+      <div class="sum-items">${sumItems()}</div>
+      <div id="co-sum">${summaryRows(express)}</div>
       <button class="btn wide" style="margin-top:24px" type="submit" form="co-form">Place order</button>
-      <p class="muted" style="font-size:12px;margin:10px 2px 0">Test mode: no money is taken and card details are not saved. Placing an order here saves it to your account.</p>
     </section>
   </div>`;
 };
@@ -1714,10 +1748,10 @@ V.order = n => {
     <p class="muted" style="margin:0">Order ${esc(o.n)} is placed for ${esc(o.email)}. You can find it in your account.</p>
     <div class="items">${o.lines.map(l => { const p = BY[l.id] && vOf(BY[l.id], l.v); return p ? `<div class="sum-item"><span class="ph">${pic(p)}</span><span>${esc(p.name)}<small>${sizeLabel(p, l.size)}, qty ${l.qty}</small></span><span class="num">${money(p.price * l.qty)}</span></div>` : ''; }).join('')}</div>
     <div class="rows num" style="width:100%">
-      ${o.disc ? `<div><span>Subtotal</span><span>${money2(o.sub)}</span></div><div class="disc"><span>Promo ${esc(o.promo || '')}</span><span>−${money2(o.disc)}</span></div>` : ''}
-      <div><span>Shipping</span><span>${o.ship ? money2(o.ship) : 'Free'}</span></div>
+      ${o.disc ? `<div><span>Subtotal</span><span>${money(o.sub)}</span></div><div class="disc"><span>Promo ${esc(o.promo || '')}</span><span>−${money(o.disc)}</span></div>` : ''}
+      <div><span>Shipping</span><span>${o.ship ? money(o.ship) : 'Free'}</span></div>
       ${o.pay ? `<div><span>Payment</span><span>${esc(o.pay.brand)} •••• ${esc(o.pay.last4)}</span></div>` : ''}
-      <div class="tot"><span>Order total</span><span>${money2(o.total)}</span></div>
+      <div class="tot"><span>Order total</span><span>${money(o.total)}</span></div>
     </div>
     <a class="btn" href="#home" style="margin-top:18px">Continue shopping</a>
   </div>`;
@@ -1736,7 +1770,7 @@ V.account = () => {
       <h1 class="h-title">Account</h1>
       <div class="acc-card"><span class="label">Signed in</span><p style="margin:8px 0 0"><b>${esc(S.user.name)}</b><br><span class="muted">${esc(S.user.email)}</span></p></div>
       <h2 class="sum-h" style="font-size:13px;margin-bottom:12px">Orders</h2>
-      ${S.orders.length ? `<div class="orders">${S.orders.slice().reverse().map(o => `<a class="order" href="#order-${o.n}"><span>${esc(o.n)}<small>${new Date(o.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, ${o.lines.reduce((a, l) => a + l.qty, 0)} items</small></span><span class="num">${money2(o.total)}</span></a>`).join('')}</div>` : `<p class="muted">No orders yet.</p>`}
+      ${S.orders.length ? `<div class="orders">${S.orders.slice().reverse().map(o => `<a class="order" href="#order-${o.n}"><span>${esc(o.n)}<small>${new Date(o.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}, ${o.lines.reduce((a, l) => a + l.qty, 0)} items</small></span><span class="num">${money(o.total)}</span></a>`).join('')}</div>` : `<p class="muted">No orders yet.</p>`}
       <button class="btn" data-act="signout" style="margin-top:26px">Sign out</button>
     </div>`;
   }
@@ -2350,7 +2384,7 @@ for (const [type, on] of [['pointerover', true], ['pointerout', false]])
   });
 // Details, Shipping and returns, and the FAQ open and close with their height easing instead of jumping
 document.addEventListener('click', e => {
-  const sm = e.target.closest && e.target.closest('.more summary, .faq summary');
+  const sm = e.target.closest && e.target.closest('.more summary, .faq summary, .co-peek summary');
   if (!sm || still()) return;
   const det = sm.parentElement, body = $('.body', det);
   if (!body || !body.animate || det.dataset.anim) return;
@@ -2373,7 +2407,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   const d = e.target.dataset;
-  if (d.act === 'ship') { express = e.target.value === 'exp'; $('#co-sum').innerHTML = summaryRows(express, true); }
+  if (d.act === 'ship') { express = e.target.value === 'exp'; $('#co-sum').innerHTML = $('#co-peek-sum').innerHTML = summaryRows(express); $('#co-peek-tot').textContent = money(total(express)); }
   if (d.act === 'pay') setPay(e.target.value);
 });
 document.addEventListener('input', e => {
